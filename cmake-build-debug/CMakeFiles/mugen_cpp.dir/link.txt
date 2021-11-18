@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/mugen_cpp.dir/main.cpp.o CMakeFiles/mugen_cpp.dir/oscillator.cpp.o CMakeFiles/mugen_cpp.dir/MusicBox.cpp.o CMakeFiles/mugen_cpp.dir/AudioAPI.cpp.o -o mugen_cpp  /usr/lib/libSDL2main.a /usr/lib/libSDL2-2.0.so.0.16.0 -lportaudio ../lib/libportsf.a -lpthread 
