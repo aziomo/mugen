@@ -1,3 +1,0 @@
-/home/alberto/code/MUSOGEN/mugen_cpp/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/alberto/code/MUSOGEN/mugen_cpp/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/alberto/code/MUSOGEN/mugen_cpp/cmake-build-debug/CMakeFiles/mugen_cpp.dir
