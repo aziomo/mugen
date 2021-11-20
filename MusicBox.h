@@ -10,6 +10,7 @@
 #include <queue>
 #include "oscillator.h"
 #include "AudioAPI.h"
+#include <thread>
 
 const double SEMITONE_RATIO = pow(2.0, 1.0 / 12.0);
 

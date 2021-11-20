@@ -20,7 +20,6 @@ MusicBox::MusicBox(int oscillators) {
         auto* osc = new Oscillator(44100);
         this->oscillators.push_back(osc);
     }
-//    mainThread = std::thread(&MusicBox::mainLoop, this);
 }
 
 MusicBox::~MusicBox() {
@@ -79,7 +78,7 @@ float MusicBox::getSampleAllOscs(double frequency, double amplitude) {
     int nOscs = oscillators.size();
     for (int i = 1; i < nOscs + 1; i++){
         auto* osc = oscillators[i-1];
-        osc->setFrequency(frequency * (i * 1.5));
+        osc->setFrequency(frequency * i);
         sample += (float) osc->getSample(amplitude * (i * 0.5));
     }
     if (nOscs > 1)

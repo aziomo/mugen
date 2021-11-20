@@ -5,7 +5,6 @@
 #include "MusicBox.h"
 #include "MainWindow.h"
 
-
 int main() {
 
     MusicBox* musicBox = new MusicBox(1);
