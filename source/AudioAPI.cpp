@@ -5,7 +5,7 @@
 
 
 #include <iostream>
-#include "AudioAPI.h"
+#include "../include/AudioAPI.h"
 
 PaError AudioAPI::init(int bufferSize, double sampleRate)
 {

@@ -5,7 +5,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include "MusicBox.h"
+#include "../include/MusicBox.h"
 
 std::mutex mu;
 std::queue<float*> blocksQueue;

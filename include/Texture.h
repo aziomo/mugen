@@ -1,13 +1,14 @@
-//
-// Created by alberto on 11/19/21.
-//
 #ifndef MUGEN_CPP_TEXTURE_H
 #define MUGEN_CPP_TEXTURE_H
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_image.h>
 #include <cstdio>
 #include <string>
+
+
+static std::string assets_dir = "/home/alberto/code/MUSOGEN/mugen_cpp/assets/";
 
 class Texture {
 public:
@@ -20,6 +21,27 @@ public:
 
     ~Texture(){
         free();
+    }
+
+    void loadFromFile(SDL_Renderer* pRenderer, std::string path){
+        renderer = pRenderer;
+        free();
+        SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
+        if( loadedSurface == nullptr ){
+            printf( "Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError() );
+        }
+        else
+        {
+            texture = SDL_CreateTextureFromSurface( renderer, loadedSurface );
+            if( texture == nullptr ) {
+                printf( "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
+            }
+            else {
+                width = loadedSurface->w;
+                height = loadedSurface->h;
+            }
+            SDL_FreeSurface( loadedSurface );
+        }
     }
 
     void loadFromText(SDL_Renderer* pRenderer, std::string textValue, SDL_Color textColor, TTF_Font* font){

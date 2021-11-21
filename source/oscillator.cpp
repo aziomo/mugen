@@ -2,7 +2,7 @@
 // Created by alberto on 11/11/21.
 //
 
-#include "oscillator.h"
+#include "../include/oscillator.h"
 
 
 void Oscillator::setWaveformType(WaveformType type) {

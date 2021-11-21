@@ -2,8 +2,8 @@
 // Created by alberto on 11/20/21.
 //
 
-#include "MainWindow.h"
-#include "WaveformMenu.h"
+#include "../include/MainWindow.h"
+#include "../include/WaveformMenu.h"
 
 MainWindow::MainWindow(MusicBox* musicBox){
     this->mBox = musicBox;
@@ -22,8 +22,8 @@ void MainWindow::init(){
 
         TTF_Init();
 
-//        mainFont = TTF_OpenFont("HoneyRoom.ttf", 20);
-        mainFont = TTF_OpenFont("Anonymous_Pro.ttf", 24);
+        mainFont = TTF_OpenFont("HoneyRoom.ttf", 32);
+//        mainFont = TTF_OpenFont("Anonymous_Pro.ttf", 24);
         if (mainFont == nullptr)
             printf("font fucked up\n");
         waveformMenu = new WaveformMenu(this);
@@ -82,6 +82,16 @@ void MainWindow::handleKeyPress(SDL_Keycode key){
             mBox->addOscillator(WaveformType::SQUARE); break;
         case SDLK_MINUS:
             mBox->popOscillator(); break;
+        case SDLK_i:
+            waveformMenu->setFocusedControl();
+            break;
+        case SDLK_UP:
+
+        case SDLK_DOWN:
+        case SDLK_LEFT:
+            waveformMenu->focusPrevControl(); break;
+        case SDLK_RIGHT:
+            waveformMenu->focusNextControl(); break;
         default:
             break;
     }

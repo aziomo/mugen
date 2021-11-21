@@ -24,10 +24,11 @@ public:
     TTF_Font* mainFont = nullptr;
 
 private:
+    int borderSize = 10;
     WaveformMenu* waveformMenu;
     SDL_Rect windowArea = {0, 0, windowWidth, windowHeight};
     SDL_Window* window = nullptr;
-    SDL_Rect mainArea = {25, 25, windowWidth - 50, windowHeight - 50};
+    SDL_Rect mainArea = {borderSize, borderSize, windowWidth - borderSize*2, windowHeight - borderSize*2};
     MusicBox* mBox;
 };
 

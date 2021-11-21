@@ -2,8 +2,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_keyboard.h>
 #include <thread>
-#include "MusicBox.h"
-#include "MainWindow.h"
+#include "include/MusicBox.h"
+#include "include/MainWindow.h"
 
 int main() {
 
