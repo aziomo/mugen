@@ -22,8 +22,7 @@ void MainWindow::init(){
 
         TTF_Init();
 
-        mainFont = TTF_OpenFont("HoneyRoom.ttf", 32);
-//        mainFont = TTF_OpenFont("Anonymous_Pro.ttf", 24);
+        mainFont = TTF_OpenFont((assets_dir + "pixie.ttf").c_str(), 32);
         if (mainFont == nullptr)
             printf("font fucked up\n");
         waveformMenu = new WaveformMenu(this);
