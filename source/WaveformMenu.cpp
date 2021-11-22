@@ -3,35 +3,38 @@
 //
 
 #include "../include/WaveformMenu.h"
-#include "../include/MainWindow.h"
 #include <string>
 #include <iomanip>
 #include <sstream>
 
 void WaveformMenu::init(){
     textColor = {255,255,255};
-
-    setTextLabel(&screenTitle, "instrument creator");
-    setTextLabel(&upArrow, "^");
-    setTextLabel(&downArrow, "v");
-    setTextLabel(&oscCounter, "Oscillator " + std::to_string(currentOsc) + " of " + std::to_string(maxOsc));
-    setTextLabel(&wavetypeLabel, "WAVE");
-    setTextLabel(&wavetypeSign, "~");
-    setTextLabel(&frequencyLabel, "FREQ");
-    setTextLabel(&amplitudeLabel, "AMP");
-    setTextLabel(&frequencyValue, doubleToStr(currentFrequency, 3));
-    setTextLabel(&amplitudeValue, doubleToStr(currentAmplitude, 1));
-    sineImage.loadFromFile(window->renderer, assets_dir + "sine.png");
-    squareImage.loadFromFile(window->renderer, assets_dir + "square.png");
-    triangleImage.loadFromFile(window->renderer, assets_dir + "triangle.png");
-    sawdownImage.loadFromFile(window->renderer, assets_dir + "sawdown.png");
-    sawupImage.loadFromFile(window->renderer, assets_dir + "sawup.png");
-    noiseImage.loadFromFile(window->renderer, assets_dir + "noise.png");
+    loadTextures();
     focusedSelectorIndex = 0;
-    wavetypeSelector.loadControl(&sineImage, window->renderer);
+    std::vector<Texture*> waveImages {&sineImage, &squareImage, &triangleImage,
+                                      &sawupImage, &sawdownImage, &noiseImage};
+    wavetypeSelector.loadControl(waveImages, window);
+    frequencySelector.loadControl(currentFreqMod, &frequencyValue, window);
+    amplitudeSelector.loadControl(currentAmplitude, &amplitudeValue, window);
     wavetypeSelector.isHighlighted = true;
-    frequencySelector.loadControl(&frequencyValue, window->renderer);
-    amplitudeSelector.loadControl(&amplitudeValue, window->renderer);
+}
+
+void WaveformMenu::loadTextures(){
+    setTextTexture(&screenTitle, "instrument creator");
+    setTextTexture(&oscCounter, "Oscillator " + std::to_string(currentOsc) + " of " + std::to_string(maxOsc));
+    setTextTexture(&wavetypeLabel, "WAVE");
+    setTextTexture(&wavetypeSign, "~");
+    setTextTexture(&frequencyLabel, "FREQ");
+    setTextTexture(&amplitudeLabel, "AMP");
+    setTextTexture(&frequencyValue, doubleToStr(currentFreqMod, 2));
+    setTextTexture(&amplitudeValue, doubleToStr(currentAmplitude, 2));
+    setImageTexture(&arrow, assets_dir + "arrow.png");
+    setImageTexture(&sineImage, assets_dir + "sine.png");
+    setImageTexture(&squareImage, assets_dir + "square.png");
+    setImageTexture(&triangleImage, assets_dir + "triangle.png");
+    setImageTexture(&sawdownImage, assets_dir + "sawdown.png");
+    setImageTexture(&sawupImage, assets_dir + "sawup.png");
+    setImageTexture(&noiseImage, assets_dir + "noise.png");
 }
 
 void WaveformMenu::render(){
@@ -45,9 +48,6 @@ void WaveformMenu::render(){
     amplitudeSelector.render((window->windowWidth - amplitudeValue.width) *3/4, window->windowHeight /2);
 }
 
-void WaveformMenu::highlightShit(){
-    wavetypeSelector.switchHighlight();
-}
 
 void WaveformMenu::focusNextControl(){
     controls[focusedSelectorIndex]->switchHighlight();
@@ -65,24 +65,59 @@ void WaveformMenu::focusPrevControl(){
     controls[focusedSelectorIndex]->switchHighlight();
 }
 
-void WaveformMenu::setFocusedControl(){
-    controls[focusedSelectorIndex]->switchHighlight();
-    focusedSelectorIndex++;
-    if (focusedSelectorIndex == controls.size())
-        focusedSelectorIndex = 0;
-    controls[focusedSelectorIndex]->switchHighlight();
+void WaveformMenu::setTextTexture(Texture* texture, std::string text){
+    texture->loadFromText(renderer, text, textColor, window->mainFont);
 }
 
-void WaveformMenu::setTextLabel(Texture* texture, std::string text){
-    texture->loadFromText(window->renderer, text, textColor, window->mainFont);
+void WaveformMenu::setImageTexture(Texture* texture, std::string imagePath){
+    texture->loadFromFile(renderer, imagePath);
 }
 
 WaveformMenu::WaveformMenu(MainWindow* mainWindow) {
     window = mainWindow;
+    renderer = mainWindow->renderer;
 }
 
 std::string WaveformMenu::doubleToStr(double d, int precision){
     std::stringstream stream;
     stream << std::fixed << std::setprecision(precision) << d;
     return stream.str();
+}
+
+void WaveformMenu::chooseFocusedControl() {
+    controls[focusedSelectorIndex]->switchHighlight();
+    controls[focusedSelectorIndex]->switchEditing();
+}
+
+void WaveformMenu::handleKeyPress(SDL_Keycode key) {
+    switch (key) {
+        case SDLK_UP:
+
+            break;
+        case SDLK_DOWN:
+
+            break;
+        case SDLK_LEFT:
+            if (controls[focusedSelectorIndex]->isHighlighted){
+                focusPrevControl();
+            }
+            if (controls[focusedSelectorIndex]->isEditing){
+                controls[focusedSelectorIndex]->decrement();
+            }
+             break;
+        case SDLK_RIGHT:
+            if (controls[focusedSelectorIndex]->isHighlighted) {
+                focusNextControl();
+            }
+            if (controls[focusedSelectorIndex]->isEditing){
+                controls[focusedSelectorIndex]->increment();
+            }
+            break;
+        case SDLK_RETURN:
+            chooseFocusedControl(); break;
+        default:
+            break;
+
+    }
+
 }

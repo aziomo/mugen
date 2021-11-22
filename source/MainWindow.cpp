@@ -32,6 +32,7 @@ void MainWindow::init(){
 }
 
 void MainWindow::render(){
+    SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     SDL_RenderFillRect(renderer, &windowArea);
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
@@ -83,15 +84,17 @@ void MainWindow::handleKeyPress(SDL_Keycode key){
         case SDLK_MINUS:
             mBox->popOscillator(); break;
         case SDLK_i:
-            waveformMenu->setFocusedControl();
             break;
         case SDLK_UP:
-
+            break;
         case SDLK_DOWN:
+            break;
         case SDLK_LEFT:
-            waveformMenu->focusPrevControl(); break;
+            waveformMenu->handleKeyPress(SDLK_LEFT); break;
         case SDLK_RIGHT:
-            waveformMenu->focusNextControl(); break;
+            waveformMenu->handleKeyPress(SDLK_RIGHT); break;
+        case SDLK_RETURN:
+            waveformMenu->handleKeyPress(SDLK_RETURN); break;
         default:
             break;
     }

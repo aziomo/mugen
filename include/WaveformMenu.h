@@ -11,42 +11,45 @@
 
 class MainWindow;
 
-
-
 class WaveformMenu {
 public:
     WaveformMenu(MainWindow* mainWindow);
     void init();
     void render();
 
-    void highlightShit();
+    void focusNextControl();
+    void setTextTexture(Texture* texture, std::string text);
+    void focusPrevControl();
+    void chooseFocusedControl();
 
-    void setFocusedControl();
-
+    SDL_Renderer* renderer;
 //private:
     int currentOsc = 0, maxOsc = 0;
-    double currentFrequency = 440.000, currentAmplitude = 0.5;
+    double currentFreqMod = 1.0, currentAmplitude = 1.0;
     SDL_Color textColor;
     SelectControl wavetypeSelector, frequencySelector, amplitudeSelector;
     std::vector<SelectControl*> controls {&wavetypeSelector, &frequencySelector, &amplitudeSelector};
     int focusedSelectorIndex = 0;
-    Texture screenTitle, oscCounter,
-        downArrow, upArrow,
+    Texture screenTitle, oscCounter, arrow,
+        sineImage, squareImage, triangleImage,
+        sawdownImage, sawupImage, noiseImage,
         wavetypeLabel, wavetypeSign,
-        sineImage, squareImage, triangleImage, sawdownImage, sawupImage, noiseImage,
-        frequencyLabel, frequencyValue, amplitudeLabel, amplitudeValue;
+        frequencyLabel, frequencyValue,
+        amplitudeLabel, amplitudeValue;
 
     MainWindow* window;
     std::vector<Texture> textures;
 
-    void setTextLabel(Texture* texture, std::string text);
 
 
-    std::string doubleToStr(double d, int precision);
+    static std::string doubleToStr(double d, int precision);
 
-    void focusNextControl();
 
-    void focusPrevControl();
+    void setImageTexture(Texture *texture, std::string imagePath);
+
+    void loadTextures();
+
+    void handleKeyPress(SDL_Keycode key);
 };
 
 #endif //MUGEN_CPP_WAVEFORMMENU_H

@@ -58,6 +58,12 @@ public:
         SDL_Rect renderQuad = {x, y, width, height};
         SDL_RenderCopy(renderer, texture, nullptr, &renderQuad);
     }
+
+    void renderRotated(int x, int y, double angle){
+        SDL_Rect renderQuad = {x, y, width, height};
+        SDL_RenderCopyEx(renderer, texture, nullptr, &renderQuad, angle, nullptr, SDL_FLIP_NONE);
+    }
+
     void free(){
         if (texture != nullptr){
             SDL_DestroyTexture(texture);
@@ -69,9 +75,9 @@ public:
 
     int width;
     int height;
+    SDL_Texture* texture;
 private:
     SDL_Renderer* renderer;
-    SDL_Texture* texture;
 };
 
 #endif //MUGEN_CPP_TEXTURE_H

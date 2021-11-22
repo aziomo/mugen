@@ -23,9 +23,9 @@ public:
     SDL_Renderer* renderer = nullptr;
     TTF_Font* mainFont = nullptr;
 
+    WaveformMenu* waveformMenu;
 private:
     int borderSize = 10;
-    WaveformMenu* waveformMenu;
     SDL_Rect windowArea = {0, 0, windowWidth, windowHeight};
     SDL_Window* window = nullptr;
     SDL_Rect mainArea = {borderSize, borderSize, windowWidth - borderSize*2, windowHeight - borderSize*2};
