@@ -28,6 +28,7 @@ class AudioAPI {
 
 public:
     AudioAPI(int bufferSize, double sampleRate);
+    ~AudioAPI();
     PaError init(int bufferSize, double sampleRate);
     PaError writeOut(float* frame);
 

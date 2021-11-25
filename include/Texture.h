@@ -8,7 +8,7 @@
 #include <string>
 
 
-static std::string assets_dir = "/home/alberto/code/MUSOGEN/mugen_cpp/assets/";
+static std::string assets_dir = "../assets/";
 
 class Texture {
 public:

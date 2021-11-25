@@ -1,9 +1,3 @@
-//
-// Created by alberto on 11/11/21.
-//
-
-
-
 #include <iostream>
 #include "../include/AudioAPI.h"
 
@@ -79,6 +73,12 @@ PaError AudioAPI::init(int bufferSize, double sampleRate)
 
 AudioAPI::AudioAPI(int bufferSize, double sampleRate) {
     init(bufferSize, sampleRate);
+}
+
+AudioAPI::~AudioAPI(){
+    Pa_CloseStream(stream);
+    stream = nullptr;
+    Pa_Terminate();
 }
 
 void AudioAPI::ListOutputDevices(){

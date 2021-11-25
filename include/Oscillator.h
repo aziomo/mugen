@@ -20,8 +20,11 @@ private:
     double currentPhase;
     double phaseIncrement;
     double(Oscillator::*getTick)();
-
 public:
+    double freqModifier = 1.0;
+    double ampModifier = 1.0;
+
+    WaveformType waveType;
 
     Oscillator(int sampleRate, WaveformType waveformType = WaveformType::SINE);
     ~Oscillator();
@@ -32,9 +35,20 @@ public:
     double sineTick();
     double squareTick();
 
-    double getSample(double amplitude);
+    double getSample();
 
     void shiftPhase();
+
+    void setAmpMod(double modifier);
+
+    void setFreqMod(double modifier);
+
+    double noiseTick();
+
+    double triangleTick();
+
+    double sawtoothTick();
+
 };
 
 

@@ -5,14 +5,14 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 add_executable(mugen main.cpp
-        source/oscillator.cpp   include/oscillator.h
+        source/Oscillator.cpp include/Oscillator.h
         source/MusicBox.cpp     include/MusicBox.h
         source/AudioAPI.cpp     include/AudioAPI.h
         source/WaveformMenu.cpp include/WaveformMenu.h
         source/MainWindow.cpp   include/MainWindow.h
         include/WaveformType.h
         include/Texture.h
-        source/SelectControl.cpp include/SelectControl.h)
+        source/SelectControl.cpp include/SelectControl.h source/Instrument.cpp include/Instrument.h)
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2TTF REQUIRED)

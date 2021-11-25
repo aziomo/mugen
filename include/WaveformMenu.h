@@ -14,6 +14,7 @@ class MainWindow;
 class WaveformMenu {
 public:
     WaveformMenu(MainWindow* mainWindow);
+    ~WaveformMenu();
     void init();
     void render();
 
@@ -32,13 +33,15 @@ public:
     int focusedSelectorIndex = 0;
     Texture screenTitle, oscCounter, arrow,
         sineImage, squareImage, triangleImage,
-        sawdownImage, sawupImage, noiseImage,
+        sawtoothImage, noiseImage,
         wavetypeLabel, wavetypeSign,
         frequencyLabel, frequencyValue,
         amplitudeLabel, amplitudeValue;
-
+    MusicBox* musicBox;
     MainWindow* window;
-    std::vector<Texture> textures;
+    Instrument* editedInstrument;
+    Oscillator* editedOsc;
+//    std::vector<Texture> textures;
 
 
 
@@ -50,6 +53,10 @@ public:
     void loadTextures();
 
     void handleKeyPress(SDL_Keycode key);
+
+    void updateTextures();
+
+    WaveformType nextWaveType(WaveformType type, bool increment = true);
 };
 
 #endif //MUGEN_CPP_WAVEFORMMENU_H

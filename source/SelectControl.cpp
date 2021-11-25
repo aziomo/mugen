@@ -7,6 +7,18 @@
 #include "../include/SelectControl.h"
 #include "../include/WaveformMenu.h"
 
+SelectControl::~SelectControl(){
+    rend = nullptr;
+    for(auto texture : optionsImages){
+        texture = nullptr;
+    }
+    arrowTexture = nullptr;
+    modifiedValue = nullptr;
+    modifiedOsc = nullptr;
+    mainTexture = nullptr;
+    font = nullptr;
+}
+
 void SelectControl::switchHighlight(){
     isHighlighted = !isHighlighted;
 }
@@ -15,21 +27,24 @@ void SelectControl::switchEditing(){
     isEditing = !isEditing;
 }
 
-void SelectControl::loadControl(double initialValue, Texture* textTexture, MainWindow* window) {
+void SelectControl::loadTextControl(double* initialValue, Texture* textTexture, MainWindow* window) {
+    isImage = false;
     this->rend = window->renderer;
     this->arrowTexture = &window->waveformMenu->arrow;
     this->textColor = window->waveformMenu->textColor;
     this->font = window->mainFont;
-    selectionValue = initialValue;
+    modifiedValue = initialValue;
     mainTexture = textTexture;
 }
 
-void SelectControl::loadControl(std::vector<Texture*> imageTextures, MainWindow* window) {
+void SelectControl::loadImageControl(Oscillator* osc, std::vector<Texture*> imageTextures, MainWindow* window) {
+    isImage = true;
+    imageIndex = 0;
     this->rend = window->renderer;
     this->arrowTexture = &window->waveformMenu->arrow;
-    selectionValue = 0;
     optionsImages = std::move(imageTextures);
-    mainTexture = optionsImages[selectionValue];
+    modifiedOsc = osc;
+    mainTexture = optionsImages[0];
 }
 
 void SelectControl::enableEditing(){
@@ -49,7 +64,6 @@ void SelectControl::render(int x, int y) {
     }
 
     if (isEditing){
-
         arrowTexture->renderRotated(x - arrowTexture->width,
                              y + (mainTexture->height - arrowTexture->height) / 2, 270);
         arrowTexture->renderRotated(x + mainTexture->width,
@@ -59,31 +73,33 @@ void SelectControl::render(int x, int y) {
 }
 
 void SelectControl::increment() {
-    if (optionsImages.size() != 0){
-        if (++selectionValue == optionsImages.size()){
-            selectionValue = 0;
+    if (this->isImage){
+        if (++imageIndex == optionsImages.size()){
+            imageIndex = 0;
         }
-        mainTexture = optionsImages[selectionValue];
+        nextWaveType();
+        mainTexture = optionsImages[imageIndex];
     }
     else {
-        selectionValue += 0.01;
-        mainTexture->loadFromText(rend, doubleToStr(selectionValue, 2), textColor, font);
+        *modifiedValue += 0.01;
+        mainTexture->loadFromText(rend, doubleToStr(*modifiedValue, 2), textColor, font);
     }
 }
 
 void SelectControl::decrement() {
-    if (optionsImages.size() != 0){
-        if (--selectionValue < 0){
-            selectionValue += optionsImages.size();
+    if (this->isImage){
+        if (--imageIndex < 0){
+            imageIndex += optionsImages.size();
         }
-        mainTexture = optionsImages[selectionValue];
+        nextWaveType(false);
+        mainTexture = optionsImages[imageIndex];
     }
     else {
-        selectionValue -= 0.01;
-        if (selectionValue < 0) {
-            selectionValue = 0;
+        *modifiedValue -= 0.01;
+        if (*modifiedValue < 0) {
+            *modifiedValue = 0;
         }
-        mainTexture->loadFromText(rend, doubleToStr(selectionValue, 2), textColor, font);
+        mainTexture->loadFromText(rend, doubleToStr(*modifiedValue, 2), textColor, font);
     }
 }
 
@@ -91,4 +107,19 @@ std::string SelectControl::doubleToStr(double d, int precision){
     std::stringstream stream;
     stream << std::fixed << std::setprecision(precision) << d;
     return stream.str();
+}
+
+void SelectControl::nextWaveType(bool increment){
+    switch (modifiedOsc->waveType) {
+        case WaveformType::SINE:
+            modifiedOsc->setWaveformType(increment ? WaveformType::SQUARE : WaveformType::NOISE); break;
+        case WaveformType::SQUARE:
+            modifiedOsc->setWaveformType(increment ? WaveformType::TRIANGLE : WaveformType::SINE); break;
+        case WaveformType::TRIANGLE:
+            modifiedOsc->setWaveformType(increment ? WaveformType::SAWTOOTH : WaveformType::SQUARE); break;
+        case WaveformType::SAWTOOTH:
+            modifiedOsc->setWaveformType(increment ? WaveformType::NOISE : WaveformType::TRIANGLE); break;
+        case WaveformType::NOISE:
+            modifiedOsc->setWaveformType(increment ? WaveformType::SINE : WaveformType::SAWTOOTH); break;
+    }
 }

@@ -8,8 +8,9 @@
 #define KEYBOARD_SIZE 17
 
 #include <queue>
-#include "oscillator.h"
+#include "Oscillator.h"
 #include "AudioAPI.h"
+#include "Instrument.h"
 #include <thread>
 
 const double SEMITONE_RATIO = pow(2.0, 1.0 / 12.0);
@@ -20,8 +21,8 @@ public:
     ~MusicBox();
     bool isRunning;
     bool pressedKeys[KEYBOARD_SIZE];
-    float getSample(double frequency, double amplitude);
-    void fillSampleFrame(float* frame, double frequency, double amplitude);
+    float getSample(double frequency);
+    void fillSampleFrame(float* frame, double frequency);
     void playSound();
     void playMidiNote(int offset = 0);
     void startPlaying();
@@ -31,12 +32,14 @@ public:
     void addOscillator(WaveformType wavetype);
     void popOscillator();
     int getRootCPosition();
+    std::vector<Instrument*> instruments;
+    int currentInstrument = 0;
+    std::vector<Oscillator*> oscillators;
 private:
     const int octaveSize = 12;
     int currentOctave = 4;
     std::thread mainThread;
     int blockSize;
-    std::vector<Oscillator*> oscillators;
 
     std::queue<float*> frameQueue;
     AudioAPI* audioApi;
@@ -44,7 +47,7 @@ private:
     double midiToFrequency(int midiNote);
     void mainLoop();
     float* readBlockOfSamples();
-    float getSampleAllOscs(double frequency, double amplitude);
+    float getSampleAllOscs(double frequency);
 };
 
 

@@ -11,7 +11,6 @@ int main() {
     MainWindow* mainWindow = new MainWindow(musicBox);
     int quit = 0;
     SDL_Event e;
-
     while (!quit){
         while (SDL_PollEvent(&e) != 0) {
             if (e.type == SDL_QUIT){
@@ -35,6 +34,7 @@ int main() {
         }
         mainWindow->render();
     }
-
+    delete mainWindow;
+    delete musicBox;
     return 0;
 }

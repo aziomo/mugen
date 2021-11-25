@@ -1,27 +1,44 @@
-//
-// Created by alberto on 11/20/21.
-//
-
 #include "../include/WaveformMenu.h"
 #include <string>
 #include <iomanip>
 #include <sstream>
 
+WaveformMenu::WaveformMenu(MainWindow* mainWindow) {
+    window = mainWindow;
+    renderer = mainWindow->renderer;
+    musicBox = mainWindow->mBox;
+}
+
+WaveformMenu::~WaveformMenu(){
+    renderer = nullptr;
+    for (auto control : controls) {
+        control = nullptr;
+    }
+    musicBox = nullptr;
+    window = nullptr;
+    editedInstrument = nullptr;
+    editedOsc = nullptr;
+}
+
 void WaveformMenu::init(){
     textColor = {255,255,255};
+    editedOsc = musicBox->oscillators.front();
     loadTextures();
     focusedSelectorIndex = 0;
     std::vector<Texture*> waveImages {&sineImage, &squareImage, &triangleImage,
-                                      &sawupImage, &sawdownImage, &noiseImage};
-    wavetypeSelector.loadControl(waveImages, window);
-    frequencySelector.loadControl(currentFreqMod, &frequencyValue, window);
-    amplitudeSelector.loadControl(currentAmplitude, &amplitudeValue, window);
+                                      &sawtoothImage, &noiseImage};
+    wavetypeSelector.loadImageControl(editedOsc, waveImages, window);
+    frequencySelector.loadTextControl(&editedOsc->freqModifier, &frequencyValue, window);
+    amplitudeSelector.loadTextControl(&editedOsc->ampModifier, &amplitudeValue, window);
     wavetypeSelector.isHighlighted = true;
+//    editedInstrument = musicBox->instruments.front();
+//    editedOsc = editedInstrument->oscillators.front();
+
 }
 
 void WaveformMenu::loadTextures(){
     setTextTexture(&screenTitle, "instrument creator");
-    setTextTexture(&oscCounter, "Oscillator " + std::to_string(currentOsc) + " of " + std::to_string(maxOsc));
+    setTextTexture(&oscCounter, "Oscillator " + std::to_string(currentOsc) + " of " + std::to_string(musicBox->instruments.size()));
     setTextTexture(&wavetypeLabel, "WAVE");
     setTextTexture(&wavetypeSign, "~");
     setTextTexture(&frequencyLabel, "FREQ");
@@ -32,12 +49,17 @@ void WaveformMenu::loadTextures(){
     setImageTexture(&sineImage, assets_dir + "sine.png");
     setImageTexture(&squareImage, assets_dir + "square.png");
     setImageTexture(&triangleImage, assets_dir + "triangle.png");
-    setImageTexture(&sawdownImage, assets_dir + "sawdown.png");
-    setImageTexture(&sawupImage, assets_dir + "sawup.png");
+    setImageTexture(&sawtoothImage, assets_dir + "sawtooth.png");
     setImageTexture(&noiseImage, assets_dir + "noise.png");
 }
 
+void WaveformMenu::updateTextures(){
+    setTextTexture(&oscCounter, "Oscillator " + std::to_string(currentOsc) + " of " + std::to_string(musicBox->instruments.size()));
+}
+
+
 void WaveformMenu::render(){
+    updateTextures();
     screenTitle.render((window->windowWidth - screenTitle.width) /2, window->windowHeight /10);
     oscCounter.render((window->windowWidth - oscCounter.width) /2, window->windowHeight /4);
     wavetypeLabel.render((window->windowWidth - wavetypeLabel.width) /4, window->windowHeight *2/5);
@@ -47,7 +69,6 @@ void WaveformMenu::render(){
     frequencySelector.render((window->windowWidth - frequencyValue.width) /2, window->windowHeight /2);
     amplitudeSelector.render((window->windowWidth - amplitudeValue.width) *3/4, window->windowHeight /2);
 }
-
 
 void WaveformMenu::focusNextControl(){
     controls[focusedSelectorIndex]->switchHighlight();
@@ -73,11 +94,6 @@ void WaveformMenu::setImageTexture(Texture* texture, std::string imagePath){
     texture->loadFromFile(renderer, imagePath);
 }
 
-WaveformMenu::WaveformMenu(MainWindow* mainWindow) {
-    window = mainWindow;
-    renderer = mainWindow->renderer;
-}
-
 std::string WaveformMenu::doubleToStr(double d, int precision){
     std::stringstream stream;
     stream << std::fixed << std::setprecision(precision) << d;
@@ -92,6 +108,9 @@ void WaveformMenu::chooseFocusedControl() {
 void WaveformMenu::handleKeyPress(SDL_Keycode key) {
     switch (key) {
         case SDLK_UP:
+            if (controls[focusedSelectorIndex]->isHighlighted){
+
+            }
 
             break;
         case SDLK_DOWN:
@@ -119,5 +138,19 @@ void WaveformMenu::handleKeyPress(SDL_Keycode key) {
             break;
 
     }
+}
 
+WaveformType WaveformMenu::nextWaveType(WaveformType type, bool increment){
+    switch (type) {
+        case WaveformType::SINE:
+            return increment ? WaveformType::SQUARE : WaveformType::NOISE;
+        case WaveformType::SQUARE:
+            return increment ? WaveformType::TRIANGLE : WaveformType::SINE;
+        case WaveformType::TRIANGLE:
+            return increment ? WaveformType::SAWTOOTH : WaveformType::SQUARE;
+        case WaveformType::SAWTOOTH:
+            return increment ? WaveformType::NOISE : WaveformType::TRIANGLE;
+        case WaveformType::NOISE:
+            return increment ? WaveformType::SINE : WaveformType::SAWTOOTH;
+    }
 }

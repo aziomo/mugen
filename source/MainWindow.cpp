@@ -1,13 +1,23 @@
-//
-// Created by alberto on 11/20/21.
-//
-
 #include "../include/MainWindow.h"
 #include "../include/WaveformMenu.h"
 
 MainWindow::MainWindow(MusicBox* musicBox){
     this->mBox = musicBox;
     init();
+}
+
+MainWindow::~MainWindow(){
+    delete waveformMenu;
+    mBox = nullptr;
+    TTF_CloseFont(mainFont);
+    mainFont = nullptr;
+    TTF_Quit();
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    window = nullptr;
+    renderer = nullptr;
+    IMG_Quit();
+    SDL_Quit();
 }
 
 void MainWindow::init(){
@@ -22,9 +32,10 @@ void MainWindow::init(){
 
         TTF_Init();
 
-        mainFont = TTF_OpenFont((assets_dir + "pixie.ttf").c_str(), 32);
+        mainFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 32);
         if (mainFont == nullptr)
             printf("font fucked up\n");
+
         waveformMenu = new WaveformMenu(this);
         waveformMenu->init();
     }

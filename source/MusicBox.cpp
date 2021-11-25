@@ -1,7 +1,3 @@
-//
-// Created by alberto on 11/11/21.
-//
-
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -26,6 +22,7 @@ MusicBox::~MusicBox() {
     for (Oscillator* osc : this->oscillators) {
         delete osc;
     }
+    delete audioApi;
 }
 
 void MusicBox::addOscillator(WaveformType wavetype){
@@ -62,24 +59,24 @@ void MusicBox::stopPlaying(){
     mainThread.join();
 }
 
-void MusicBox::fillSampleFrame(float* frame, double frequency, double amplitude) {
+void MusicBox::fillSampleFrame(float* frame, double frequency) {
     for (int i = 0; i < blockSize; i++) {
-        frame[i] = getSampleAllOscs(frequency, amplitude);
+        frame[i] = getSampleAllOscs(frequency);
     }
 }
 
-float MusicBox::getSample(double frequency, double amplitude) {
+float MusicBox::getSample(double frequency) {
     this->oscillators[0]->setFrequency(frequency);
-    return (float) this->oscillators[0]->getSample(amplitude);
+    return (float) this->oscillators[0]->getSample();
 }
 
-float MusicBox::getSampleAllOscs(double frequency, double amplitude) {
+float MusicBox::getSampleAllOscs(double frequency) {
     float sample = 0;
     int nOscs = oscillators.size();
-    for (int i = 1; i < nOscs + 1; i++){
-        auto* osc = oscillators[i-1];
-        osc->setFrequency(frequency * i);
-        sample += (float) osc->getSample(amplitude * (i * 0.5));
+    for (int i = 0; i < nOscs; i++){
+        auto* osc = oscillators[i];
+        osc->setFrequency(frequency);
+        sample += (float) osc->getSample();
     }
     if (nOscs > 1)
         sample /= nOscs;
@@ -90,7 +87,7 @@ void MusicBox::playMidiNote(int offset){
     int midiNote = getRootCPosition() + offset;
     for (int i = 0; i < 16; i++) {
         float frame[blockSize];
-        fillSampleFrame(frame, midiToFrequency(midiNote), 0.1);
+        fillSampleFrame(frame, midiToFrequency(midiNote));
         audioApi->writeOut(frame);
     }
 }
@@ -99,8 +96,8 @@ void MusicBox::playTwoNotes(int midiNote1, int midiNote2){
     float maxSample;
     for (int i = 0; i < 16; i++) {
         float frame1[blockSize], frame2[blockSize];
-        fillSampleFrame(frame1, midiToFrequency(midiNote1), 0.3);
-        fillSampleFrame(frame2, midiToFrequency(midiNote2), 0.3);
+        fillSampleFrame(frame1, midiToFrequency(midiNote1));
+        fillSampleFrame(frame2, midiToFrequency(midiNote2));
 //        mixSampleFrames(frame1, frame2); // DELETED
         audioApi->writeOut(frame1);
     }
@@ -122,7 +119,7 @@ void MusicBox::mainLoop(){
 
 //        frame = readBlockOfSamples();
 
-        fillSampleFrame(frame, 220, 0.1);
+        fillSampleFrame(frame, 220);
 //        audioApi->writeOut(readBlockOfSamples());
         audioApi->writeOut(frame);
 //        blocksQueue.pop();
@@ -156,7 +153,7 @@ float* MusicBox::readBlockOfSamples() {
 void MusicBox::playSound(){
     for (int i = 0; i < 8; i++) {
         float frame[audioApi->bufferSize];
-        fillSampleFrame(frame, 220.0, 0.3);
+        fillSampleFrame(frame, 220.0);
         audioApi->writeOut(frame);
     }
 }

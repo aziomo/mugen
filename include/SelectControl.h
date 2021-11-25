@@ -15,6 +15,8 @@ class SelectControl {
 
 public:
 
+    ~SelectControl();
+
     void decrement();
     void increment();
     void render(int x, int y);
@@ -24,12 +26,15 @@ public:
 
     void switchEditing();
     void switchHighlight();
-    void loadControl(double initialValue, Texture *textTexture, MainWindow *window);
-    void loadControl(std::vector<Texture *> imageTextures, MainWindow *window);
+    void loadTextControl(double* initialValue, Texture *textTexture, MainWindow *window);
+    void loadImageControl(Oscillator* osc, std::vector<Texture *> imageTextures, MainWindow *window);
+    double* modifiedValue;
+    Oscillator* modifiedOsc;
 private:
+    bool isImage;
     SDL_Renderer* rend;
     int borderSize = 2;
-    double selectionValue;
+    int imageIndex;
     Texture* mainTexture;
     std::vector<Texture*> optionsImages;
     Texture* arrowTexture;
@@ -40,6 +45,8 @@ private:
     void enableEditing();
 
     static std::string doubleToStr(double d, int precision);
+
+    void nextWaveType(bool increment = true);
 };
 
 
