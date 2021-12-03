@@ -16,11 +16,12 @@ class Oscillator {
 
 private:
     double twoPiOverSampleRate;
-    double currentFrequency;
     double currentPhase;
     double phaseIncrement;
     double(Oscillator::*getTick)();
 public:
+    double currentFrequency;
+    Oscillator* lfo;
     double freqModifier = 1.0;
     double ampModifier = 1.0;
 
@@ -49,6 +50,13 @@ public:
 
     double sawtoothTick();
 
+    void setLFO(int sampleRate, WaveformType waveformType);
+
+    void unsetLFO();
+
+    void setFrequencyWithLFO();
+
+    double sawtoothUpTick();
 };
 
 

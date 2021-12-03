@@ -16,18 +16,26 @@ void Oscillator::setWaveformType(WaveformType type) {
         case WaveformType::TRIANGLE:
             waveType = WaveformType::TRIANGLE;
             getTick = &Oscillator::triangleTick; break;
-        case WaveformType::SAWTOOTH:
-            waveType = WaveformType::SAWTOOTH;
+        case WaveformType::SAWTOOTHDOWN:
+            waveType = WaveformType::SAWTOOTHDOWN;
             getTick = &Oscillator::sawtoothTick; break;
+        case WaveformType::SAWTOOTHUP:
+            waveType = WaveformType::SAWTOOTHUP;
+            getTick = &Oscillator::sawtoothUpTick; break;
         case WaveformType::NOISE:
             waveType = WaveformType::NOISE;
             getTick = &Oscillator::noiseTick; break;
-    }
+
+        }
 }
 
 void Oscillator::setFrequency(double frequency){
     currentFrequency = frequency * freqModifier;
     phaseIncrement = twoPiOverSampleRate * currentFrequency;
+}
+
+void Oscillator::setFrequencyWithLFO(){
+    phaseIncrement = twoPiOverSampleRate * (currentFrequency  + (currentFrequency * lfo->getSample()));
 }
 
 Oscillator::Oscillator(int sampleRate, WaveformType waveformType) {
@@ -38,11 +46,22 @@ Oscillator::Oscillator(int sampleRate, WaveformType waveformType) {
     phaseIncrement = 0.0;
     freqModifier = 1.0;
     ampModifier = 1.0;
+    lfo = nullptr;
 }
 
 Oscillator::~Oscillator() {
     getTick = nullptr;
 }
+
+void Oscillator::setLFO(int sampleRate, WaveformType waveformType){
+    lfo = new Oscillator(sampleRate, waveformType);
+}
+
+void Oscillator::unsetLFO(){
+    delete lfo;
+    lfo = nullptr;
+}
+
 
 double Oscillator::sineTick()
 {
@@ -73,6 +92,12 @@ double Oscillator::sawtoothTick(){
     return value;
 }
 
+double Oscillator::sawtoothUpTick(){
+    double value = (2.0 * (currentPhase * (1.0 / TWOPI))) - 1.0;
+    shiftPhase();
+    return value;
+}
+
 double Oscillator::noiseTick(){
     double value = 2.0 * ((double)rand() / (double)(RAND_MAX)) - 1.0;
     shiftPhase();
@@ -90,6 +115,9 @@ void Oscillator::shiftPhase(){
 }
 
 double Oscillator::getSample() {
+    if (lfo != nullptr){
+        setFrequencyWithLFO();
+    }
     double sample = ampModifier * (this->*getTick)();
     return sample;
 }

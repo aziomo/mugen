@@ -12,42 +12,53 @@
 #include "AudioAPI.h"
 #include "Instrument.h"
 #include <thread>
+#include <atomic>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
 
 const double SEMITONE_RATIO = pow(2.0, 1.0 / 12.0);
 
 class MusicBox {
 public:
-    MusicBox(int oscillators);
+    MusicBox();
     ~MusicBox();
     bool isRunning;
     bool pressedKeys[KEYBOARD_SIZE];
-    float getSample(double frequency);
-    void fillSampleFrame(float* frame, double frequency);
-    void playSound();
     void playMidiNote(int offset = 0);
     void startPlaying();
     void stopPlaying();
     void loadBlockOfSamples(float* frame);
-    void playTwoNotes(int midiNote1, int midiNote2);
-    void addOscillator(WaveformType wavetype);
-    void popOscillator();
+    //void playTwoNotes(int midiNote1, int midiNote2);
     int getRootCPosition();
     std::vector<Instrument*> instruments;
     int currentInstrument = 0;
-    std::vector<Oscillator*> oscillators;
-private:
+    int blockSize;
+    void putMidiNoteInQueue(int offset);
+
+//private:
+    std::mutex blocksQueueMutex;
+    std::queue<float*> blocksQueue;
+    std::condition_variable queueFull;
+    int blocksLeft;
+//    std::atomic<int> blocksLeft;
+
     const int octaveSize = 12;
     int currentOctave = 4;
     std::thread mainThread;
-    int blockSize;
 
     std::queue<float*> frameQueue;
     AudioAPI* audioApi;
 
     double midiToFrequency(int midiNote);
     void mainLoop();
-    float* readBlockOfSamples();
-    float getSampleAllOscs(double frequency);
+//    float* readBlockOfSamples();
+
+    void copyBlock(float *source, float *destination);
+
+    void readBlockOfSamples(float *outputBlock);
+
+
 };
 
 

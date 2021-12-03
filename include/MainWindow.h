@@ -15,22 +15,28 @@ class MainWindow {
 public:
     MainWindow(MusicBox* musicBox);
     ~MainWindow();
-    void init();
+    void initSDL();
     void render();
     void handleKeyPress(SDL_Keycode key);
 
-    int windowWidth = SET_WINDOW_WIDTH;
-    int windowHeight = SET_WINDOW_HEIGHT;
+    int w = SET_WINDOW_WIDTH;
+    int h = SET_WINDOW_HEIGHT;
     SDL_Renderer* renderer = nullptr;
     TTF_Font* mainFont = nullptr;
+    TTF_Font* smallFont = nullptr;
 
     WaveformMenu* waveformMenu;
     MusicBox* mBox;
-private:
+    SDL_Rect mainArea = {borderSize, borderSize, w - borderSize * 2, h - borderSize * 2};
     int borderSize = 10;
-    SDL_Rect windowArea = {0, 0, windowWidth, windowHeight};
+
+    void handleNewKeyPress(const Uint8 *keys);
+
+private:
+    SDL_Rect windowArea = {0, 0, w, h};
     SDL_Window* window = nullptr;
-    SDL_Rect mainArea = {borderSize, borderSize, windowWidth - borderSize*2, windowHeight - borderSize*2};
+
+    void quitSDL();
 };
 
 #endif //MUGEN_CPP_MAINWINDOW_H

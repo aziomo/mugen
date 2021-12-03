@@ -8,45 +8,46 @@
 
 #include "Texture.h"
 #include "MainWindow.h"
+#include "SelectorType.h"
+#include "Control.h"
 #include <vector>
 
 
-class SelectControl {
+class SelectControl : public Control {
 
 public:
 
-    ~SelectControl();
+    ~SelectControl() override;
 
-    void decrement();
-    void increment();
+    void decrement(bool largeDecrement) override;
+    void increment(bool largeIncrement) override;
     void render(int x, int y);
 
-    bool isHighlighted = false;
-    bool isEditing = false;
+//    bool isHighlighted = false;
+//    bool isEditing = false;
+
+    void activate() override;
 
     void switchEditing();
-    void switchHighlight();
-    void loadTextControl(double* initialValue, Texture *textTexture, MainWindow *window);
-    void loadImageControl(Oscillator* osc, std::vector<Texture *> imageTextures, MainWindow *window);
-    double* modifiedValue;
-    Oscillator* modifiedOsc;
+    void loadTextControl(SelectorType type, Texture *textTexture, MainWindow *window);
+    void loadImageControl(std::vector<Texture *> imageTextures, MainWindow *window);
+    void setModifiedOsc(Oscillator *osc);
+    void isModifyingLFO(bool isModifying);
+    Texture* mainTexture;
 private:
-    bool isImage;
     SDL_Renderer* rend;
     int borderSize = 2;
-    int imageIndex;
-    Texture* mainTexture;
     std::vector<Texture*> optionsImages;
     Texture* arrowTexture;
     SDL_Rect highlightRect, bgRect;
-    SDL_Color textColor = {255,255,255};
-    TTF_Font* font;
+    SelectorType type;
+    WaveformMenu* menu;
+    Oscillator* modifiedOsc;
+    bool modifyLFO = false;
+    void setNextWaveType(bool increment = true);
 
-    void enableEditing();
 
-    static std::string doubleToStr(double d, int precision);
 
-    void nextWaveType(bool increment = true);
 };
 
 

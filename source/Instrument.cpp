@@ -2,8 +2,7 @@
 
 
 Instrument::Instrument(int blockSize) {
-    Oscillator* osc = new Oscillator(44100);
-    oscillators.push_back(osc);
+    oscillators.push_back(new Oscillator(44100));
     this->blockSize = blockSize;
 }
 
@@ -14,41 +13,28 @@ Instrument::~Instrument() {
 
 float Instrument::generateSample(double frequency) {
     float sample = 0;
-    int oscCount = oscillators.size();
+    int oscCount = (int) oscillators.size();
     for (int i = 0; i < oscCount; i++){
         auto* osc = oscillators.at(i);
         osc->setFrequency(frequency);
-        osc->setFreqMod(1.0 + i * 0.5);
         sample += (float) osc->getSample();
     }
     if (oscCount > 1)
-        sample /= oscCount;
+        sample /= (float) oscCount;
     return sample;
 }
 
-void Instrument::fillSampleFrame(float* frame, double frequency){
+void Instrument::fillSampleBlock(float* frame, double frequency){
+    double volume = 1.0;
     for (int i = 0; i < blockSize; i++) {
-        frame[i] = generateSample(frequency);
+        frame[i] = generateSample(frequency) * volume;
     }
 }
 
 void Instrument::addOscillator(){
-    Oscillator* osc = new Oscillator(44100);
-    oscillators.push_back(osc);
+    oscillators.push_back(new Oscillator(44100));
 }
 
 void Instrument::removeOscillator(){
     oscillators.pop_back();
-}
-
-void Instrument::setOscFreqMod(int oscNumber, double modifier){
-    oscillators.at(oscNumber)->setFreqMod(modifier);
-}
-
-void Instrument::setOscAmpMod(int oscNumber, double modifier){
-    oscillators.at(oscNumber)->setAmpMod(modifier);
-}
-
-void Instrument::setOscWavetype(int oscNumber, WaveformType type){
-    oscillators.at(oscNumber)->setWaveformType(type);
 }

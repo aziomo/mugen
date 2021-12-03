@@ -3,12 +3,36 @@
 
 MainWindow::MainWindow(MusicBox* musicBox){
     this->mBox = musicBox;
-    init();
+    initSDL();
+    waveformMenu = new WaveformMenu(this);
+    waveformMenu->init();
 }
 
 MainWindow::~MainWindow(){
     delete waveformMenu;
     mBox = nullptr;
+    quitSDL();
+}
+
+void MainWindow::initSDL(){
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
+    } else {
+        window = SDL_CreateWindow("mugen", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_SHOWN );
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        if( window == nullptr || renderer == nullptr ) {
+            printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
+        }
+        TTF_Init();
+        mainFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 26);
+        smallFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 16);
+        if (mainFont == nullptr){
+            printf("font fucked up\n");
+        }
+    }
+}
+
+void MainWindow::quitSDL(){
     TTF_CloseFont(mainFont);
     mainFont = nullptr;
     TTF_Quit();
@@ -18,27 +42,6 @@ MainWindow::~MainWindow(){
     renderer = nullptr;
     IMG_Quit();
     SDL_Quit();
-}
-
-void MainWindow::init(){
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
-    } else {
-        window = SDL_CreateWindow( "mugen", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, windowWidth, windowHeight, SDL_WINDOW_SHOWN );
-        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-        if( window == nullptr || renderer == nullptr ) {
-            printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
-        }
-
-        TTF_Init();
-
-        mainFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 32);
-        if (mainFont == nullptr)
-            printf("font fucked up\n");
-
-        waveformMenu = new WaveformMenu(this);
-        waveformMenu->init();
-    }
 }
 
 void MainWindow::render(){
@@ -58,11 +61,14 @@ void MainWindow::handleKeyPress(SDL_Keycode key){
         case SDLK_s:
             mBox->playMidiNote(1); break; // C#
         case SDLK_x:
-            mBox->playMidiNote(2); break; // D
+//            mBox->playMidiNote(2); break; // D
+            mBox->putMidiNoteInQueue(2); break;
         case SDLK_d:
-            mBox->playMidiNote(3); break; // D#
+//            mBox->playMidiNote(3); break; // D#
+            mBox->putMidiNoteInQueue(3); break;
         case SDLK_c:
-            mBox->playMidiNote(4); break; // E
+//            mBox->playMidiNote(4); break; // E
+            mBox->putMidiNoteInQueue(4); break;
         case SDLK_v:
             mBox->playMidiNote(5); break; // F
         case SDLK_g:
@@ -87,18 +93,21 @@ void MainWindow::handleKeyPress(SDL_Keycode key){
             mBox->playMidiNote(15); break; // D#
         case SDLK_SLASH:
             mBox->playMidiNote(16); break; // E
-        case SDLK_9:
-            mBox->addOscillator(WaveformType::SINE); break;
-        case SDLK_0:
-            mBox->addOscillator(WaveformType::SQUARE); break;
         case SDLK_MINUS:
-            mBox->popOscillator(); break;
-        case SDLK_i:
-            break;
+            waveformMenu->handleKeyPress(SDLK_MINUS); break;
+        case SDLK_EQUALS:
+            waveformMenu->handleKeyPress(SDLK_EQUALS); break;
+        case SDLK_2:
+            waveformMenu->handleKeyPress(SDLK_2); break;
+        case SDLK_3:
+            waveformMenu->handleKeyPress(SDLK_3); break;
+        case SDLK_9:
+            waveformMenu->handleKeyPress(SDLK_9); break;
+
         case SDLK_UP:
-            break;
+            waveformMenu->handleKeyPress(SDLK_UP); break;
         case SDLK_DOWN:
-            break;
+            waveformMenu->handleKeyPress(SDLK_DOWN); break;
         case SDLK_LEFT:
             waveformMenu->handleKeyPress(SDLK_LEFT); break;
         case SDLK_RIGHT:
@@ -107,5 +116,18 @@ void MainWindow::handleKeyPress(SDL_Keycode key){
             waveformMenu->handleKeyPress(SDLK_RETURN); break;
         default:
             break;
+    }
+}
+
+void MainWindow::handleNewKeyPress(const Uint8 *keys) {
+
+    if (keys[SDL_SCANCODE_X]){
+        mBox->putMidiNoteInQueue(2);
+    }
+    if (keys[SDL_SCANCODE_D]) {
+        mBox->putMidiNoteInQueue(3);
+    }
+    if (keys[SDL_SCANCODE_C]) {
+        mBox->putMidiNoteInQueue(4);
     }
 }

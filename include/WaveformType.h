@@ -10,7 +10,8 @@ enum class WaveformType {
     SINE,
     SQUARE,
     TRIANGLE,
-    SAWTOOTH,
+    SAWTOOTHDOWN,
+    SAWTOOTHUP,
     NOISE
 };
 

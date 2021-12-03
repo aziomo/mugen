@@ -15,8 +15,8 @@ public:
     Texture(){
         renderer = nullptr;
         texture = nullptr;
-        width = 0;
-        height = 0;
+        w = 0;
+        h = 0;
     }
 
     ~Texture(){
@@ -37,8 +37,8 @@ public:
                 printf( "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
             }
             else {
-                width = loadedSurface->w;
-                height = loadedSurface->h;
+                w = loadedSurface->w;
+                h = loadedSurface->h;
             }
             SDL_FreeSurface( loadedSurface );
         }
@@ -49,18 +49,18 @@ public:
         free();
         SDL_Surface* textSurface = TTF_RenderUTF8_Blended(font, textValue.c_str(), textColor);
         texture = SDL_CreateTextureFromSurface(renderer, textSurface);
-        width = textSurface->w;
-        height = textSurface->h;
+        w = textSurface->w;
+        h = textSurface->h;
         SDL_FreeSurface(textSurface);
     }
 
     void render(int x, int y){
-        SDL_Rect renderQuad = {x, y, width, height};
+        SDL_Rect renderQuad = {x, y, w, h};
         SDL_RenderCopy(renderer, texture, nullptr, &renderQuad);
     }
 
     void renderRotated(int x, int y, double angle){
-        SDL_Rect renderQuad = {x, y, width, height};
+        SDL_Rect renderQuad = {x, y, w, h};
         SDL_RenderCopyEx(renderer, texture, nullptr, &renderQuad, angle, nullptr, SDL_FLIP_NONE);
     }
 
@@ -68,13 +68,13 @@ public:
         if (texture != nullptr){
             SDL_DestroyTexture(texture);
             texture = nullptr;
-            width = 0;
-            height = 0;
+            w = 0;
+            h = 0;
         }
     }
 
-    int width;
-    int height;
+    int w;
+    int h;
     SDL_Texture* texture;
 private:
     SDL_Renderer* renderer;

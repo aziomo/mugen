@@ -1,53 +1,24 @@
-#include <thread>
-#include <mutex>
-#include <condition_variable>
+
+
+
 #include "../include/MusicBox.h"
 
-std::mutex mu;
-std::queue<float*> blocksQueue;
-std::condition_variable queueFull;
-int blocksLeft;
 
-MusicBox::MusicBox(int oscillators) {
+
+MusicBox::MusicBox() {
     audioApi = new AudioAPI(512, 44100.0);
     blockSize = audioApi->bufferSize;
     isRunning = false;
-    for (int i = 0; i < oscillators; i++){
-        auto* osc = new Oscillator(44100);
-        this->oscillators.push_back(osc);
-    }
+    instruments.push_back(new Instrument(blockSize));
+    blocksLeft = 0;
 }
 
 MusicBox::~MusicBox() {
-    for (Oscillator* osc : this->oscillators) {
-        delete osc;
+    while (!instruments.empty()){
+        instruments.pop_back();
     }
     delete audioApi;
 }
-
-void MusicBox::addOscillator(WaveformType wavetype){
-    auto* osc = new Oscillator(44100, wavetype);
-    this->oscillators.push_back(osc);
-}
-
-void MusicBox::popOscillator(){
-    if (!oscillators.empty())
-        oscillators.pop_back();
-}
-
-//void MusicBox::createBlockOfSamples(){
-//    float block[blockSize];
-//    float singleSample = 0;
-//    for (int i = 0; i < blockSize; i++){
-//        for (int j = 0; i < KEYBOARD_SIZE; j++){
-//            if (pressedKeys[j]){
-//                singleSample += oscillators[0]->getSample()
-//            }
-//
-//        }
-//    }
-//
-//}
 
 void MusicBox::startPlaying(){
     isRunning = true;
@@ -59,49 +30,28 @@ void MusicBox::stopPlaying(){
     mainThread.join();
 }
 
-void MusicBox::fillSampleFrame(float* frame, double frequency) {
-    for (int i = 0; i < blockSize; i++) {
-        frame[i] = getSampleAllOscs(frequency);
-    }
-}
-
-float MusicBox::getSample(double frequency) {
-    this->oscillators[0]->setFrequency(frequency);
-    return (float) this->oscillators[0]->getSample();
-}
-
-float MusicBox::getSampleAllOscs(double frequency) {
-    float sample = 0;
-    int nOscs = oscillators.size();
-    for (int i = 0; i < nOscs; i++){
-        auto* osc = oscillators[i];
-        osc->setFrequency(frequency);
-        sample += (float) osc->getSample();
-    }
-    if (nOscs > 1)
-        sample /= nOscs;
-    return sample;
-}
-
 void MusicBox::playMidiNote(int offset){
     int midiNote = getRootCPosition() + offset;
     for (int i = 0; i < 16; i++) {
         float frame[blockSize];
-        fillSampleFrame(frame, midiToFrequency(midiNote));
+        instruments.front()->fillSampleBlock(frame, midiToFrequency(midiNote));
         audioApi->writeOut(frame);
     }
 }
 
-void MusicBox::playTwoNotes(int midiNote1, int midiNote2){
-    float maxSample;
-    for (int i = 0; i < 16; i++) {
-        float frame1[blockSize], frame2[blockSize];
-        fillSampleFrame(frame1, midiToFrequency(midiNote1));
-        fillSampleFrame(frame2, midiToFrequency(midiNote2));
-//        mixSampleFrames(frame1, frame2); // DELETED
-        audioApi->writeOut(frame1);
+void MusicBox::putMidiNoteInQueue(int offset){
+    std::unique_lock<std::mutex> lock(blocksQueueMutex);
+
+    int midiNote = getRootCPosition() + offset;
+    float* newBlock = new float[blockSize];
+    instruments.front()->fillSampleBlock(newBlock, midiToFrequency(midiNote));
+    if (blocksLeft < 8){
+        blocksQueue.push(newBlock);
+        blocksLeft++;
     }
+    else delete[] newBlock;
 }
+
 
 
 double MusicBox::midiToFrequency(int midiNote){
@@ -111,26 +61,32 @@ double MusicBox::midiToFrequency(int midiNote){
     return c0 * pow(SEMITONE_RATIO, (double) midiNote);
 }
 
-void MusicBox::mainLoop(){
-
-    float frame[blockSize];
-
-    while (isRunning){
-
-//        frame = readBlockOfSamples();
-
-        fillSampleFrame(frame, 220);
-//        audioApi->writeOut(readBlockOfSamples());
-        audioApi->writeOut(frame);
-//        blocksQueue.pop();
-//        blocksLeft--;
+void MusicBox::copyBlock(float* source, float* destination){
+    for (int i = 0; i < blockSize; i++){
+        destination[i] = source[i];
     }
 }
 
+void MusicBox::mainLoop(){
+
+    float mainOutputBlock[blockSize];
+
+    while (isRunning){
+
+        if (blocksLeft > 0) {
+            readBlockOfSamples(mainOutputBlock);
+            audioApi->writeOut(mainOutputBlock);
+        }
+
+        /*           STEADY SIGNAL OUTPUT  */
+//        instruments.front()->fillSampleBlock(mainOutputBlock, 440);
+//        audioApi->writeOut(mainOutputBlock);
+    }
+}
 
 void MusicBox::loadBlockOfSamples(float* frame) {
 
-    std::unique_lock<std::mutex> lock(mu);
+    std::unique_lock<std::mutex> lock(blocksQueueMutex);
     if (blocksLeft == 8){
         queueFull.wait(lock);
     }
@@ -139,8 +95,19 @@ void MusicBox::loadBlockOfSamples(float* frame) {
     queueFull.notify_one();
 }
 
-float* MusicBox::readBlockOfSamples() {
-    std::unique_lock<std::mutex> lock(mu);
+
+void MusicBox::readBlockOfSamples(float* outputBlock) {
+
+    // new version
+    std::unique_lock<std::mutex> lock(blocksQueueMutex);
+    copyBlock(blocksQueue.front(), outputBlock);
+    blocksQueue.pop();
+    blocksLeft--;
+
+    // old version
+
+    /*
+    std::unique_lock<std::mutex> lock(blocksQueueMutex);
     if (blocksLeft == 0){
         queueFull.wait(lock);
     }
@@ -148,19 +115,24 @@ float* MusicBox::readBlockOfSamples() {
 
     return blocksQueue.front();
 //    blocksQueue.pop();
-}
-
-void MusicBox::playSound(){
-    for (int i = 0; i < 8; i++) {
-        float frame[audioApi->bufferSize];
-        fillSampleFrame(frame, 220.0);
-        audioApi->writeOut(frame);
-    }
+    */
 }
 
 int MusicBox::getRootCPosition() {
     return octaveSize * currentOctave;
 }
 
+/*
+void MusicBox::playTwoNotes(int midiNote1, int midiNote2){
+    float maxSample;
+    for (int i = 0; i < 16; i++) {
+        float frame1[blockSize], frame2[blockSize];
+        instruments.front()->fillSampleFrame(frame1, midiToFrequency(midiNote1));
+        instruments.front()->fillSampleBlock(frame2, midiToFrequency(midiNote2));
+//        mixSampleFrames(frame1, frame2); // DELETED
+        audioApi->writeOut(frame1);
+    }
+}
+*/
 
 
