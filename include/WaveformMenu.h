@@ -52,7 +52,8 @@ public:
         lfoLabel,
         helpBar,
         undefinedLabel,
-        blocksLeftLabel;
+    // debug controls
+        blocksLeftLabel, maxSampleLabel;
     MusicBox* musicBox;
     MainWindow* window;
     Instrument* editedInstrument;

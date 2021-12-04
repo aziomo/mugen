@@ -38,3 +38,15 @@ void Instrument::addOscillator(){
 void Instrument::removeOscillator(){
     oscillators.pop_back();
 }
+
+void Instrument::fillMainBufferSegment(float *mainBuffer, int offset, double frequency) {
+    for (int i = 0; i < blockSize; i++) {
+        mainBuffer[offset + i] = generateSample(frequency);
+    }
+}
+
+void Instrument::addToMainBufferSegment(float *mainBuffer, int offset, double frequency) {
+    for (int i = 0; i < blockSize; i++) {
+        mainBuffer[offset + i] += generateSample(frequency);
+    }
+}

@@ -14,12 +14,14 @@ int main() {
 
     bool stillPressed = false;
 
+    musicBox->startPlaying();
     while (!quit){
         // new keyboard capture system
         SDL_PumpEvents();
 
         const Uint8* state = SDL_GetKeyboardState(nullptr);
 
+//        if (state[SDLv
         mainWindow->handleNewKeyPress(state);
 
         if(!state[SDL_SCANCODE_1] && stillPressed){
@@ -38,18 +40,13 @@ int main() {
 
 
 
-
-
-
-
         // old keyboard capture system
-        /*
-        while (SDL_PollEvent(&e) != 0) {
+        /*while (SDL_PollEvent(&e) != 0) {
             if (e.type == SDL_QUIT){
                 quit = 1;
             }
             else if (e.type == SDL_KEYDOWN){
-                mainWindow->handleKeyPress(e.key.keysym.sym);
+                mainWindow->handleKeyPress(&e);
                 switch (e.key.keysym.sym) {
                     case SDLK_F4:
                         quit = 1;
@@ -63,7 +60,7 @@ int main() {
                         break;
                 }
             }
-        } */
+        }*/
         mainWindow->render();
     }
     delete mainWindow;

@@ -54,13 +54,19 @@ void MainWindow::render(){
     SDL_RenderPresent(renderer);
 }
 
-void MainWindow::handleKeyPress(SDL_Keycode key){
-    switch (key) {
+void MainWindow::handleKeyPress(SDL_Event* event){
+    if (event->type == SDL_KEYDOWN) {
+
+    } else if (event->type == SDL_KEYUP){
+
+    }
+    switch (event->key.keysym.sym) {
         case SDLK_z:
             mBox->playMidiNote(); break; //play C note  octave * currentOctave - 3
         case SDLK_s:
             mBox->playMidiNote(1); break; // C#
         case SDLK_x:
+            mBox->pressedKeys[2] = true;
 //            mBox->playMidiNote(2); break; // D
             mBox->putMidiNoteInQueue(2); break;
         case SDLK_d:
@@ -121,13 +127,34 @@ void MainWindow::handleKeyPress(SDL_Keycode key){
 
 void MainWindow::handleNewKeyPress(const Uint8 *keys) {
 
-    if (keys[SDL_SCANCODE_X]){
-        mBox->putMidiNoteInQueue(2);
+    if (keys[SDL_SCANCODE_X] && !mBox->pressedKeys[2]){
+        mBox->pressedKeys[2] = true;
     }
-    if (keys[SDL_SCANCODE_D]) {
-        mBox->putMidiNoteInQueue(3);
+    if (!keys[SDL_SCANCODE_X] && mBox->pressedKeys[2]){
+        mBox->pressedKeys[2] = false;
+    }
+    if (keys[SDL_SCANCODE_D] && !mBox->pressedKeys[3]){
+        mBox->pressedKeys[3] = true;
+    }
+    if (!keys[SDL_SCANCODE_D] && mBox->pressedKeys[3]){
+        mBox->pressedKeys[3] = false;
+    }
+    if (keys[SDL_SCANCODE_C] && !mBox->pressedKeys[4]){
+        mBox->pressedKeys[4] = true;
+    }
+    if (!keys[SDL_SCANCODE_C] && mBox->pressedKeys[4]){
+        mBox->pressedKeys[4] = false;
+    }
+
+
+    /*if (keys[SDL_SCANCODE_D]) {
+//        mBox->putMidiNoteInQueue(3);
+        mBox->putMidiNoteInMainBuffer(3);
+        mBox->putMidiNoteInMainBuffer(3);
     }
     if (keys[SDL_SCANCODE_C]) {
-        mBox->putMidiNoteInQueue(4);
-    }
+//        mBox->putMidiNoteInQueue(4);
+//        mBox->putMidiNoteInMainBuffer(4);
+        mBox->putMidiNoteInMainBuffer(4);
+    }*/
 }

@@ -57,7 +57,7 @@ void WaveformMenu::loadTextures(){
     setTextTexture(&lfoAmpValue, "-");
     lfoWaveSelector.loadTextControl(SelectorType::WAVETYPE, &undefinedLabel, window);
 
-    setTextTexture(&blocksLeftLabel, "0");
+
     setTextTexture(&helpBar, helpMessage, window->smallFont);
     setImageTexture(&arrowImg, assets_dir + "arrow.png");
     setImageTexture(&sineImg, assets_dir + "sine.png");
@@ -71,6 +71,11 @@ void WaveformMenu::loadTextures(){
 
     setImageTexture(&checkImg, assets_dir + "check.png");
     lfoCheckBox.loadTextures("LFO", &lfoLabel, window);
+
+
+    //debug controls
+    setTextTexture(&blocksLeftLabel, "0");
+    setTextTexture(&maxSampleLabel, "0.0");
 }
 
 void WaveformMenu::updateTextures(){
@@ -79,7 +84,8 @@ void WaveformMenu::updateTextures(){
     setTextTexture(&mainFreqValue, doubleToStr(editedOsc->freqModifier, 2));
     setTextTexture(&mainAmpValue, doubleToStr(editedOsc->ampModifier, 2));
 
-    setTextTexture(&blocksLeftLabel, std::to_string(musicBox->blocksLeft));
+
+
 
     if (editedOsc->lfo != nullptr) {
         setWaveImage(&lfoWaveSelector, editedOsc->lfo->waveType);
@@ -91,6 +97,10 @@ void WaveformMenu::updateTextures(){
         setTextTexture(&lfoAmpValue, "-");
         lfoWaveSelector.loadTextControl(SelectorType::WAVETYPE, &undefinedLabel, window);
     }
+
+    // debug controls
+    setTextTexture(&blocksLeftLabel, std::to_string(musicBox->blocksAvailable));
+    setTextTexture(&maxSampleLabel, std::to_string(musicBox->maxSample));
 }
 
 int WaveformMenu::xByPercent(Texture* texture, double percent){
@@ -106,6 +116,8 @@ void WaveformMenu::render(){
 
     blocksLeftLabel.render(xByPercent(&blocksLeftLabel, 0.75),
                            yByPercent(&blocksLeftLabel, 0.75));
+    maxSampleLabel.render(xByPercent(&maxSampleLabel, 0.75),
+                           yByPercent(&maxSampleLabel, 0.80));
 
     // MISC
     screenTitle.render(xByPercent(&screenTitle, 0.3),

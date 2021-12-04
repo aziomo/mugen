@@ -32,11 +32,14 @@ public:
 
     void handleNewKeyPress(const Uint8 *keys);
 
+    void handleKeyPress(SDL_Event *event);
+
 private:
     SDL_Rect windowArea = {0, 0, w, h};
     SDL_Window* window = nullptr;
 
     void quitSDL();
+
 };
 
 #endif //MUGEN_CPP_MAINWINDOW_H

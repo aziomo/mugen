@@ -24,41 +24,57 @@ public:
     MusicBox();
     ~MusicBox();
     bool isRunning;
+
     bool pressedKeys[KEYBOARD_SIZE];
+//    std::vector<bool> pressedKeys = {};
+
+    float maxSample;
     void playMidiNote(int offset = 0);
     void startPlaying();
     void stopPlaying();
-    void loadBlockOfSamples(float* frame);
+    void loadBlockToQueue(float* frame);
     //void playTwoNotes(int midiNote1, int midiNote2);
     int getRootCPosition();
     std::vector<Instrument*> instruments;
     int currentInstrument = 0;
     int blockSize;
-    void putMidiNoteInQueue(int offset);
-
+    void putMidiNoteInQueue(int rootCOffset);
+    void putMidiNoteInMainBuffer(int rootCOffset);
+    bool readFromMainBuffer(float* outputBlock);
 //private:
-    std::mutex blocksQueueMutex;
+    int maxBlockCount = 8;
+    std::mutex mutexBlocksReadyToRead;
     std::queue<float*> blocksQueue;
-    std::condition_variable queueFull;
-    int blocksLeft;
-//    std::atomic<int> blocksLeft;
+    float* mainBuffer;
+    std::condition_variable blocksReadyToRead;
+//    int blocksAvailable;
+    std::atomic<int> blocksAvailable;
+
+    int currentWriteBlockIndex = 0;
+    int currentReadBlockIndex = 0; // starting from 1
 
     const int octaveSize = 12;
     int currentOctave = 4;
     std::thread mainThread;
+    std::thread readThread, writeThread;
 
     std::queue<float*> frameQueue;
     AudioAPI* audioApi;
 
     double midiToFrequency(int midiNote);
     void mainLoop();
-//    float* readBlockOfSamples();
+//    float* readBlockFromQueue();
 
     void copyBlock(float *source, float *destination);
 
-    void readBlockOfSamples(float *outputBlock);
+    void readBlockFromQueue(float *outputBlock);
 
 
+    void writePressedKeysToMainBuffer();
+
+    void bufferWriteLoop();
+
+    void bufferReadLoop();
 };
 
 
