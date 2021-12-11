@@ -34,6 +34,8 @@ public:
 
     void handleKeyPress(SDL_Event *event);
 
+    void handleNewKeyPress(const Uint8 *keyState, bool *lastKeyState, int* keyPressState);
+
 private:
     SDL_Rect windowArea = {0, 0, w, h};
     SDL_Window* window = nullptr;

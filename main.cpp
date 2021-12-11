@@ -13,16 +13,30 @@ int main() {
     SDL_Event e;
 
     bool stillPressed = false;
+    bool lastKeyState[128];
+    int keyPressState[128] = {0};
+    const Uint8* state = SDL_GetKeyboardState(nullptr);
+
+    for (int i = 0; i < 128; i++) {
+        lastKeyState[i] = state[i];
+    }
+
+    //SDL_GetKeyboardState(nullptr);
 
     musicBox->startPlaying();
     while (!quit){
         // new keyboard capture system
         SDL_PumpEvents();
 
-        const Uint8* state = SDL_GetKeyboardState(nullptr);
+        int keyboardSize = 20;
+        state = SDL_GetKeyboardState(&keyboardSize);
 
-//        if (state[SDLv
-        mainWindow->handleNewKeyPress(state);
+        mainWindow->handleNewKeyPress(state, lastKeyState, keyPressState);
+
+        //  0 + 0 -> 0
+        //  0 + 1 -> 1
+        //  1 + 0 -> 0
+        //  1 + 1 -> 0
 
         if(!state[SDL_SCANCODE_1] && stillPressed){
             stillPressed = false;
@@ -38,14 +52,16 @@ int main() {
             quit = 1;
         }
 
+        for (int i = 0; i < 128; i++) {
+            lastKeyState[i] = state[i];
+        }
+
 
 
         // old keyboard capture system
-        /*while (SDL_PollEvent(&e) != 0) {
-            if (e.type == SDL_QUIT){
-                quit = 1;
-            }
-            else if (e.type == SDL_KEYDOWN){
+/*
+        while (SDL_PollEvent(&e) != 0) {
+            if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP){
                 mainWindow->handleKeyPress(&e);
                 switch (e.key.keysym.sym) {
                     case SDLK_F4:
@@ -56,11 +72,11 @@ int main() {
                             musicBox->stopPlaying() : musicBox->startPlaying();
                         break;
                     default:
-                        // do nothing i guess
                         break;
                 }
             }
-        }*/
+        }
+*/
         mainWindow->render();
     }
     delete mainWindow;

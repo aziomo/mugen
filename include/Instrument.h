@@ -23,6 +23,8 @@ public:
     std::vector<Oscillator*> oscillators;
 
     void addToMainBufferSegment(float *mainBuffer, int offset, double frequency);
+
+    void testAddTwoNotesToMainBufferSegment(float *mainBuffer, int offset, double frequency);
 };
 
 

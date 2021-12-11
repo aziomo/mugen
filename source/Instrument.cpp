@@ -50,3 +50,13 @@ void Instrument::addToMainBufferSegment(float *mainBuffer, int offset, double fr
         mainBuffer[offset + i] += generateSample(frequency);
     }
 }
+
+void Instrument::testAddTwoNotesToMainBufferSegment(float *mainBuffer, int offset, double frequency) {
+    for (int i = 0; i < blockSize; i++) {
+        mainBuffer[offset + i] += generateSample(frequency);
+        mainBuffer[offset + i] += generateSample(frequency);
+    }
+//    for (int i = 0; i < blockSize; i++)
+//        mainBuffer[offset + i] += generateSample(frequency);
+
+}

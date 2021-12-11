@@ -95,7 +95,9 @@ void MusicBox::writePressedKeysToMainBuffer(){
             for (int i = 0; i < KEYBOARD_SIZE; i++){
                 if (pressedKeys[i]){
                     int midiNote = getRootCPosition() + i;
-                    instruments.front()->addToMainBufferSegment(mainBuffer, (currentWriteBlockIndex * blockSize),
+//                    instruments.front()->addToMainBufferSegment(mainBuffer, (currentWriteBlockIndex * blockSize),
+//                                                                midiToFrequency(midiNote));
+                    instruments.front()->testAddTwoNotesToMainBufferSegment(mainBuffer, (currentWriteBlockIndex * blockSize),
                                                                 midiToFrequency(midiNote));
                     scaleFactor++;
                 }
