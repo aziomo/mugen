@@ -310,6 +310,16 @@ void WaveformMenu::handleKeyPress(SDL_Keycode key) {
             break;
         case SDLK_RETURN:
             selectFocusedControl(); break;
+
+        case SDLK_w:
+            if (musicBox->outputFile == nullptr){
+                musicBox->openFile();
+            }
+            else {
+                musicBox->closeFile();
+            }
+
+            break;
         default:
             break;
     }

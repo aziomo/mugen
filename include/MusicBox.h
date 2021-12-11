@@ -16,6 +16,7 @@
 #include <mutex>
 #include <thread>
 #include <condition_variable>
+#include <sndfile.h>
 
 const double SEMITONE_RATIO = pow(2.0, 1.0 / 12.0);
 
@@ -27,6 +28,8 @@ public:
 
     bool pressedKeys[KEYBOARD_SIZE];
 //    std::vector<bool> pressedKeys = {};
+
+    SNDFILE* outputFile;
 
     float maxSample;
     void playMidiNote(int offset = 0);
@@ -75,6 +78,12 @@ public:
     void bufferWriteLoop();
 
     void bufferReadLoop();
+
+    void openFile();
+
+    void closeFile();
+
+    long writeBlockToFile(float *block);
 };
 
 

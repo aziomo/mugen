@@ -1,4 +1,5 @@
 #include <iostream>
+
 #include "../include/MusicBox.h"
 
 MusicBox::MusicBox() {
@@ -8,6 +9,7 @@ MusicBox::MusicBox() {
     instruments.push_back(new Instrument(blockSize));
     blocksAvailable = 0;
     mainBuffer = new float[blockSize * maxBlockCount];
+    outputFile = nullptr;
 }
 
 MusicBox::~MusicBox() {
@@ -95,10 +97,10 @@ void MusicBox::writePressedKeysToMainBuffer(){
             for (int i = 0; i < KEYBOARD_SIZE; i++){
                 if (pressedKeys[i]){
                     int midiNote = getRootCPosition() + i;
-//                    instruments.front()->addToMainBufferSegment(mainBuffer, (currentWriteBlockIndex * blockSize),
-//                                                                midiToFrequency(midiNote));
-                    instruments.front()->testAddTwoNotesToMainBufferSegment(mainBuffer, (currentWriteBlockIndex * blockSize),
+                    instruments.front()->addToMainBufferSegment(mainBuffer, (currentWriteBlockIndex * blockSize),
                                                                 midiToFrequency(midiNote));
+//                    instruments.front()->testAddTwoNotesToMainBufferSegment(mainBuffer, (currentWriteBlockIndex * blockSize),
+//                                                                midiToFrequency(midiNote));
                     scaleFactor++;
                 }
             }
@@ -175,6 +177,7 @@ void MusicBox::bufferReadLoop(){
     while (isRunning){
 
         if (readFromMainBuffer(outputBlock)){
+            writeBlockToFile(outputBlock);
             audioApi->writeOut(outputBlock);
         }
 
@@ -203,17 +206,25 @@ int MusicBox::getRootCPosition() {
     return octaveSize * currentOctave;
 }
 
-/*
-void MusicBox::playTwoNotes(int midiNote1, int midiNote2){
-    float maxSample;
-    for (int i = 0; i < 16; i++) {
-        float frame1[blockSize], frame2[blockSize];
-        instruments.front()->fillSampleFrame(frame1, midiToFrequency(midiNote1));
-        instruments.front()->fillSampleBlock(frame2, midiToFrequency(midiNote2));
-//        mixSampleFrames(frame1, frame2); // DELETED
-        audioApi->writeOut(frame1);
+void MusicBox::openFile() {
+    if (outputFile == nullptr){
+        SF_INFO fileInfo;
+        fileInfo.samplerate = 44100;
+        fileInfo.channels = 1;
+        fileInfo.format = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
+        outputFile = sf_open("retard.wav", SFM_WRITE, &fileInfo);
+        if (outputFile == nullptr){
+            auto errorMessage = sf_strerror(nullptr);
+            printf("%s\n", errorMessage);
+        }
     }
 }
-*/
 
+long MusicBox::writeBlockToFile(float* block){
+    return sf_write_float(outputFile, block, blockSize);
+}
 
+void MusicBox::closeFile(){
+    sf_close(outputFile);
+    outputFile = nullptr;
+}

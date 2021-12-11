@@ -22,5 +22,5 @@ include_directories($(SDL2_INCLUDE_DIRS) ${SDL2TTF_INCLUDE_DIRS} ${SDL2_IMAGE_IN
 
 target_link_libraries(mugen ${SDL2_LIBRARIES} ${SDL2TTF_LIBRARY} ${SDL2_IMAGE_LIBRARIES})
 target_link_libraries(mugen portaudio)
-#target_link_libraries(mugen libsndfile)
+target_link_libraries(mugen sndfile)
 target_link_libraries(mugen pthread)

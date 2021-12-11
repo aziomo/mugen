@@ -143,6 +143,11 @@ void MainWindow::handleNewKeyPress(const Uint8 *keyState, bool* lastKeyState, in
     if (!keyState[SDL_SCANCODE_C] && lastKeyState[SDL_SCANCODE_C])
         mBox->pressedKeys[4] = false;
 
+
+    if (keyState[SDL_SCANCODE_W] && !lastKeyState[SDL_SCANCODE_W])
+        waveformMenu->handleKeyPress(SDLK_w);
+
+
     if (keyState[SDL_SCANCODE_UP] && !lastKeyState[SDL_SCANCODE_UP])
         waveformMenu->handleKeyPress(SDLK_UP);
     if (keyState[SDL_SCANCODE_UP] && lastKeyState[SDL_SCANCODE_UP] && keyPressState[SDL_SCANCODE_UP]++ > 10)
