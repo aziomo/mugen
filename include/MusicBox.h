@@ -53,6 +53,9 @@ public:
 //    int blocksAvailable;
     std::atomic<int> blocksAvailable;
 
+    double globalTime;
+    double timeStep;
+
     int currentWriteBlockIndex = 0;
     int currentReadBlockIndex = 0; // starting from 1
 
@@ -86,6 +89,8 @@ public:
     long writeBlockToFile(float *block);
 
     void writePressedKeysToQueue();
+
+    void newWritePressedKeysToQueue();
 };
 
 

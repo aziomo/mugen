@@ -10,6 +10,8 @@ MusicBox::MusicBox() {
     blocksAvailable = 0;
     mainBuffer = new float[blockSize * maxBlockCount];
     outputFile = nullptr;
+    globalTime = 0.0;
+    timeStep = 1.0 / 44100.0;
 }
 
 MusicBox::~MusicBox() {
@@ -158,6 +160,48 @@ void MusicBox::writePressedKeysToQueue(){
 }
 
 
+void MusicBox::newWritePressedKeysToQueue(){
+    if (blocksAvailable < maxBlockCount){
+        bool anyPressed = false;
+        for (bool keyPress : pressedKeys){
+            if (keyPress) {
+                anyPressed = true;
+                break;
+            }
+        }
+
+        if (anyPressed){
+            float* newBlock = new float[blockSize];
+            for (int i = 0; i < blockSize; i++) {
+                newBlock[i] = 0;
+            }
+            int scaleFactor = 0;
+            for (int i = 0; i < KEYBOARD_SIZE; i++){
+                if (pressedKeys[i]){
+                    int midiNote = getRootCPosition() + i;
+                    instruments.front()->newAddToMainBufferSegment(newBlock, 0,
+                                                                midiToFrequency(midiNote), globalTime);
+//                    instruments.front()->testAddTwoNotesToMainBufferSegment(mainBuffer, (currentWriteBlockIndex * blockSize),
+//                                                                midiToFrequency(midiNote));
+                    scaleFactor++;
+                }
+            }
+            globalTime += timeStep * blockSize;
+            for (int i = 0; i < blockSize; i++) {
+                newBlock[i] /= scaleFactor;
+                if (maxSample < newBlock[i]){
+                    maxSample = newBlock[i];
+                }
+            }
+            blocksQueue.push(newBlock);
+            blocksAvailable++;
+        }
+    }
+}
+
+
+
+
 bool MusicBox::readFromMainBuffer(float* outputBlock) {
 
     if (blocksAvailable == 0) {
@@ -209,7 +253,7 @@ void MusicBox::mainLoop(){
 void MusicBox::bufferWriteLoop(){
     while (isRunning) {
 //        writePressedKeysToMainBuffer();
-        writePressedKeysToQueue();
+        newWritePressedKeysToQueue();
     }
 }
 
