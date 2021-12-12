@@ -150,7 +150,7 @@ void SelectControl::setNextWaveType(bool increment){
         case WaveformType::SAWTOOTHUP:
             nextWave = increment ? WaveformType::NOISE : WaveformType::SAWTOOTHDOWN; break;
         case WaveformType::NOISE:
-            nextWave = increment ? WaveformType::SINE : WaveformType::SAWTOOTHDOWN; break;
+            nextWave = increment ? WaveformType::SINE : WaveformType::SAWTOOTHUP; break;
     }
 
     if (modifyLFO){

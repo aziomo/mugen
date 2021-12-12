@@ -46,17 +46,20 @@ void Oscillator::shiftPhase(){
     }*/
 }
 
-double Oscillator::newSineTick(double dTime){
-    double value = sin(TWOPI * currentFrequency * dTime);
-    return value;
+double Oscillator::getPhase(double dTime)
+{
+    return TWOPI * currentFrequency * dTime;
 }
 
 double Oscillator::sineTick()
 {
-    double value = sin(currentPhase);
-    // double value = sin(someValue + dTime);
-    shiftPhase();
+    double value = sin(currentPhase); // = sin(TWOPI * currentFrequency / sampleRate * totalTicks);
+    shiftPhase();                     // totalTicks++;
     return value;
+}
+
+double Oscillator::newSineTick(double dTime){
+    return sin(getPhase(dTime));
 }
 
 double Oscillator::squareTick()
@@ -64,6 +67,58 @@ double Oscillator::squareTick()
     double value = currentPhase <= PI ? 1.0 : -1.0;
     shiftPhase();
     return value;
+}
+
+double Oscillator::newSquareTick(double dTime)
+{
+    return sin(getPhase(dTime)) <= 0 ? 1.0 : -1.0;
+}
+
+double Oscillator::triangleTick() {
+    double value = 2.0 * (currentPhase * (1.0 / TWOPI)) - 1;
+    if (value < 0.0)
+        value = -value;
+    value = 2.0 * (value - 0.5);
+    shiftPhase();
+    return value;
+}
+
+double Oscillator::newTriangleTick(double dTime) {
+    double value = 2.0 * (fmod(getPhase(dTime), TWOPI) * (1.0 / TWOPI)) - 1;
+    if (value < 0.0)
+        value = -value;
+    value = 2.0 * (value - 0.5);
+    return value;
+}
+
+double Oscillator::sawDownTick(){
+    double value = 1.0 - 2.0 * (currentPhase * (1.0 / TWOPI));
+    shiftPhase();
+    return value;
+}
+
+double Oscillator::newSawDownTick(double dTime){
+    return 1.0 - 2.0 * (fmod(getPhase(dTime), TWOPI) * (1.0 / TWOPI));
+}
+
+double Oscillator::sawUpTick(){
+    double value = (2.0 * (currentPhase * (1.0 / TWOPI))) - 1.0;
+    shiftPhase();
+    return value;
+}
+
+double Oscillator::newSawUpTick(double dTime){
+    return (2.0 * (fmod(getPhase(dTime), TWOPI) * (1.0 / TWOPI))) - 1.0;
+}
+
+double Oscillator::noiseTick(){
+    double value = 2.0 * ((double)rand() / (double)(RAND_MAX)) - 1.0;
+    shiftPhase();
+    return value;
+}
+
+double Oscillator::newNoiseTick(double dTime){
+    return 2.0 * ((double)rand() / (double)(RAND_MAX)) - 1.0;
 }
 
 void Oscillator::setFrequencyWithLFO(){
@@ -77,33 +132,6 @@ void Oscillator::setLFO(int sampleRate, WaveformType waveformType){
 void Oscillator::unsetLFO(){
     delete lfo;
     lfo = nullptr;
-}
-
-double Oscillator::triangleTick() {
-    double value = 2.0 * (currentPhase * (1.0 / TWOPI)) - 1;
-    if (value < 0.0)
-        value = -value;
-    value = 2.0 * (value - 0.5);
-    shiftPhase();
-    return value;
-}
-
-double Oscillator::sawtoothTick(){
-    double value = 1.0 - 2.0 * (currentPhase * (1.0 / TWOPI));
-    shiftPhase();
-    return value;
-}
-
-double Oscillator::sawtoothUpTick(){
-    double value = (2.0 * (currentPhase * (1.0 / TWOPI))) - 1.0;
-    shiftPhase();
-    return value;
-}
-
-double Oscillator::noiseTick(){
-    double value = 2.0 * ((double)rand() / (double)(RAND_MAX)) - 1.0;
-    shiftPhase();
-    return value;
 }
 
 void Oscillator::setAmpMod(double modifier){
@@ -124,22 +152,32 @@ void Oscillator::setWaveformType(WaveformType type) {
             waveType = WaveformType::SINE;
             getTick = &Oscillator::sineTick;
             newGetTick = &Oscillator::newSineTick;
-                    break;
+            break;
         case WaveformType::SQUARE:
             waveType = WaveformType::SQUARE;
-            getTick = &Oscillator::squareTick; break;
+            getTick = &Oscillator::squareTick;
+            newGetTick = &Oscillator::newSquareTick;
+            break;
         case WaveformType::TRIANGLE:
             waveType = WaveformType::TRIANGLE;
-            getTick = &Oscillator::triangleTick; break;
+            getTick = &Oscillator::triangleTick;
+            newGetTick = &Oscillator::newTriangleTick;
+            break;
         case WaveformType::SAWTOOTHDOWN:
             waveType = WaveformType::SAWTOOTHDOWN;
-            getTick = &Oscillator::sawtoothTick; break;
+            getTick = &Oscillator::sawDownTick;
+            newGetTick = &Oscillator::newSawDownTick;
+            break;
         case WaveformType::SAWTOOTHUP:
             waveType = WaveformType::SAWTOOTHUP;
-            getTick = &Oscillator::sawtoothUpTick; break;
+            getTick = &Oscillator::sawUpTick;
+            newGetTick = &Oscillator::newSawUpTick;
+            break;
         case WaveformType::NOISE:
             waveType = WaveformType::NOISE;
-            getTick = &Oscillator::noiseTick; break;
+            getTick = &Oscillator::noiseTick;
+            newGetTick = &Oscillator::newNoiseTick;
+            break;
 
     }
 }

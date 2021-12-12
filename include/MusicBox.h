@@ -45,7 +45,7 @@ public:
     void putMidiNoteInMainBuffer(int rootCOffset);
     bool readFromMainBuffer(float* outputBlock);
 //private:
-    int maxBlockCount = 8;
+    int maxBlockCount = 4;
     std::mutex mutexBlocksReadyToRead;
     std::queue<float*> blocksQueue;
     float* mainBuffer;
@@ -61,20 +61,14 @@ public:
 
     const int octaveSize = 12;
     int currentOctave = 4;
-    std::thread mainThread;
     std::thread readThread, writeThread;
-
-    std::queue<float*> frameQueue;
     AudioAPI* audioApi;
 
     double midiToFrequency(int midiNote);
-    void mainLoop();
-//    float* readBlockFromQueue();
 
     void copyBlock(float *source, float *destination);
 
     bool readBlockFromQueue(float *outputBlock);
-
 
     void writePressedKeysToMainBuffer();
 

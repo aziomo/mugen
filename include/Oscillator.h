@@ -50,7 +50,7 @@ public:
 
     double triangleTick();
 
-    double sawtoothTick();
+    double sawDownTick();
 
     void setLFO(int sampleRate, WaveformType waveformType);
 
@@ -58,11 +58,25 @@ public:
 
     void setFrequencyWithLFO();
 
-    double sawtoothUpTick();
+    double sawUpTick();
 
     double newSineTick(double dTime);
 
     double newGetSample(double dTime);
+
+    double newSquareTick(double dTime);
+
+    double getPhase(double dTime);
+
+    double newTriangleTick(double dTime);
+
+    double newNoiseTick();
+
+    double newSawDownTick(double dTime);
+
+    double newSawUpTick(double dTime);
+
+    double newNoiseTick(double dTime);
 };
 
 

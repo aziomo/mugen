@@ -235,21 +235,6 @@ void MusicBox::copyBlock(float* source, float* destination){
     }
 }
 
-void MusicBox::mainLoop(){
-
-    float outputBlock[blockSize];
-
-    while (isRunning){
-
-        readFromMainBuffer(outputBlock);
-        audioApi->writeOut(outputBlock);
-
-        /*           STEADY SIGNAL OUTPUT  */
-//        instruments.front()->fillSampleBlock(outputBlock, 440);
-//        audioApi->writeOut(outputBlock);
-    }
-}
-
 void MusicBox::bufferWriteLoop(){
     while (isRunning) {
 //        writePressedKeysToMainBuffer();
