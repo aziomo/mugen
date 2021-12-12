@@ -118,6 +118,46 @@ void MusicBox::writePressedKeysToMainBuffer(){
     }
 }
 
+
+void MusicBox::writePressedKeysToQueue(){
+    if (blocksAvailable < maxBlockCount){
+        bool anyPressed = false;
+        for (bool keyPress : pressedKeys){
+            if (keyPress) {
+                anyPressed = true;
+                break;
+            }
+        }
+
+        if (anyPressed){
+            float* newBlock = new float[blockSize];
+            for (int i = 0; i < blockSize; i++) {
+                newBlock[i] = 0;
+            }
+            int scaleFactor = 0;
+            for (int i = 0; i < KEYBOARD_SIZE; i++){
+                if (pressedKeys[i]){
+                    int midiNote = getRootCPosition() + i;
+                    instruments.front()->addToMainBufferSegment(newBlock, 0,
+                                                                midiToFrequency(midiNote));
+//                    instruments.front()->testAddTwoNotesToMainBufferSegment(mainBuffer, (currentWriteBlockIndex * blockSize),
+//                                                                midiToFrequency(midiNote));
+                    scaleFactor++;
+                }
+            }
+            for (int i = 0; i < blockSize; i++) {
+                newBlock[i] /= scaleFactor;
+                if (maxSample < newBlock[i]){
+                    maxSample = newBlock[i];
+                }
+            }
+            blocksQueue.push(newBlock);
+            blocksAvailable++;
+        }
+    }
+}
+
+
 bool MusicBox::readFromMainBuffer(float* outputBlock) {
 
     if (blocksAvailable == 0) {
@@ -168,7 +208,8 @@ void MusicBox::mainLoop(){
 
 void MusicBox::bufferWriteLoop(){
     while (isRunning) {
-        writePressedKeysToMainBuffer();
+//        writePressedKeysToMainBuffer();
+        writePressedKeysToQueue();
     }
 }
 
@@ -176,7 +217,8 @@ void MusicBox::bufferReadLoop(){
     float outputBlock[blockSize];
     while (isRunning){
 
-        if (readFromMainBuffer(outputBlock)){
+//      if (readFromMainBuffer(outputBlock)){
+        if (readBlockFromQueue(outputBlock)){
             writeBlockToFile(outputBlock);
             audioApi->writeOut(outputBlock);
         }
@@ -190,14 +232,20 @@ void MusicBox::bufferReadLoop(){
 void MusicBox::loadBlockToQueue(float* frame) {
     blocksQueue.push(frame);
     blocksAvailable++;
-    blocksReadyToRead.notify_one();
+//    blocksReadyToRead.notify_one();
 }
 
 
-void MusicBox::readBlockFromQueue(float* outputBlock) {
-    copyBlock(blocksQueue.front(), outputBlock);
-    blocksQueue.pop();
-    blocksAvailable--;
+bool MusicBox::readBlockFromQueue(float* outputBlock) {
+    if (blocksAvailable == 0){
+        return false;
+    } else {
+        copyBlock(blocksQueue.front(), outputBlock);
+        blocksQueue.pop();
+        blocksAvailable--;
+        return true;
+    }
+
 }
 
 

@@ -70,7 +70,7 @@ public:
 
     void copyBlock(float *source, float *destination);
 
-    void readBlockFromQueue(float *outputBlock);
+    bool readBlockFromQueue(float *outputBlock);
 
 
     void writePressedKeysToMainBuffer();
@@ -84,6 +84,8 @@ public:
     void closeFile();
 
     long writeBlockToFile(float *block);
+
+    void writePressedKeysToQueue();
 };
 
 
