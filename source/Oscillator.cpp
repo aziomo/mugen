@@ -6,6 +6,7 @@ Oscillator::Oscillator(int sampleRate, WaveformType waveformType) {
     twoPiOverSampleRate = TWOPI / sampleRate;
     this->sampleRate = sampleRate;
     currentFrequency = 0.0;
+    baseFrequency = 0.0;
     currentPhase = 0.0;
     phaseIncrement = 0.0;
     freqModifier = 1.0;
@@ -21,33 +22,30 @@ double Oscillator::getSample() {
     return sample;
 }
 
-double Oscillator::newGetSample(double dTime) {
-    if (lfo != nullptr){
-        setFrequencyWithLFO();
-    }
-    double sample = ampModifier * (this->*newGetTick)(dTime);
-    return sample;
-}
-
-
 void Oscillator::setFrequency(double frequency){
+    baseFrequency = frequency;
     currentFrequency = frequency * freqModifier;
     phaseIncrement = TWOPI / sampleRate * currentFrequency;
 }
 
+
 void Oscillator::shiftPhase(){
     currentPhase += phaseIncrement;
     // currentPhase += someValue + dTime || someValue * dTime;
-    /*if (currentPhase >= TWOPI){
+    if (currentPhase >= TWOPI){
         currentPhase -= TWOPI;
     }
     if (currentPhase < 0.0){
         currentPhase += TWOPI;
-    }*/
+    }
 }
 
 double Oscillator::getPhase(double dTime)
 {
+    if (lfo != nullptr && lfo->waveType != WaveformType::SINE){
+        return TWOPI * (currentFrequency + currentFrequency * lfo->newGetSample(dTime)) * dTime;
+//        return lfo->getPhase(dTime);
+    }
     return TWOPI * currentFrequency * dTime;
 }
 
@@ -58,8 +56,30 @@ double Oscillator::sineTick()
     return value;
 }
 
-double Oscillator::newSineTick(double dTime){
+double Oscillator::newGetSample(double dTime)
+{
+//    if (lfo != nullptr && lfo->waveType != WaveformType::SINE){
+//        newSetFrequencyWithLFO(dTime);
+//    } else {
+//        setFrequency(baseFrequency);
+//    }
+    return ampModifier * (this->*newGetTick)(dTime);
+}
+
+double Oscillator::newSineTick(double dTime)
+{
+    if (lfo != nullptr){
+        return sin(getPhase(dTime) + baseFrequency * lfo->newGetSample(dTime));
+    }
     return sin(getPhase(dTime));
+}
+
+void Oscillator::newSetFrequencyWithLFO(double dTime){
+    currentFrequency = baseFrequency + (baseFrequency * lfo->newGetSample(dTime));
+}
+
+void Oscillator::setFrequencyWithLFO(){
+    phaseIncrement = twoPiOverSampleRate * (currentFrequency  + (currentFrequency * lfo->getSample()));
 }
 
 double Oscillator::squareTick()
@@ -71,6 +91,9 @@ double Oscillator::squareTick()
 
 double Oscillator::newSquareTick(double dTime)
 {
+    if (lfo != nullptr){
+        return sin(getPhase(dTime) + baseFrequency * lfo->newGetSample(dTime)) <= 0 ? 1.0 : -1.0;
+    }
     return sin(getPhase(dTime)) <= 0 ? 1.0 : -1.0;
 }
 
@@ -84,7 +107,16 @@ double Oscillator::triangleTick() {
 }
 
 double Oscillator::newTriangleTick(double dTime) {
-    double value = 2.0 * (fmod(getPhase(dTime), TWOPI) * (1.0 / TWOPI)) - 1;
+
+    double firstValue;
+    if (lfo != nullptr){
+        firstValue = getPhase(dTime) + baseFrequency * lfo->newGetSample(dTime);
+    } else {
+        firstValue = getPhase(dTime);
+    }
+
+
+    double value = 2.0 * (fmod(firstValue, TWOPI) * (1.0 / TWOPI)) - 1;
     if (value < 0.0)
         value = -value;
     value = 2.0 * (value - 0.5);
@@ -119,10 +151,6 @@ double Oscillator::noiseTick(){
 
 double Oscillator::newNoiseTick(double dTime){
     return 2.0 * ((double)rand() / (double)(RAND_MAX)) - 1.0;
-}
-
-void Oscillator::setFrequencyWithLFO(){
-    phaseIncrement = TWOPI / sampleRate * (currentFrequency  + (currentFrequency * lfo->getSample()));
 }
 
 void Oscillator::setLFO(int sampleRate, WaveformType waveformType){

@@ -74,8 +74,9 @@ void WaveformMenu::loadTextures(){
 
 
     //debug controls
-    setTextTexture(&blocksLeftLabel, "0");
-    setTextTexture(&maxSampleLabel, "0.0");
+    setTextTexture(&debugBlocksLeftLabel, "0");
+    setTextTexture(&debugMaxSampleLabel, "0.0");
+    setTextTexture(&debugCurrentFrequencyLabel, "0.0");
 }
 
 void WaveformMenu::updateTextures(){
@@ -99,8 +100,11 @@ void WaveformMenu::updateTextures(){
     }
 
     // debug controls
-    setTextTexture(&blocksLeftLabel, std::to_string(musicBox->blocksAvailable));
-    setTextTexture(&maxSampleLabel, std::to_string(musicBox->maxSample));
+    setTextTexture(&debugBlocksLeftLabel, std::to_string(musicBox->blocksAvailable));
+    setTextTexture(&debugMaxSampleLabel, std::to_string(musicBox->maxSample));
+    setTextTexture(&debugCurrentFrequencyLabel, std::to_string(musicBox->instruments.front()->oscillators.front()->currentFrequency));
+//    if (musicBox->instruments.front()->oscillators.front()->lfo != nullptr)
+//    setTextTexture(&debugCurrentFrequencyLabel, std::to_string(sin(musicBox->instruments.front()->oscillators.front()->lfo->newGetSample(musicBox->globalTime))));
 }
 
 int WaveformMenu::xByPercent(Texture* texture, double percent){
@@ -114,10 +118,12 @@ int WaveformMenu::yByPercent(Texture* texture, double percent){
 void WaveformMenu::render(){
     updateTextures();
 
-    blocksLeftLabel.render(xByPercent(&blocksLeftLabel, 0.75),
-                           yByPercent(&blocksLeftLabel, 0.75));
-    maxSampleLabel.render(xByPercent(&maxSampleLabel, 0.75),
-                           yByPercent(&maxSampleLabel, 0.80));
+    debugBlocksLeftLabel.render(xByPercent(&debugBlocksLeftLabel, 0.75),
+                                yByPercent(&debugBlocksLeftLabel, 0.75));
+    debugMaxSampleLabel.render(xByPercent(&debugMaxSampleLabel, 0.75),
+                               yByPercent(&debugMaxSampleLabel, 0.80));
+    debugCurrentFrequencyLabel.render(xByPercent(&debugCurrentFrequencyLabel, 0.75),
+                               yByPercent(&debugCurrentFrequencyLabel, 0.85));
 
     // MISC
     screenTitle.render(xByPercent(&screenTitle, 0.3),
@@ -276,10 +282,16 @@ void WaveformMenu::handleKeyPress(SDL_Keycode key) {
             if (getFocusedControl()->isHighlighted){
                 changeControlFocus(Direction::UP);
             }
+            if (getFocusedControl()->isEditing){
+                getFocusedControl()->increment(true);
+            }
             break;
         case SDLK_DOWN:
             if (getFocusedControl()->isHighlighted){
                 changeControlFocus(Direction::DOWN);
+            }
+            if (getFocusedControl()->isEditing){
+                getFocusedControl()->decrement(true);
             }
             break;
         case SDLK_LEFT:
@@ -328,8 +340,8 @@ void WaveformMenu::handleKeyPress(SDL_Keycode key) {
 void WaveformMenu::setLFO(){
     if (editedOsc->lfo == nullptr){
         editedOsc->setLFO(44100, WaveformType::SINE);
-        editedOsc->lfo->setFrequency(5);
-        editedOsc->lfo->setAmpMod(0.5);
+        editedOsc->lfo->setFrequency(1);
+        editedOsc->lfo->setAmpMod(0.01);
     }
     else {
         editedOsc->unsetLFO();

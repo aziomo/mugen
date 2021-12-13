@@ -68,8 +68,8 @@ void Instrument::addToMainBufferSegment(float *mainBuffer, int offset, double fr
 void Instrument::newAddToMainBufferSegment(float *mainBuffer, int offset, double frequency, double timePoint) {
     double timestep = 1.0 / 44100.0;
     for (int i = 0; i < blockSize; i++) {
-        timePoint += timestep;
         mainBuffer[offset + i] += newGenerateSample(frequency, timePoint);
+        timePoint += timestep;
     }
 }
 

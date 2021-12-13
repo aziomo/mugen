@@ -10,8 +10,9 @@ MusicBox::MusicBox() {
     blocksAvailable = 0;
     mainBuffer = new float[blockSize * maxBlockCount];
     outputFile = nullptr;
-    globalTime = 0.0;
     timeStep = 1.0 / 44100.0;
+    globalTime = 0.0;
+//    globalTime = timeStep * blockSize * 512;
 }
 
 MusicBox::~MusicBox() {
@@ -142,8 +143,6 @@ void MusicBox::writePressedKeysToQueue(){
                     int midiNote = getRootCPosition() + i;
                     instruments.front()->addToMainBufferSegment(newBlock, 0,
                                                                 midiToFrequency(midiNote));
-//                    instruments.front()->testAddTwoNotesToMainBufferSegment(mainBuffer, (currentWriteBlockIndex * blockSize),
-//                                                                midiToFrequency(midiNote));
                     scaleFactor++;
                 }
             }
@@ -181,12 +180,11 @@ void MusicBox::newWritePressedKeysToQueue(){
                     int midiNote = getRootCPosition() + i;
                     instruments.front()->newAddToMainBufferSegment(newBlock, 0,
                                                                 midiToFrequency(midiNote), globalTime);
-//                    instruments.front()->testAddTwoNotesToMainBufferSegment(mainBuffer, (currentWriteBlockIndex * blockSize),
-//                                                                midiToFrequency(midiNote));
                     scaleFactor++;
                 }
             }
             globalTime += timeStep * blockSize;
+
             for (int i = 0; i < blockSize; i++) {
                 newBlock[i] /= scaleFactor;
                 if (maxSample < newBlock[i]){
@@ -238,7 +236,8 @@ void MusicBox::copyBlock(float* source, float* destination){
 void MusicBox::bufferWriteLoop(){
     while (isRunning) {
 //        writePressedKeysToMainBuffer();
-        newWritePressedKeysToQueue();
+        writePressedKeysToQueue();
+//        newWritePressedKeysToQueue();
     }
 }
 
@@ -252,16 +251,12 @@ void MusicBox::bufferReadLoop(){
             audioApi->writeOut(outputBlock);
         }
 
-        /*           STEADY SIGNAL OUTPUT  */
-//        instruments.front()->fillSampleBlock(outputBlock, 440);
-//        audioApi->writeOut(outputBlock);
     }
 }
 
 void MusicBox::loadBlockToQueue(float* frame) {
     blocksQueue.push(frame);
     blocksAvailable++;
-//    blocksReadyToRead.notify_one();
 }
 
 
@@ -274,10 +269,7 @@ bool MusicBox::readBlockFromQueue(float* outputBlock) {
         blocksAvailable--;
         return true;
     }
-
 }
-
-
 
 int MusicBox::getRootCPosition() {
     return octaveSize * currentOctave;

@@ -53,7 +53,7 @@ public:
         helpBar,
         undefinedLabel,
     // debug controls
-        blocksLeftLabel, maxSampleLabel;
+        debugBlocksLeftLabel, debugMaxSampleLabel, debugCurrentFrequencyLabel;
     MusicBox* musicBox;
     MainWindow* window;
     Instrument* editedInstrument;

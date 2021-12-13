@@ -23,6 +23,7 @@ private:
     double(Oscillator::*newGetTick)(double);
 public:
     double currentFrequency;
+    double baseFrequency;
     Oscillator* lfo;
     double freqModifier = 1.0;
     double ampModifier = 1.0;
@@ -77,6 +78,8 @@ public:
     double newSawUpTick(double dTime);
 
     double newNoiseTick(double dTime);
+
+    void newSetFrequencyWithLFO(double dTime);
 };
 
 
