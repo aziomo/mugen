@@ -62,80 +62,7 @@ void MainWindow::render(){
     SDL_RenderPresent(renderer);
 }
 
-void MainWindow::handleKeyPress(SDL_Event* event){
-    if (event->type == SDL_KEYDOWN) {
-
-    } else if (event->type == SDL_KEYUP){
-
-    }
-    switch (event->key.keysym.sym) {
-        case SDLK_z:
-            mBox->playMidiNote(); break; //play C note  octave * currentOctave - 3
-        case SDLK_s:
-            mBox->playMidiNote(1); break; // C#
-        case SDLK_x:
-            mBox->pressedKeys[2] = true;
-//            mBox->playMidiNote(2); break; // D
-            mBox->putMidiNoteInQueue(2); break;
-        case SDLK_d:
-//            mBox->playMidiNote(3); break; // D#
-            mBox->putMidiNoteInQueue(3); break;
-        case SDLK_c:
-//            mBox->playMidiNote(4); break; // E
-            mBox->putMidiNoteInQueue(4); break;
-        case SDLK_v:
-            mBox->playMidiNote(5); break; // F
-        case SDLK_g:
-            mBox->playMidiNote(6); break; // F#
-        case SDLK_b:
-            mBox->playMidiNote(7); break; // G
-        case SDLK_h:
-            mBox->playMidiNote(8); break; // G#
-        case SDLK_n:
-            mBox->playMidiNote(9); break; // A
-        case SDLK_j:
-            mBox->playMidiNote(10); break; // A#
-        case SDLK_m:
-            mBox->playMidiNote(11); break; // B
-        case SDLK_COMMA:
-            mBox->playMidiNote(12); break; // C
-        case SDLK_l:
-            mBox->playMidiNote(13); break; // C#
-        case SDLK_PERIOD:
-            mBox->playMidiNote(14); break; // D
-        case SDLK_SEMICOLON:
-            mBox->playMidiNote(15); break; // D#
-        case SDLK_SLASH:
-            mBox->playMidiNote(16); break; // E
-        case SDLK_MINUS:
-            waveformMenu->handleKeyPress(SDLK_MINUS); break;
-        case SDLK_EQUALS:
-            waveformMenu->handleKeyPress(SDLK_EQUALS); break;
-        case SDLK_2:
-            waveformMenu->handleKeyPress(SDLK_2); break;
-        case SDLK_3:
-            waveformMenu->handleKeyPress(SDLK_3); break;
-        case SDLK_i:
-            waveformMenu->handleKeyPress(SDLK_i); break;
-        case SDLK_9:
-            waveformMenu->handleKeyPress(SDLK_9); break;
-
-        case SDLK_UP:
-            waveformMenu->handleKeyPress(SDLK_UP); break;
-        case SDLK_DOWN:
-            waveformMenu->handleKeyPress(SDLK_DOWN); break;
-        case SDLK_LEFT:
-            waveformMenu->handleKeyPress(SDLK_LEFT); break;
-        case SDLK_RIGHT:
-            waveformMenu->handleKeyPress(SDLK_RIGHT); break;
-        case SDLK_RETURN:
-            waveformMenu->handleKeyPress(SDLK_RETURN); break;
-        default:
-            break;
-    }
-}
-
-void MainWindow::handleNewKeyPress(const Uint8 *keyState, bool* lastKeyState, int* keyPressState) {
+void MainWindow::handleKeyPress(const Uint8 *keyState, bool* lastKeyState, int* keyPressState) {
 
 
     if (keyState[SDL_SCANCODE_Z] && !lastKeyState[SDL_SCANCODE_Z])
@@ -161,7 +88,7 @@ void MainWindow::handleNewKeyPress(const Uint8 *keyState, bool* lastKeyState, in
     if (keyState[SDL_SCANCODE_C] && !lastKeyState[SDL_SCANCODE_C])
         mBox->pressedKeys[4] = true;
     if (!keyState[SDL_SCANCODE_C] && lastKeyState[SDL_SCANCODE_C])
-        mBox->pressedKeys[4] = false;//
+        mBox->pressedKeys[4] = false;
 
     if (keyState[SDL_SCANCODE_V] && !lastKeyState[SDL_SCANCODE_V])
         mBox->pressedKeys[5] = true;

@@ -1,5 +1,4 @@
 #include "../include/WaveformMenu.h"
-#include "../include/Direction.h"
 #include <string>
 #include <iomanip>
 #include <sstream>
@@ -104,7 +103,7 @@ void WaveformMenu::updateTextures(){
     setTextTexture(&debugMaxSampleLabel, std::to_string(musicBox->maxSample));
 //    setTextTexture(&debugCurrentFrequencyLabel, std::to_string(musicBox->instruments.front()->oscillators.front()->currentFrequency));
     if (musicBox->instruments.front()->oscillators.front()->lfo != nullptr)
-//    setTextTexture(&debugCurrentFrequencyLabel, std::to_string(sin(musicBox->instruments.front()->oscillators.front()->lfo->newGetSample(musicBox->globalTime))));
+//    setTextTexture(&debugCurrentFrequencyLabel, std::to_string(sin(musicBox->instruments.front()->oscillators.front()->lfo->getSample(musicBox->globalTime))));
     setTextTexture(&debugCurrentFrequencyLabel, std::to_string(sin(
             musicBox->instruments.front()->oscillators.front()->getLfoInterpolatedSample(musicBox->globalTime))));
 }

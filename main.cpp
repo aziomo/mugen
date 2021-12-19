@@ -31,7 +31,7 @@ int main() {
         int keyboardSize = 20;
         state = SDL_GetKeyboardState(&keyboardSize);
 
-        mainWindow->handleNewKeyPress(state, lastKeyState, keyPressState);
+        mainWindow->handleKeyPress(state, lastKeyState, keyPressState);
 
         //  0 + 0 -> 0
         //  0 + 1 -> 1

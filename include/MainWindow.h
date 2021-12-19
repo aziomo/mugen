@@ -17,7 +17,6 @@ public:
     ~MainWindow();
     void initSDL();
     void render();
-    void handleKeyPress(SDL_Keycode key);
 
     int w = SET_WINDOW_WIDTH;
     int h = SET_WINDOW_HEIGHT;
@@ -30,11 +29,7 @@ public:
     int borderSize = 10;
     SDL_Rect mainArea = {borderSize, borderSize, w - borderSize * 2, h - borderSize * 2};
 
-    void handleNewKeyPress(const Uint8 *keys);
-
-    void handleKeyPress(SDL_Event *event);
-
-    void handleNewKeyPress(const Uint8 *keyState, bool *lastKeyState, int* keyPressState);
+    void handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int* keyPressState);
 
 private:
     SDL_Rect windowArea = {0, 0, w, h};

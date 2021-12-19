@@ -15,21 +15,15 @@ const double TWOPI = 2.0 * PI;
 class Oscillator {
 
 private:
-    double twoPiOverSampleRate;
     double sampleRate;
-    double currentPhase;
-    double phaseIncrement;
-    double(Oscillator::*getTick)();
-    double(Oscillator::*newGetTick)(double);
+    double(Oscillator::*getTick)(double);
     static constexpr int lookupTableSize = 44100;
     double lfoLookupTable[lookupTableSize];
 public:
     double currentFrequency;
-    double baseFrequency;
     Oscillator* lfo;
     double freqModifier = 1.0;
     double ampModifier = 1.0;
-    bool debugBool = true;
     WaveformType waveType;
 
     Oscillator(int sampleRate, WaveformType waveformType = WaveformType::SINE);
@@ -37,65 +31,30 @@ public:
     void setWaveformType(WaveformType type);
     void setFrequency(double frequency);
 
-
-    double sineTick();
-    double squareTick();
-
-    double getSample();
-
-    void shiftPhase();
-
     void setAmpMod(double modifier);
-
     void setFreqMod(double modifier);
 
-    double noiseTick();
-
-    double triangleTick();
-
-    double sawDownTick();
-
     void setLFO(int sampleRate, WaveformType waveformType);
-
     void unsetLFO();
 
-    void setFrequencyWithLFO();
-
-    double sawUpTick();
-
-    double newSineTick(double dTime);
-
-    double newGetSample(double dTime);
-
-    double newSquareTick(double dTime);
-
     double getPhase(double dTime);
+    double getPhase(double dTime, double frequency);
+    double getSample(double dTime);
 
-    double newTriangleTick(double dTime);
-
-    double newNoiseTick();
-
-    double newSawDownTick(double dTime);
-
-    double newSawUpTick(double dTime);
-
-    double newNoiseTick(double dTime);
-
-    void newSetFrequencyWithLFO(double dTime);
-
+    double sineTick(double dTime);
+    double squareTick(double dTime);
+    double triangleTick(double dTime);
+    double sawDownTick(double dTime);
+    double sawUpTick(double dTime);
+    double noiseTick(double dTime);
 
     static double YofX(double x, WaveformType function);
 
-    int phaseToIndex(double phase);
-
     void setupLfoLookup(WaveformType type);
 
-    double getLfoTruncatedSample(double dTime);
-
-    double getPhaseV2(double dTime, double frequency);
-
+    int phaseToIndex(double phase);
     double indexToPhase(int index);
-
+    double getLfoTruncatedSample(double dTime);
     double getLfoInterpolatedSample(double dTime);
 };
 

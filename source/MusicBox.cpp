@@ -8,11 +8,9 @@ MusicBox::MusicBox() {
     isRunning = false;
     instruments.push_back(new Instrument(blockSize));
     blocksAvailable = 0;
-    mainBuffer = new float[blockSize * maxBlockCount];
     outputFile = nullptr;
     timeStep = 1.0 / 44100.0;
     globalTime = 0.0;
-//    globalTime = timeStep * blockSize * 512;
 }
 
 MusicBox::~MusicBox() {
@@ -24,138 +22,14 @@ MusicBox::~MusicBox() {
 
 void MusicBox::startPlaying(){
     isRunning = true;
-//    mainThread = std::thread(&MusicBox::mainLoop, this);
     readThread = std::thread(&MusicBox::bufferReadLoop, this);
     writeThread = std::thread(&MusicBox::bufferWriteLoop, this);
 }
 
 void MusicBox::stopPlaying(){
     isRunning = false;
-//    mainThread.join();
     readThread.join();
     writeThread.join();
-}
-
-void MusicBox::playMidiNote(int offset){
-    int midiNote = getRootCPosition() + offset;
-    for (int i = 0; i < 16; i++) {
-        float frame[blockSize];
-        instruments.front()->fillSampleBlock(frame, midiToFrequency(midiNote));
-        audioApi->writeOut(frame);
-    }
-}
-
-void MusicBox::putMidiNoteInQueue(int rootCOffset){
-    std::unique_lock<std::mutex> lm(mutexBlocksReadyToRead);
-
-    int midiNote = getRootCPosition() + rootCOffset;
-    float* newBlock = new float[blockSize];
-    instruments.front()->fillSampleBlock(newBlock, midiToFrequency(midiNote));
-
-    // fillMainBlockAt(mainBuffer, rootCOffset, blockLength);
-
-    if (blocksAvailable < maxBlockCount){
-        loadBlockToQueue(newBlock);
-    }
-    else delete[] newBlock;
-}
-
-
-void MusicBox::putMidiNoteInMainBuffer(int rootCOffset){
-//    std::unique_lock<std::mutex> lock(blocksQueueMutex);
-    int midiNote = getRootCPosition() + rootCOffset;
-
-    if (blocksAvailable < maxBlockCount){
-        instruments.front()->fillMainBufferSegment(mainBuffer, (currentWriteBlockIndex * blockSize),
-                                                   midiToFrequency(midiNote));
-        currentWriteBlockIndex++;
-        if (currentWriteBlockIndex == maxBlockCount) currentWriteBlockIndex = 0;
-        blocksAvailable++;
-//        std::unique_lock<std::mutex> lm(mutexBlocksReadyToRead);
-        if (blocksAvailable > 3){
-            std::cout <<"retard" << std::endl;
-            std::unique_lock<std::mutex> lm(mutexBlocksReadyToRead);
-            blocksReadyToRead.notify_one();
-        }
-
-    }
-}
-
-void MusicBox::writePressedKeysToMainBuffer(){
-    if (blocksAvailable < maxBlockCount){
-        bool anyPressed = false;
-        for (bool keyPress : pressedKeys){
-            if (keyPress) {
-                anyPressed = true;
-                break;
-            }
-        }
-
-        if (anyPressed){
-            int offset = currentWriteBlockIndex * blockSize;
-            for (int i = 0; i < blockSize; i++) {
-                mainBuffer[offset + i] = 0;
-            }
-            int scaleFactor = 0;
-            for (int i = 0; i < KEYBOARD_SIZE; i++){
-                if (pressedKeys[i]){
-                    int midiNote = getRootCPosition() + i;
-                    instruments.front()->addToMainBufferSegment(mainBuffer, (currentWriteBlockIndex * blockSize),
-                                                                midiToFrequency(midiNote));
-//                    instruments.front()->testAddTwoNotesToMainBufferSegment(mainBuffer, (currentWriteBlockIndex * blockSize),
-//                                                                midiToFrequency(midiNote));
-                    scaleFactor++;
-                }
-            }
-            for (int i = 0; i < blockSize; i++) {
-                mainBuffer[offset + i] /= scaleFactor;
-                if (maxSample < mainBuffer[offset + i]){
-                    maxSample = mainBuffer[offset + i];
-                }
-            }
-
-            currentWriteBlockIndex++;
-            if (currentWriteBlockIndex == maxBlockCount) currentWriteBlockIndex = 0;
-            blocksAvailable++;
-        }
-    }
-}
-
-
-void MusicBox::writePressedKeysToQueue(){
-    if (blocksAvailable < maxBlockCount){
-        bool anyPressed = false;
-        for (bool keyPress : pressedKeys){
-            if (keyPress) {
-                anyPressed = true;
-                break;
-            }
-        }
-
-        if (anyPressed){
-            float* newBlock = new float[blockSize];
-            for (int i = 0; i < blockSize; i++) {
-                newBlock[i] = 0;
-            }
-            int scaleFactor = 0;
-            for (int i = 0; i < KEYBOARD_SIZE; i++){
-                if (pressedKeys[i]){
-                    int midiNote = getRootCPosition() + i;
-                    instruments.front()->addToMainBufferSegment(newBlock, 0,
-                                                                midiToFrequency(midiNote));
-                    scaleFactor++;
-                }
-            }
-            for (int i = 0; i < blockSize; i++) {
-                newBlock[i] /= scaleFactor;
-                if (maxSample < newBlock[i]){
-                    maxSample = newBlock[i];
-                }
-            }
-            blocksQueue.push(newBlock);
-            blocksAvailable++;
-        }
-    }
 }
 
 template <typename T>
@@ -165,7 +39,7 @@ void MusicBox::zeroOutArray(T* array, int arraySize){
     }
 }
 
-void MusicBox::newWritePressedKeysToQueue(){
+void MusicBox::writePressedKeysToBuffer(){
     if (blocksAvailable < maxBlockCount){
         bool anyPressed = false;
         for (bool keyPress : pressedKeys){
@@ -182,7 +56,7 @@ void MusicBox::newWritePressedKeysToQueue(){
             for (int i = 0; i < KEYBOARD_SIZE; i++){
                 if (pressedKeys[i]){
                     int midiNote = getRootCPosition() + i;
-                    instruments.front()->newAddToMainBufferSegment(newBlock, 0,
+                    instruments.front()->addToMainBufferSegment(newBlock, 0,
                                                                 midiToFrequency(midiNote), globalTime);
                     scaleFactor++;
                 }
@@ -195,33 +69,11 @@ void MusicBox::newWritePressedKeysToQueue(){
                     maxSample = newBlock[i];
                 }
             }
-            blocksQueue.push(newBlock);
+            blocksBuffer.push(newBlock);
             blocksAvailable++;
         }
     }
 }
-
-
-
-
-bool MusicBox::readFromMainBuffer(float* outputBlock) {
-
-    if (blocksAvailable == 0) {
-//        std::unique_lock<std::mutex> lm(mutexBlocksReadyToRead);
-//        blocksReadyToRead.wait(lm);
-        return false;
-    } else {
-        for(int i = 0; i < blockSize; i++){
-            outputBlock[i] = mainBuffer[(currentReadBlockIndex * blockSize) + i];
-        }
-        currentReadBlockIndex++;
-        if (currentReadBlockIndex == maxBlockCount) currentReadBlockIndex = 0;
-        blocksAvailable--;
-        return true;
-    }
-
-}
-
 
 
 double MusicBox::midiToFrequency(int midiNote){
@@ -239,37 +91,26 @@ void MusicBox::copyBlock(float* source, float* destination){
 
 void MusicBox::bufferWriteLoop(){
     while (isRunning) {
-//        writePressedKeysToMainBuffer();
-//        writePressedKeysToQueue();
-        newWritePressedKeysToQueue();
+        writePressedKeysToBuffer();
     }
 }
 
 void MusicBox::bufferReadLoop(){
     float outputBlock[blockSize];
     while (isRunning){
-
-//      if (readFromMainBuffer(outputBlock)){
-        if (readBlockFromQueue(outputBlock)){
+        if (readBlockFromBuffer(outputBlock)){
             writeBlockToFile(outputBlock);
             audioApi->writeOut(outputBlock);
         }
-
     }
 }
 
-void MusicBox::loadBlockToQueue(float* frame) {
-    blocksQueue.push(frame);
-    blocksAvailable++;
-}
-
-
-bool MusicBox::readBlockFromQueue(float* outputBlock) {
+bool MusicBox::readBlockFromBuffer(float* outputBlock) {
     if (blocksAvailable == 0){
         return false;
     } else {
-        copyBlock(blocksQueue.front(), outputBlock);
-        blocksQueue.pop();
+        copyBlock(blocksBuffer.front(), outputBlock);
+        blocksBuffer.pop();
         blocksAvailable--;
         return true;
     }

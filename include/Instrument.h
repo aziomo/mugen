@@ -17,17 +17,12 @@ public:
     int blockSize;
     std::vector<Oscillator*> oscillators;
 
-    float generateSample(double frequency);
-    void fillSampleBlock(float *frame, double frequency);
-    void fillMainBufferSegment(float* mainBuffer, int offset, double frequency);
     void addOscillator();
     void removeOscillator();
-    void addToMainBufferSegment(float *mainBuffer, int offset, double frequency);
-    void testAddTwoNotesToMainBufferSegment(float *mainBuffer, int offset, double frequency);
 
-    float newGenerateSample(double frequency, double dTime);
+    float generateSample(double frequency, double dTime);
 
-    void newAddToMainBufferSegment(float *mainBuffer, int offset, double frequency, double timePoint);
+    void addToMainBufferSegment(float *mainBuffer, int offset, double frequency, double timePoint);
 };
 
 
