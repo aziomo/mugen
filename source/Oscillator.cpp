@@ -14,7 +14,6 @@ void Oscillator::setFrequency(double frequency){
     currentFrequency = frequency * freqModifier;
 }
 
-
 void Oscillator::setupLfoLookup(WaveformType type){
     for (double & i : lfoLookupTable){
         i = 0;
@@ -108,10 +107,10 @@ double Oscillator::getLfoInterpolatedSample(double dTime){
 
     double VP1 = lfoLookupTable[P1index];
     double VP2 = lfoLookupTable[P2index];
-    double V = std::abs(VP2 - VP1);
+    double V = VP2 - VP1;
 
-    double Si = std::abs(P2 - Pc);
-    double S = std::abs(P2 - P1);
+    double Si = Pc - P1;
+    double S = P2 - P1;
     double Rs = Si / S;
 
     return VP1 + V * Rs;
@@ -127,7 +126,7 @@ double Oscillator::getPhase(double dTime)
 {
     if (lfo != nullptr){
         return TWOPI * currentFrequency * dTime
-        + lfo->ampModifier * 10.0 / lfo->currentFrequency * getLfoTruncatedSample(dTime);
+               + lfo->ampModifier * 10.0 / lfo->currentFrequency * getLfoInterpolatedSample(dTime);
     }
     return TWOPI * currentFrequency * dTime;
 }

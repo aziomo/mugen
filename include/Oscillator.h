@@ -17,7 +17,7 @@ class Oscillator {
 private:
     double sampleRate;
     double(Oscillator::*getTick)(double);
-    static constexpr int lookupTableSize = 44100;
+    static constexpr int lookupTableSize = 512;
     double lfoLookupTable[lookupTableSize];
 public:
     double currentFrequency;
