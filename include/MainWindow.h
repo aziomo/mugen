@@ -6,8 +6,8 @@
 #include "MusicBox.h"
 #include "Texture.h"
 
-#define SET_WINDOW_WIDTH   (800)
-#define SET_WINDOW_HEIGHT  (600)
+#define SET_WINDOW_WIDTH   (1024)
+#define SET_WINDOW_HEIGHT  (768)
 
 class WaveformMenu;
 
@@ -27,8 +27,8 @@ public:
 
     WaveformMenu* waveformMenu;
     MusicBox* mBox;
-    SDL_Rect mainArea = {borderSize, borderSize, w - borderSize * 2, h - borderSize * 2};
     int borderSize = 10;
+    SDL_Rect mainArea = {borderSize, borderSize, w - borderSize * 2, h - borderSize * 2};
 
     void handleNewKeyPress(const Uint8 *keys);
 
@@ -42,6 +42,7 @@ private:
 
     void quitSDL();
 
+    void renderBorders();
 };
 
 #endif //MUGEN_CPP_MAINWINDOW_H

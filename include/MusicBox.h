@@ -85,6 +85,10 @@ public:
     void writePressedKeysToQueue();
 
     void newWritePressedKeysToQueue();
+
+    template <typename T>
+    void zeroOutArray(T *array, int arraySize);
+
 };
 
 

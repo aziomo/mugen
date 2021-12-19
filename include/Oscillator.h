@@ -21,13 +21,15 @@ private:
     double phaseIncrement;
     double(Oscillator::*getTick)();
     double(Oscillator::*newGetTick)(double);
+    static constexpr int lookupTableSize = 44100;
+    double lfoLookupTable[lookupTableSize];
 public:
     double currentFrequency;
     double baseFrequency;
     Oscillator* lfo;
     double freqModifier = 1.0;
     double ampModifier = 1.0;
-
+    bool debugBool = true;
     WaveformType waveType;
 
     Oscillator(int sampleRate, WaveformType waveformType = WaveformType::SINE);
@@ -80,6 +82,21 @@ public:
     double newNoiseTick(double dTime);
 
     void newSetFrequencyWithLFO(double dTime);
+
+
+    static double YofX(double x, WaveformType function);
+
+    int phaseToIndex(double phase);
+
+    void setupLfoLookup(WaveformType type);
+
+    double getLfoTruncatedSample(double dTime);
+
+    double getPhaseV2(double dTime, double frequency);
+
+    double indexToPhase(int index);
+
+    double getLfoInterpolatedSample(double dTime);
 };
 
 

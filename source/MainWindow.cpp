@@ -44,6 +44,12 @@ void MainWindow::quitSDL(){
     SDL_Quit();
 }
 
+void MainWindow::renderBorders(){
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_Rect waveformMenuBorder = {0,0, windowArea.w*5/9, windowArea.h*3/5};
+    SDL_RenderDrawRect(renderer, &waveformMenuBorder);
+}
+
 void MainWindow::render(){
     SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -51,6 +57,8 @@ void MainWindow::render(){
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
     SDL_RenderFillRect(renderer, &mainArea);
     waveformMenu->render();
+    waveformMenu->renderGraph();
+//    renderBorders();
     SDL_RenderPresent(renderer);
 }
 
@@ -107,6 +115,8 @@ void MainWindow::handleKeyPress(SDL_Event* event){
             waveformMenu->handleKeyPress(SDLK_2); break;
         case SDLK_3:
             waveformMenu->handleKeyPress(SDLK_3); break;
+        case SDLK_i:
+            waveformMenu->handleKeyPress(SDLK_i); break;
         case SDLK_9:
             waveformMenu->handleKeyPress(SDLK_9); break;
 
@@ -221,6 +231,9 @@ void MainWindow::handleNewKeyPress(const Uint8 *keyState, bool* lastKeyState, in
 
     if (keyState[SDL_SCANCODE_W] && !lastKeyState[SDL_SCANCODE_W])
         waveformMenu->handleKeyPress(SDLK_w);
+
+    if (keyState[SDL_SCANCODE_I] && !lastKeyState[SDL_SCANCODE_I])
+        waveformMenu->handleKeyPress(SDLK_i);
 
 
     if (keyState[SDL_SCANCODE_UP] && !lastKeyState[SDL_SCANCODE_UP])

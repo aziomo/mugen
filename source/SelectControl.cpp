@@ -155,6 +155,7 @@ void SelectControl::setNextWaveType(bool increment){
 
     if (modifyLFO){
         menu->editedOsc->lfo->setWaveformType(nextWave);
+        menu->editedOsc->setupLfoLookup(menu->editedOsc->lfo->waveType);
     } else {
         menu->editedOsc->setWaveformType(nextWave);
     }

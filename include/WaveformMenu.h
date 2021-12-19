@@ -61,7 +61,7 @@ public:
 
     static std::string doubleToStr(double d, int precision);
 
-
+    bool drawIntegral = false;
     void setImageTexture(Texture *texture, std::string imagePath);
     void loadTextures();
     void handleKeyPress(SDL_Keycode key);
@@ -79,6 +79,12 @@ public:
     void setLFO();
 
     void nextOsc(bool reverse = false);
+
+
+
+    double YofX(double X);
+
+    void renderGraph(bool fullscreen = false);
 };
 
 #endif //MUGEN_CPP_WAVEFORMMENU_H

@@ -158,6 +158,12 @@ void MusicBox::writePressedKeysToQueue(){
     }
 }
 
+template <typename T>
+void MusicBox::zeroOutArray(T* array, int arraySize){
+    for (int i = 0; i < arraySize; i++){
+        array[i] = 0;
+    }
+}
 
 void MusicBox::newWritePressedKeysToQueue(){
     if (blocksAvailable < maxBlockCount){
@@ -171,9 +177,7 @@ void MusicBox::newWritePressedKeysToQueue(){
 
         if (anyPressed){
             float* newBlock = new float[blockSize];
-            for (int i = 0; i < blockSize; i++) {
-                newBlock[i] = 0;
-            }
+            zeroOutArray(newBlock, blockSize);
             int scaleFactor = 0;
             for (int i = 0; i < KEYBOARD_SIZE; i++){
                 if (pressedKeys[i]){
@@ -236,8 +240,8 @@ void MusicBox::copyBlock(float* source, float* destination){
 void MusicBox::bufferWriteLoop(){
     while (isRunning) {
 //        writePressedKeysToMainBuffer();
-        writePressedKeysToQueue();
-//        newWritePressedKeysToQueue();
+//        writePressedKeysToQueue();
+        newWritePressedKeysToQueue();
     }
 }
 
