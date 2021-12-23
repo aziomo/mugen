@@ -5,9 +5,10 @@
 #include <SDL2/SDL_ttf.h>
 #include "MusicBox.h"
 #include "Texture.h"
+#include "GraphPainter.h"
 
-#define SET_WINDOW_WIDTH   (1024)
-#define SET_WINDOW_HEIGHT  (768)
+#define SET_WINDOW_WIDTH   (1000)
+#define SET_WINDOW_HEIGHT  (700)
 
 class WaveformMenu;
 
@@ -25,6 +26,7 @@ public:
     TTF_Font* smallFont = nullptr;
 
     WaveformMenu* waveformMenu;
+    GraphPainter* graphPainter;
     MusicBox* mBox;
     int borderSize = 10;
     SDL_Rect mainArea = {borderSize, borderSize, w - borderSize * 2, h - borderSize * 2};

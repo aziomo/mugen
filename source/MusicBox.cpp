@@ -11,6 +11,9 @@ MusicBox::MusicBox() {
     outputFile = nullptr;
     timeStep = 1.0 / 44100.0;
     globalTime = 0.0;
+    for (int i = 0; i < KEYBOARD_SIZE; i++){
+        pressedNotes[i].frequency = midiToFrequency(getRootCPosition() + i);
+    }
 }
 
 MusicBox::~MusicBox() {
@@ -42,8 +45,17 @@ void MusicBox::zeroOutArray(T* array, int arraySize){
 void MusicBox::writePressedKeysToBuffer(){
     if (blocksAvailable < maxBlockCount){
         bool anyPressed = false;
-        for (bool keyPress : pressedKeys){
-            if (keyPress) {
+
+
+//        for (bool keyPress : pressedKeys){
+//            if (keyPress) {
+//                anyPressed = true;
+//                break;
+//            }
+//        }
+
+        for (auto note : pressedNotes){
+            if (note.isPlaying) {
                 anyPressed = true;
                 break;
             }
@@ -53,18 +65,25 @@ void MusicBox::writePressedKeysToBuffer(){
             float* newBlock = new float[blockSize];
             zeroOutArray(newBlock, blockSize);
             int scaleFactor = 0;
+//            for (int i = 0; i < KEYBOARD_SIZE; i++){
+//                if (pressedKeys[i]){
+//                    int midiNote = getRootCPosition() + i;
+//                    instruments.front()->addToBufferBlock(newBlock, midiToFrequency(midiNote), globalTime);
+//                    scaleFactor++;
+//                }
+//            }
+
             for (int i = 0; i < KEYBOARD_SIZE; i++){
-                if (pressedKeys[i]){
-                    int midiNote = getRootCPosition() + i;
-                    instruments.front()->addToMainBufferSegment(newBlock, 0,
-                                                                midiToFrequency(midiNote), globalTime);
+                if (pressedNotes[i].isPlaying){
+                    instruments.front()->addToBufferBlock(newBlock, &pressedNotes[i], globalTime);
                     scaleFactor++;
                 }
             }
+
             globalTime += timeStep * blockSize;
 
             for (int i = 0; i < blockSize; i++) {
-                newBlock[i] /= scaleFactor;
+//                newBlock[i] /= scaleFactor;
                 if (maxSample < newBlock[i]){
                     maxSample = newBlock[i];
                 }
@@ -141,4 +160,15 @@ long MusicBox::writeBlockToFile(float* block){
 void MusicBox::closeFile(){
     sf_close(outputFile);
     outputFile = nullptr;
+}
+
+void MusicBox::pressNoteKey(int keyPosition){
+    pressedNotes[keyPosition].isPlaying = true;
+    pressedNotes[keyPosition].isPressed = true;
+    pressedNotes[keyPosition].pressedOnTime = globalTime;
+}
+
+void MusicBox::releaseNoteKey(int keyPosition){
+    pressedNotes[keyPosition].isPressed = false;
+    pressedNotes[keyPosition].releasedOnTime = globalTime;
 }

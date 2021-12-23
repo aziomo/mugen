@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include "Oscillator.h"
+#include "Envelope.h"
 
 class Instrument {
 public:
@@ -16,13 +17,25 @@ public:
     std::string name;
     int blockSize;
     std::vector<Oscillator*> oscillators;
+    Envelope env;
+
+    float lastSample = 0;
+    bool helpingBool = false;
+
+    int envelopeMoment = 0;
 
     void addOscillator();
     void removeOscillator();
 
     float generateSample(double frequency, double dTime);
 
-    void addToMainBufferSegment(float *mainBuffer, int offset, double frequency, double timePoint);
+    //void addToBufferBlock(float *bufferBlock, double frequency, double timePoint);
+
+    double getEnvelopeAmplifier(double globalTime, Note* note);
+
+    float generateSample(Note* note, double dTime);
+
+    void addToBufferBlock(float *mainBuffer, Note* note, double timePoint);
 };
 
 

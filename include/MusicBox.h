@@ -23,6 +23,7 @@ public:
     bool isRunning;
 
     bool pressedKeys[KEYBOARD_SIZE];
+    Note pressedNotes[KEYBOARD_SIZE];
 
     SNDFILE* outputFile;
 
@@ -66,6 +67,9 @@ public:
     template <typename T>
     void zeroOutArray(T *array, int arraySize);
 
+    void pressNoteKey(int keyPosition);
+
+    void releaseNoteKey(int keyPosition);
 };
 
 

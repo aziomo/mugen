@@ -76,6 +76,7 @@ void WaveformMenu::loadTextures(){
     setTextTexture(&debugBlocksLeftLabel, "0");
     setTextTexture(&debugMaxSampleLabel, "0.0");
     setTextTexture(&debugCurrentFrequencyLabel, "0.0");
+    setTextTexture(&debugEnvelopeMomentLabel, "0");
 }
 
 void WaveformMenu::updateTextures(){
@@ -86,26 +87,27 @@ void WaveformMenu::updateTextures(){
 
 
 
-
     if (editedOsc->lfo != nullptr) {
         setWaveImage(&lfoWaveSelector, editedOsc->lfo->waveType);
         setTextTexture(&lfoFreqValue, doubleToStr(editedOsc->lfo->currentFrequency, 2)+"Hz");
         setTextTexture(&lfoAmpValue, doubleToStr(editedOsc->lfo->ampModifier, 2) );
+        lfoCheckBox.isChecked = true;
     }
     else {
         setTextTexture(&lfoFreqValue, "-");
         setTextTexture(&lfoAmpValue, "-");
         lfoWaveSelector.loadTextControl(SelectorType::WAVETYPE, &undefinedLabel, window);
+        lfoCheckBox.isChecked = false;
     }
 
     // debug controls
     setTextTexture(&debugBlocksLeftLabel, std::to_string(musicBox->blocksAvailable));
     setTextTexture(&debugMaxSampleLabel, std::to_string(musicBox->maxSample));
-//    setTextTexture(&debugCurrentFrequencyLabel, std::to_string(musicBox->instruments.front()->oscillators.front()->currentFrequency));
+
     if (musicBox->instruments.front()->oscillators.front()->lfo != nullptr)
-//    setTextTexture(&debugCurrentFrequencyLabel, std::to_string(sin(musicBox->instruments.front()->oscillators.front()->lfo->getSample(musicBox->globalTime))));
-    setTextTexture(&debugCurrentFrequencyLabel, std::to_string(sin(
+        setTextTexture(&debugCurrentFrequencyLabel, std::to_string(sin(
             musicBox->instruments.front()->oscillators.front()->getLfoInterpolatedSample(musicBox->globalTime))));
+    setTextTexture(&debugEnvelopeMomentLabel, std::to_string(musicBox->instruments.front()->envelopeMoment));
 }
 
 int WaveformMenu::xByPercent(Texture* texture, double percent){
@@ -125,6 +127,8 @@ void WaveformMenu::render(){
                                yByPercent(&debugMaxSampleLabel, 0.80));
     debugCurrentFrequencyLabel.render(xByPercent(&debugCurrentFrequencyLabel, 0.75),
                                yByPercent(&debugCurrentFrequencyLabel, 0.85));
+    debugEnvelopeMomentLabel.render(xByPercent(&debugCurrentFrequencyLabel, 0.75),
+                                    yByPercent(&debugCurrentFrequencyLabel, 0.90));
 
     // MISC
     screenTitle.render(xByPercent(&screenTitle, 0.3),
@@ -191,7 +195,6 @@ void WaveformMenu::renderGraph(bool fullscreen){
 
     if (drawIntegral)
     {
-
         double maxSample = 0.0;
         double minSample = abs(currentY);
 
@@ -244,7 +247,6 @@ void WaveformMenu::renderGraph(bool fullscreen){
             lastPoint = point;
         }
     }
-
 }
 
 double WaveformMenu::YofX(double x){

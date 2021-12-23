@@ -1,7 +1,3 @@
-//
-// Created by alberto on 11/29/21.
-//
-
 #include "../include/CheckboxControl.h"
 #include "../include/WaveformMenu.h"
 

@@ -1,7 +1,3 @@
-//
-// Created by alberto on 11/29/21.
-//
-
 #ifndef MUGEN_CHECKBOXCONTROL_H
 #define MUGEN_CHECKBOXCONTROL_H
 
@@ -17,13 +13,11 @@ public:
     int borderSize = 2;
     void switchCheck();
     void render(int x, int y);
-//    bool isChecked, isHighlighted;
     void loadTextures(std::string text, Texture* checkTexture, MainWindow* window);
 
     void triggerOnCheck();
 
     void (WaveformMenu::*onCheck)();
-//    void onUncheck(void (*f)());
 
     SDL_Renderer* rend;
     SDL_Rect highlightRect, bgRect, checkBgRect, checkBorderRect;

@@ -6,6 +6,7 @@ MainWindow::MainWindow(MusicBox* musicBox){
     initSDL();
     waveformMenu = new WaveformMenu(this);
     waveformMenu->init();
+    graphPainter = new GraphPainter();
 }
 
 MainWindow::~MainWindow(){
@@ -66,89 +67,89 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool* lastKeyState, int* 
 
 
     if (keyState[SDL_SCANCODE_Z] && !lastKeyState[SDL_SCANCODE_Z])
-        mBox->pressedKeys[0] = true;
+        mBox->pressNoteKey(0);
     if (!keyState[SDL_SCANCODE_Z] && lastKeyState[SDL_SCANCODE_Z])
-        mBox->pressedKeys[0] = false;
+        mBox->releaseNoteKey(0);
 
     if (keyState[SDL_SCANCODE_S] && !lastKeyState[SDL_SCANCODE_S])
-        mBox->pressedKeys[1] = true;
+        mBox->pressNoteKey(1);
     if (!keyState[SDL_SCANCODE_S] && lastKeyState[SDL_SCANCODE_S])
-        mBox->pressedKeys[1] = false;
+        mBox->releaseNoteKey(1);
 
     if (keyState[SDL_SCANCODE_X] && !lastKeyState[SDL_SCANCODE_X])
-        mBox->pressedKeys[2] = true;
+        mBox->pressNoteKey(2);
     if (!keyState[SDL_SCANCODE_X] && lastKeyState[SDL_SCANCODE_X])
-        mBox->pressedKeys[2] = false;
+        mBox->releaseNoteKey(2);
 
     if (keyState[SDL_SCANCODE_D] && !lastKeyState[SDL_SCANCODE_D])
-        mBox->pressedKeys[3] = true;
+        mBox->pressNoteKey(3);
     if (!keyState[SDL_SCANCODE_D] && lastKeyState[SDL_SCANCODE_D])
-        mBox->pressedKeys[3] = false;
+        mBox->releaseNoteKey(3);
 
     if (keyState[SDL_SCANCODE_C] && !lastKeyState[SDL_SCANCODE_C])
-        mBox->pressedKeys[4] = true;
+        mBox->pressNoteKey(4);
     if (!keyState[SDL_SCANCODE_C] && lastKeyState[SDL_SCANCODE_C])
-        mBox->pressedKeys[4] = false;
+        mBox->releaseNoteKey(4);
 
     if (keyState[SDL_SCANCODE_V] && !lastKeyState[SDL_SCANCODE_V])
-        mBox->pressedKeys[5] = true;
+        mBox->pressNoteKey(5);
     if (!keyState[SDL_SCANCODE_V] && lastKeyState[SDL_SCANCODE_V])
-        mBox->pressedKeys[5] = false;
+        mBox->releaseNoteKey(5);
 
     if (keyState[SDL_SCANCODE_G] && !lastKeyState[SDL_SCANCODE_G])
-        mBox->pressedKeys[6] = true;
+        mBox->pressNoteKey(6);
     if (!keyState[SDL_SCANCODE_G] && lastKeyState[SDL_SCANCODE_G])
-        mBox->pressedKeys[6] = false;
+        mBox->releaseNoteKey(6);
 
     if (keyState[SDL_SCANCODE_B] && !lastKeyState[SDL_SCANCODE_B])
-        mBox->pressedKeys[7] = true;
+        mBox->pressNoteKey(7);
     if (!keyState[SDL_SCANCODE_B] && lastKeyState[SDL_SCANCODE_B])
-        mBox->pressedKeys[7] = false;
+        mBox->releaseNoteKey(7);
 
     if (keyState[SDL_SCANCODE_H] && !lastKeyState[SDL_SCANCODE_H])
-        mBox->pressedKeys[8] = true;
+        mBox->pressNoteKey(8);
     if (!keyState[SDL_SCANCODE_H] && lastKeyState[SDL_SCANCODE_H])
-        mBox->pressedKeys[8] = false;
+        mBox->releaseNoteKey(8);
 
     if (keyState[SDL_SCANCODE_N] && !lastKeyState[SDL_SCANCODE_N])
-        mBox->pressedKeys[9] = true;
+        mBox->pressNoteKey(9);
     if (!keyState[SDL_SCANCODE_N] && lastKeyState[SDL_SCANCODE_N])
-        mBox->pressedKeys[9] = false;
+        mBox->releaseNoteKey(9);
 
     if (keyState[SDL_SCANCODE_J] && !lastKeyState[SDL_SCANCODE_J])
-        mBox->pressedKeys[10] = true;
+        mBox->pressNoteKey(10);
     if (!keyState[SDL_SCANCODE_J] && lastKeyState[SDL_SCANCODE_J])
-        mBox->pressedKeys[10] = false;
+        mBox->releaseNoteKey(10);
 
     if (keyState[SDL_SCANCODE_M] && !lastKeyState[SDL_SCANCODE_M])
-        mBox->pressedKeys[11] = true;
+        mBox->pressNoteKey(11);
     if (!keyState[SDL_SCANCODE_M] && lastKeyState[SDL_SCANCODE_M])
-        mBox->pressedKeys[11] = false;
+        mBox->releaseNoteKey(11);
 
     if (keyState[SDL_SCANCODE_COMMA] && !lastKeyState[SDL_SCANCODE_COMMA])
-        mBox->pressedKeys[12] = true;
+        mBox->pressNoteKey(12);
     if (!keyState[SDL_SCANCODE_COMMA] && lastKeyState[SDL_SCANCODE_COMMA])
-        mBox->pressedKeys[12] = false;
+        mBox->releaseNoteKey(12);
 
     if (keyState[SDL_SCANCODE_L] && !lastKeyState[SDL_SCANCODE_L])
-        mBox->pressedKeys[13] = true;
+        mBox->pressNoteKey(13);
     if (!keyState[SDL_SCANCODE_L] && lastKeyState[SDL_SCANCODE_L])
-        mBox->pressedKeys[13] = false;
+        mBox->releaseNoteKey(13);
 
     if (keyState[SDL_SCANCODE_PERIOD] && !lastKeyState[SDL_SCANCODE_PERIOD])
-        mBox->pressedKeys[14] = true;
+        mBox->pressNoteKey(14);
     if (!keyState[SDL_SCANCODE_PERIOD] && lastKeyState[SDL_SCANCODE_PERIOD])
-        mBox->pressedKeys[14] = false;
+        mBox->releaseNoteKey(14);
 
     if (keyState[SDL_SCANCODE_SEMICOLON] && !lastKeyState[SDL_SCANCODE_SEMICOLON])
-        mBox->pressedKeys[15] = true;
+        mBox->pressNoteKey(15);
     if (!keyState[SDL_SCANCODE_SEMICOLON] && lastKeyState[SDL_SCANCODE_SEMICOLON])
-        mBox->pressedKeys[15] = false;
+        mBox->releaseNoteKey(15);
 
     if (keyState[SDL_SCANCODE_SLASH] && !lastKeyState[SDL_SCANCODE_SLASH])
-        mBox->pressedKeys[16] = true;
+        mBox->pressNoteKey(16);
     if (!keyState[SDL_SCANCODE_SLASH] && lastKeyState[SDL_SCANCODE_SLASH])
-        mBox->pressedKeys[16] = false;
+        mBox->releaseNoteKey(16);
 
 
     if (keyState[SDL_SCANCODE_2] && !lastKeyState[SDL_SCANCODE_2])
