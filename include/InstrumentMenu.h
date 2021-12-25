@@ -13,10 +13,11 @@
 
 class MainWindow;
 
-class WaveformMenu {
+class InstrumentMenu {
 public:
-    WaveformMenu(MainWindow* mainWindow);
-    ~WaveformMenu();
+    bool showDebug = false;
+    InstrumentMenu(MainWindow* mainWindow);
+    ~InstrumentMenu();
     void init();
     void render();
 
@@ -28,31 +29,44 @@ public:
 //private:
     std::string helpMessage;
     int currentOsc = 0, maxOsc = 0;
-    double currentFreqMod = 1.0, currentAmplitude = 1.0;
+
     SDL_Color textColor;
-    SelectControl oscSelector, mainWaveSelector, mainFreqSelector, mainAmpSelector,
-                    lfoWaveSelector, lfoFreqSelector, lfoAmpSelector;
+    SelectControl oscSelector,
+        mainWaveSelector, mainFreqSelector, mainAmpSelector,
+        lfoWaveSelector, lfoFreqSelector, lfoAmpSelector,
+        envStartingSelector, envAttackSelector, envDecaySelector, envSustainSelector, envReleaseSelector;
     CheckboxControl lfoCheckBox;
-    const static int controlMatrixRows = 3, controlMatrixCols = 4;
+    const static int controlMatrixRows = 6, controlMatrixCols = 5;
     Control* controlArray[controlMatrixRows][controlMatrixCols] = {
-            {nullptr,       nullptr,           &oscSelector,      nullptr},
-            {nullptr,       &mainWaveSelector, &mainFreqSelector, &mainAmpSelector},
-            {&lfoCheckBox,  &lfoWaveSelector,  &lfoFreqSelector,  &lfoAmpSelector}
+            {nullptr,       nullptr,           &oscSelector,      nullptr,          nullptr},
+            {nullptr,       &mainWaveSelector, &mainFreqSelector, &mainAmpSelector, &envStartingSelector},
+            {&lfoCheckBox,  &lfoWaveSelector,  &lfoFreqSelector,  &lfoAmpSelector,  &envSustainSelector},
+            {nullptr,       nullptr,           nullptr,           nullptr,          &envAttackSelector},
+            {nullptr,       nullptr,           nullptr,           nullptr,          &envDecaySelector},
+            {nullptr,       nullptr,           nullptr,           nullptr,          &envReleaseSelector}
     };
     std::vector<Texture*> waveImages {&sineImg, &squareImg, &triangleImg, &sawDownImg, &noiseImg};
     int focusedControlCol = 2;
     int focusedControlRow = 0;
-    Texture screenTitle, oscCounter,
-        arrowImg, checkImg,
+    Texture screenTitle,
+    // waveform creator textures
+        oscCounter,
         sineImg, squareImg, triangleImg,
         sawDownImg, sawUpImg, noiseImg,
         wavetypeLabel, mainWaveSign, lfoWaveSign,
         frequencyLabel, mainFreqValue, lfoFreqValue,
         amplitudeLabel, mainAmpValue, lfoAmpValue,
         lfoLabel,
+    // envelope creator textures
+        envelopeLabel,
+        durationsLabel, levelsLabel,
+        startValue, attackValue, decayValue, sustainValue, releaseValue,
+        startLabel, attackLabel, decayLabel, sustainLabel, releaseLabel,
+    // common textures
+        arrowImg, checkImg,
         helpBar,
         undefinedLabel,
-    // debug controls
+    // debug textures
         debugBlocksLeftLabel, debugMaxSampleLabel, debugCurrentFrequencyLabel, debugEnvelopeMomentLabel;
     MusicBox* musicBox;
     MainWindow* window;
@@ -80,11 +94,6 @@ public:
 
     void nextOsc(bool reverse = false);
 
-
-
-    double YofX(double X);
-
-    void renderGraph(bool fullscreen = false);
 };
 
 #endif //MUGEN_CPP_WAVEFORMMENU_H

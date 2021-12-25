@@ -16,6 +16,7 @@
 class SelectControl : public Control {
 
 public:
+    double* modifiedValue = nullptr;
 
     ~SelectControl() override;
 
@@ -34,6 +35,8 @@ public:
     void setModifiedOsc(Oscillator *osc);
     void isModifyingLFO(bool isModifying);
     Texture* mainTexture;
+    void setModifiedValue(double* modifiedValue);
+
 private:
     SDL_Renderer* rend;
     int borderSize = 2;
@@ -41,13 +44,12 @@ private:
     Texture* arrowTexture;
     SDL_Rect highlightRect, bgRect;
     SelectorType type;
-    WaveformMenu* menu;
+    InstrumentMenu* menu;
     Oscillator* modifiedOsc;
     bool modifyLFO = false;
+
+
     void setNextWaveType(bool increment = true);
-
-
-
 };
 
 

@@ -9,6 +9,7 @@ enum class SelectorType {
     OSCILLATOR,
     WAVETYPE,
     FREQUENCY,
-    AMPLITUDE
+    AMPLITUDE,
+    ENVELOPE
 };
 #endif //MUGEN_SELECTORTYPE_H

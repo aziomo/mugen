@@ -5,7 +5,7 @@
 #include <sstream>
 #include <iomanip>
 #include "../include/SelectControl.h"
-#include "../include/WaveformMenu.h"
+#include "../include/InstrumentMenu.h"
 
 SelectControl::~SelectControl(){
     rend = nullptr;
@@ -20,6 +20,10 @@ void SelectControl::setModifiedOsc(Oscillator* osc){
     modifiedOsc = osc;
 }
 
+void SelectControl::setModifiedValue(double* modifiedValue){
+    this->modifiedValue = modifiedValue;
+}
+
 void SelectControl::switchEditing(){
     isEditing = !isEditing;
 }
@@ -29,24 +33,26 @@ void SelectControl::isModifyingLFO(bool isModifying){
 }
 
 void SelectControl::loadTextControl(SelectorType selectorType, Texture* textTexture, MainWindow* window) {
-    menu = window->waveformMenu;
+    menu = window->instrumentMenu;
     this->type = selectorType;
     this->rend = window->renderer;
-    this->arrowTexture = &window->waveformMenu->arrowImg;
+    this->arrowTexture = &window->instrumentMenu->arrowImg;
     mainTexture = textTexture;
 }
 
 void SelectControl::loadImageControl(std::vector<Texture*> imageTextures, MainWindow* window) {
-    menu = window->waveformMenu;
+    menu = window->instrumentMenu;
     this->type = SelectorType::WAVETYPE;
     this->rend = window->renderer;
-    this->arrowTexture = &window->waveformMenu->arrowImg;
+    this->arrowTexture = &window->instrumentMenu->arrowImg;
     optionsImages = std::move(imageTextures);
     mainTexture = optionsImages[0];
 }
 
 void SelectControl::render(int x, int y) {
     if (isHighlighted){
+        if (type == SelectorType::ENVELOPE)
+            bool retard = true;
         highlightRect = {x - borderSize*2, y - borderSize*2,
                          mainTexture->w + borderSize * 4,
                          mainTexture->h + borderSize * 4};
@@ -88,6 +94,9 @@ void SelectControl::increment(bool largeIncrement) {
             } else {
                 menu->editedOsc->lfo->ampModifier += largeIncrement ? 0.1 : 0.001; break;
             }
+
+        case SelectorType::ENVELOPE:
+            *modifiedValue += 0.1; break;
     }
 }
 
@@ -113,9 +122,6 @@ void SelectControl::decrement(bool largeDecrement) {
                     menu->editedOsc->lfo->setFrequency(menu->editedOsc->lfo->currentFrequency
                                                         - (largeDecrement ? 0.1 : 0.001));
                 }
-//                if (menu->editedOsc->lfo->freqModifier < 0) {
-//                    menu->editedOsc->lfo->freqModifier = 0;
-//                }
             }
             break;
         case SelectorType::AMPLITUDE:
@@ -130,6 +136,11 @@ void SelectControl::decrement(bool largeDecrement) {
                     menu->editedOsc->lfo->ampModifier = 0;
                 }
             }
+            break;
+        case SelectorType::ENVELOPE:
+            *modifiedValue -= 0.1;
+            if (*modifiedValue < 0)
+                *modifiedValue = 0;
             break;
     }
 }

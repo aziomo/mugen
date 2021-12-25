@@ -1,16 +1,16 @@
 #include "../include/MainWindow.h"
-#include "../include/WaveformMenu.h"
+#include "../include/InstrumentMenu.h"
 
 MainWindow::MainWindow(MusicBox* musicBox){
     this->mBox = musicBox;
     initSDL();
-    waveformMenu = new WaveformMenu(this);
-    waveformMenu->init();
-    graphPainter = new GraphPainter();
+    instrumentMenu = new InstrumentMenu(this);
+    instrumentMenu->init();
+    graphPainter = new GraphPainter(this);
 }
 
 MainWindow::~MainWindow(){
-    delete waveformMenu;
+    delete instrumentMenu;
     mBox = nullptr;
     quitSDL();
 }
@@ -57,9 +57,7 @@ void MainWindow::render(){
     SDL_RenderFillRect(renderer, &windowArea);
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
     SDL_RenderFillRect(renderer, &mainArea);
-    waveformMenu->render();
-    waveformMenu->renderGraph();
-//    renderBorders();
+    instrumentMenu->render();
     SDL_RenderPresent(renderer);
 }
 
@@ -153,46 +151,46 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool* lastKeyState, int* 
 
 
     if (keyState[SDL_SCANCODE_2] && !lastKeyState[SDL_SCANCODE_2])
-        waveformMenu->handleKeyPress(SDLK_2);
+        instrumentMenu->handleKeyPress(SDLK_2);
     if (keyState[SDL_SCANCODE_3] && !lastKeyState[SDL_SCANCODE_3])
-        waveformMenu->handleKeyPress(SDLK_3);
+        instrumentMenu->handleKeyPress(SDLK_3);
 
     if (keyState[SDL_SCANCODE_W] && !lastKeyState[SDL_SCANCODE_W])
-        waveformMenu->handleKeyPress(SDLK_w);
+        instrumentMenu->handleKeyPress(SDLK_w);
 
     if (keyState[SDL_SCANCODE_I] && !lastKeyState[SDL_SCANCODE_I])
-        waveformMenu->handleKeyPress(SDLK_i);
+        instrumentMenu->handleKeyPress(SDLK_i);
 
 
     if (keyState[SDL_SCANCODE_UP] && !lastKeyState[SDL_SCANCODE_UP])
-        waveformMenu->handleKeyPress(SDLK_UP);
+        instrumentMenu->handleKeyPress(SDLK_UP);
     if (keyState[SDL_SCANCODE_UP] && lastKeyState[SDL_SCANCODE_UP] && keyPressState[SDL_SCANCODE_UP]++ > 10)
-        waveformMenu->handleKeyPress(SDLK_UP);
+        instrumentMenu->handleKeyPress(SDLK_UP);
     if (!keyState[SDL_SCANCODE_UP] && lastKeyState[SDL_SCANCODE_UP])
         keyPressState[SDL_SCANCODE_UP] = 0;
 
     if (keyState[SDL_SCANCODE_DOWN] && !lastKeyState[SDL_SCANCODE_DOWN])
-        waveformMenu->handleKeyPress(SDLK_DOWN);
+        instrumentMenu->handleKeyPress(SDLK_DOWN);
     if (keyState[SDL_SCANCODE_DOWN] && lastKeyState[SDL_SCANCODE_DOWN] && keyPressState[SDL_SCANCODE_DOWN]++ > 10)
-        waveformMenu->handleKeyPress(SDLK_DOWN);
+        instrumentMenu->handleKeyPress(SDLK_DOWN);
     if (!keyState[SDL_SCANCODE_DOWN] && lastKeyState[SDL_SCANCODE_DOWN])
         keyPressState[SDL_SCANCODE_DOWN] = 0;
 
     if (keyState[SDL_SCANCODE_LEFT] && !lastKeyState[SDL_SCANCODE_LEFT])
-        waveformMenu->handleKeyPress(SDLK_LEFT);
+        instrumentMenu->handleKeyPress(SDLK_LEFT);
     if (keyState[SDL_SCANCODE_LEFT] && lastKeyState[SDL_SCANCODE_LEFT] && keyPressState[SDL_SCANCODE_LEFT]++ > 10)
-        waveformMenu->handleKeyPress(SDLK_LEFT);
+        instrumentMenu->handleKeyPress(SDLK_LEFT);
     if (!keyState[SDL_SCANCODE_LEFT] && lastKeyState[SDL_SCANCODE_LEFT])
         keyPressState[SDL_SCANCODE_LEFT] = 0;
 
     if (keyState[SDL_SCANCODE_RIGHT] && !lastKeyState[SDL_SCANCODE_RIGHT])
-        waveformMenu->handleKeyPress(SDLK_RIGHT);
+        instrumentMenu->handleKeyPress(SDLK_RIGHT);
     if (keyState[SDL_SCANCODE_RIGHT] && lastKeyState[SDL_SCANCODE_RIGHT] && keyPressState[SDL_SCANCODE_RIGHT]++ > 10)
-        waveformMenu->handleKeyPress(SDLK_RIGHT);
+        instrumentMenu->handleKeyPress(SDLK_RIGHT);
     if (!keyState[SDL_SCANCODE_RIGHT] && lastKeyState[SDL_SCANCODE_RIGHT])
         keyPressState[SDL_SCANCODE_RIGHT] = 0;
 
     if (keyState[SDL_SCANCODE_RETURN] && !lastKeyState[SDL_SCANCODE_RETURN])
-        waveformMenu->handleKeyPress(SDLK_RETURN);
+        instrumentMenu->handleKeyPress(SDLK_RETURN);
 
 }

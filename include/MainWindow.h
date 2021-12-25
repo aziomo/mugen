@@ -10,7 +10,8 @@
 #define SET_WINDOW_WIDTH   (1000)
 #define SET_WINDOW_HEIGHT  (700)
 
-class WaveformMenu;
+class InstrumentMenu;
+class GraphPainter;
 
 class MainWindow {
 public:
@@ -25,7 +26,7 @@ public:
     TTF_Font* mainFont = nullptr;
     TTF_Font* smallFont = nullptr;
 
-    WaveformMenu* waveformMenu;
+    InstrumentMenu* instrumentMenu;
     GraphPainter* graphPainter;
     MusicBox* mBox;
     int borderSize = 10;

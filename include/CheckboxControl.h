@@ -8,8 +8,9 @@
 class CheckboxControl : public Control {
 
 public:
-    ~CheckboxControl() override;
-    WaveformMenu* menu;
+
+    ~CheckboxControl() override {};
+    InstrumentMenu* menu;
     int borderSize = 2;
     void switchCheck();
     void render(int x, int y);
@@ -17,7 +18,7 @@ public:
 
     void triggerOnCheck();
 
-    void (WaveformMenu::*onCheck)();
+    void (InstrumentMenu::*onCheck)();
 
     SDL_Renderer* rend;
     SDL_Rect highlightRect, bgRect, checkBgRect, checkBorderRect;

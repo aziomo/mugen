@@ -7,8 +7,8 @@
 
 
 struct Envelope {
-    double attackTimespan, decayTimespan, releaseTimespan,
-            attackValue, sustainValue;
+    double attackDuration, decayDuration, releaseDuration,
+            startingAmplitude, sustainAmplitude;
 };
 
 struct Note {

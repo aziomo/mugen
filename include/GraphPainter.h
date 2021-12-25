@@ -7,11 +7,10 @@
 
 #include "MainWindow.h"
 
+class MainWindow;
 
 class GraphPainter {
 private:
-
-
     MainWindow* window;
 
 public:

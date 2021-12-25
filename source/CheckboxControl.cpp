@@ -1,5 +1,5 @@
 #include "../include/CheckboxControl.h"
-#include "../include/WaveformMenu.h"
+#include "../include/InstrumentMenu.h"
 
 
 void CheckboxControl::switchCheck() {
@@ -44,16 +44,13 @@ void CheckboxControl::renderCheck(int x, int y){
 }
 
 void CheckboxControl::loadTextures(std::string text, Texture* labelTexture, MainWindow* window){
-    menu = window->waveformMenu;
+    menu = window->instrumentMenu;
     this->rend = window->renderer;
-    this->checkTexture = &window->waveformMenu->checkImg;
+    this->checkTexture = &window->instrumentMenu->checkImg;
     this->labelTexture = labelTexture;
-//    labelTexture->loadFromText(window->renderer, text, window->waveformMenu->textColor, window->smallFont);
+//    labelTexture->loadFromText(window->renderer, text, window->instrumentMenu->textColor, window->smallFont);
 }
 
-CheckboxControl::~CheckboxControl() {
-
-}
 
 void CheckboxControl::triggerOnCheck() {
     (menu->*onCheck)();

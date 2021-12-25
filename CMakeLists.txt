@@ -8,7 +8,7 @@ add_executable(mugen main.cpp
         source/Oscillator.cpp include/Oscillator.h
         source/MusicBox.cpp     include/MusicBox.h
         source/AudioAPI.cpp     include/AudioAPI.h
-        source/WaveformMenu.cpp include/WaveformMenu.h
+        source/InstrumentMenu.cpp include/InstrumentMenu.h
         source/MainWindow.cpp   include/MainWindow.h
         include/WaveformType.h
         include/Texture.h
