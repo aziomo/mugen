@@ -30,7 +30,7 @@ public:
     float maxSample;
     void startPlaying();
     void stopPlaying();
-    int getRootCPosition();
+    int getRootCPosition() const;
     std::vector<Instrument*> instruments;
     int currentInstrument = 0;
     int blockSize;
@@ -49,7 +49,7 @@ public:
     std::thread readThread, writeThread;
     AudioAPI* audioApi;
 
-    double midiToFrequency(int midiNote);
+    static double midiToFrequency(int midiNote);
 
     void copyBlock(float *source, float *destination);
 

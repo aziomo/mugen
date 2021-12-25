@@ -21,25 +21,25 @@ public:
     void init();
     void render();
 
-    void setTextTexture(Texture* texture, std::string text);
+    void setTextTexture(Texture* texture, std::string text) const;
 
     void selectFocusedControl();
 
     SDL_Renderer* renderer;
 //private:
     std::string helpMessage;
-    int currentOsc = 0, maxOsc = 0;
+    int currentOsc = 0;
 
     SDL_Color textColor;
     SelectControl oscSelector,
         mainWaveSelector, mainFreqSelector, mainAmpSelector,
         lfoWaveSelector, lfoFreqSelector, lfoAmpSelector,
-        envStartingSelector, envAttackSelector, envDecaySelector, envSustainSelector, envReleaseSelector;
+        envInitialSelector, envAttackSelector, envDecaySelector, envSustainSelector, envReleaseSelector;
     CheckboxControl lfoCheckBox;
     const static int controlMatrixRows = 6, controlMatrixCols = 5;
     Control* controlArray[controlMatrixRows][controlMatrixCols] = {
             {nullptr,       nullptr,           &oscSelector,      nullptr,          nullptr},
-            {nullptr,       &mainWaveSelector, &mainFreqSelector, &mainAmpSelector, &envStartingSelector},
+            {nullptr,       &mainWaveSelector, &mainFreqSelector, &mainAmpSelector, &envInitialSelector},
             {&lfoCheckBox,  &lfoWaveSelector,  &lfoFreqSelector,  &lfoAmpSelector,  &envSustainSelector},
             {nullptr,       nullptr,           nullptr,           nullptr,          &envAttackSelector},
             {nullptr,       nullptr,           nullptr,           nullptr,          &envDecaySelector},
@@ -51,23 +51,24 @@ public:
     Texture screenTitle,
     // waveform creator textures
         oscCounter,
+        wavetypeLabel,
         sineImg, squareImg, triangleImg,
         sawDownImg, sawUpImg, noiseImg,
-        wavetypeLabel, mainWaveSign, lfoWaveSign,
         frequencyLabel, mainFreqValue, lfoFreqValue,
         amplitudeLabel, mainAmpValue, lfoAmpValue,
         lfoLabel,
     // envelope creator textures
         envelopeLabel,
         durationsLabel, levelsLabel,
-        startValue, attackValue, decayValue, sustainValue, releaseValue,
-        startLabel, attackLabel, decayLabel, sustainLabel, releaseLabel,
+        initialValue, attackValue, decayValue, sustainValue, releaseValue,
+        initialLabel, attackLabel, decayLabel, sustainLabel, releaseLabel,
     // common textures
         arrowImg, checkImg,
         helpBar,
         undefinedLabel,
     // debug textures
         debugBlocksLeftLabel, debugMaxSampleLabel, debugCurrentFrequencyLabel, debugEnvelopeMomentLabel;
+
     MusicBox* musicBox;
     MainWindow* window;
     Instrument* editedInstrument;
@@ -76,24 +77,26 @@ public:
     static std::string doubleToStr(double d, int precision);
 
     bool drawIntegral = false;
-    void setImageTexture(Texture *texture, std::string imagePath);
+    void setImageTexture(Texture *texture, std::string imagePath) const;
     void loadTextures();
     void handleKeyPress(SDL_Keycode key);
     void updateTextures();
     void loadControls();
-    void setTextTexture(Texture *texture, std::string text, TTF_Font *font);
+    void setTextTexture(Texture *texture, std::string text, TTF_Font *font) const;
     void setWaveImage(SelectControl* control, WaveformType wavetype);
     void changeControlFocus(Direction direction);
     Control* getFocusedControl();
 
-    int xByPercent(Texture *texture, double percent);
-
-    int yByPercent(Texture *texture, double percent);
+    int xByPercent(Texture *texture, double percent) const;
+    int yByPercent(Texture *texture, double percent) const;
 
     void setLFO();
 
-    void nextOsc(bool reverse = false);
 
+    void selectPrevOsc();
+    void selectNextOsc();
+
+    void updateSelectorValues();
 };
 
 #endif //MUGEN_CPP_WAVEFORMMENU_H

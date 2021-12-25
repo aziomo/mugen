@@ -32,7 +32,6 @@ public:
     void switchEditing();
     void loadTextControl(SelectorType type, Texture *textTexture, MainWindow *window);
     void loadImageControl(std::vector<Texture *> imageTextures, MainWindow *window);
-    void setModifiedOsc(Oscillator *osc);
     void isModifyingLFO(bool isModifying);
     Texture* mainTexture;
     void setModifiedValue(double* modifiedValue);
@@ -45,7 +44,6 @@ private:
     SDL_Rect highlightRect, bgRect;
     SelectorType type;
     InstrumentMenu* menu;
-    Oscillator* modifiedOsc;
     bool modifyLFO = false;
 
 

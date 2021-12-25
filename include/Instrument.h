@@ -19,19 +19,10 @@ public:
     std::vector<Oscillator*> oscillators;
     Envelope env;
 
-    float lastSample = 0;
-    bool helpingBool = false;
-
     int envelopeMoment = 0;
 
     void addOscillator();
     void removeOscillator();
-
-    float generateSample(double frequency, double dTime);
-
-    //void addToBufferBlock(float *bufferBlock, double frequency, double timePoint);
-
-    double getEnvelopeAmplifier(double globalTime, Note* note);
 
     float generateSample(Note* note, double dTime);
 

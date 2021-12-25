@@ -3,7 +3,6 @@
 //
 
 #include <sstream>
-#include <iomanip>
 #include "../include/SelectControl.h"
 #include "../include/InstrumentMenu.h"
 
@@ -14,10 +13,6 @@ SelectControl::~SelectControl(){
     }
     arrowTexture = nullptr;
     mainTexture = nullptr;
-}
-
-void SelectControl::setModifiedOsc(Oscillator* osc){
-    modifiedOsc = osc;
 }
 
 void SelectControl::setModifiedValue(double* modifiedValue){
@@ -51,7 +46,7 @@ void SelectControl::loadImageControl(std::vector<Texture*> imageTextures, MainWi
 
 void SelectControl::render(int x, int y) {
     if (isHighlighted){
-        if (type == SelectorType::ENVELOPE)
+        if (type == SelectorType::DOUBLE)
             bool retard = true;
         highlightRect = {x - borderSize*2, y - borderSize*2,
                          mainTexture->w + borderSize * 4,
@@ -77,25 +72,13 @@ void SelectControl::increment(bool largeIncrement) {
         case SelectorType::INSTRUMENT:
             break;
         case SelectorType::OSCILLATOR:
-            menu->nextOsc();
+            menu->selectNextOsc();
             break;
         case SelectorType::WAVETYPE:
             setNextWaveType(); break;
-        case SelectorType::FREQUENCY:
-            if (!modifyLFO){
-                menu->editedOsc->freqModifier += largeIncrement ? 0.1 : 0.001; break;
-            } else {
-                menu->editedOsc->lfo->setFrequency(menu->editedOsc->lfo->currentFrequency + (largeIncrement ? 0.1 : 0.001)); break;
-            }
-
-        case SelectorType::AMPLITUDE:
-            if (!modifyLFO){
-                menu->editedOsc->ampModifier += largeIncrement ? 0.1 : 0.001; break;
-            } else {
-                menu->editedOsc->lfo->ampModifier += largeIncrement ? 0.1 : 0.001; break;
-            }
-
-        case SelectorType::ENVELOPE:
+        case SelectorType::FINEDOUBLE:
+            *modifiedValue += largeIncrement ? 0.1 : 0.01; break;
+        case SelectorType::DOUBLE:
             *modifiedValue += 0.1; break;
     }
 }
@@ -105,39 +88,17 @@ void SelectControl::decrement(bool largeDecrement) {
         case SelectorType::INSTRUMENT:
             break;
         case SelectorType::OSCILLATOR:
-            menu->nextOsc(true);
+            menu->selectPrevOsc();
             break;
         case SelectorType::WAVETYPE:
             setNextWaveType(false); break;
-        case SelectorType::FREQUENCY:
-            if (!modifyLFO){
-                menu->editedOsc->freqModifier -= largeDecrement ? 0.1 : 0.001;
-                if (menu->editedOsc->freqModifier < 0) {
-                    menu->editedOsc->freqModifier = 0;
-                }
-            } else {
-                if (menu->editedOsc->lfo->currentFrequency - (largeDecrement ? 0.1 : 0.001) < 0) {
-                    menu->editedOsc->lfo->setFrequency(0);
-                } else {
-                    menu->editedOsc->lfo->setFrequency(menu->editedOsc->lfo->currentFrequency
-                                                        - (largeDecrement ? 0.1 : 0.001));
-                }
-            }
+        case SelectorType::FINEDOUBLE:
+            *modifiedValue -= largeDecrement ? 0.1 : 0.01;
+            if (*modifiedValue < 0)
+                *modifiedValue = 0;
             break;
-        case SelectorType::AMPLITUDE:
-            if (!modifyLFO){
-                menu->editedOsc->ampModifier -= largeDecrement ? 0.1 : 0.001;
-                if (menu->editedOsc->ampModifier < 0) {
-                    menu->editedOsc->ampModifier = 0;
-                }
-            } else {
-                menu->editedOsc->lfo->ampModifier -= largeDecrement ? 0.1 : 0.001;
-                if (menu->editedOsc->lfo->ampModifier < 0) {
-                    menu->editedOsc->lfo->ampModifier = 0;
-                }
-            }
-            break;
-        case SelectorType::ENVELOPE:
+
+        case SelectorType::DOUBLE:
             *modifiedValue -= 0.1;
             if (*modifiedValue < 0)
                 *modifiedValue = 0;

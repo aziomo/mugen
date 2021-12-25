@@ -1,7 +1,7 @@
 #include "../include/MainWindow.h"
 #include "../include/InstrumentMenu.h"
 
-MainWindow::MainWindow(MusicBox* musicBox){
+MainWindow::MainWindow(MusicBox *musicBox) {
     this->mBox = musicBox;
     initSDL();
     instrumentMenu = new InstrumentMenu(this);
@@ -9,31 +9,31 @@ MainWindow::MainWindow(MusicBox* musicBox){
     graphPainter = new GraphPainter(this);
 }
 
-MainWindow::~MainWindow(){
+MainWindow::~MainWindow() {
     delete instrumentMenu;
     mBox = nullptr;
     quitSDL();
 }
 
-void MainWindow::initSDL(){
+void MainWindow::initSDL() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
+        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
     } else {
-        window = SDL_CreateWindow("mugen", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_SHOWN );
+        window = SDL_CreateWindow("mugen", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, SDL_WINDOW_SHOWN);
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-        if( window == nullptr || renderer == nullptr ) {
-            printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
+        if (window == nullptr || renderer == nullptr) {
+            printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         }
         TTF_Init();
         mainFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 26);
         smallFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 16);
-        if (mainFont == nullptr){
+        if (mainFont == nullptr) {
             printf("font fucked up\n");
         }
     }
 }
 
-void MainWindow::quitSDL(){
+void MainWindow::quitSDL() {
     TTF_CloseFont(mainFont);
     mainFont = nullptr;
     TTF_Quit();
@@ -45,13 +45,13 @@ void MainWindow::quitSDL(){
     SDL_Quit();
 }
 
-void MainWindow::renderBorders(){
+void MainWindow::renderBorders() {
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    SDL_Rect waveformMenuBorder = {0,0, windowArea.w*5/9, windowArea.h*3/5};
+    SDL_Rect waveformMenuBorder = {0, 0, windowArea.w * 5 / 9, windowArea.h * 3 / 5};
     SDL_RenderDrawRect(renderer, &waveformMenuBorder);
 }
 
-void MainWindow::render(){
+void MainWindow::render() {
     SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     SDL_RenderFillRect(renderer, &windowArea);
@@ -61,7 +61,7 @@ void MainWindow::render(){
     SDL_RenderPresent(renderer);
 }
 
-void MainWindow::handleKeyPress(const Uint8 *keyState, bool* lastKeyState, int* keyPressState) {
+void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *keyPressState) {
 
 
     if (keyState[SDL_SCANCODE_Z] && !lastKeyState[SDL_SCANCODE_Z])
