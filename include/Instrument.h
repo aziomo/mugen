@@ -10,13 +10,16 @@
 #include "Oscillator.h"
 #include "Envelope.h"
 
+using std::vector;
+
+
 class Instrument {
 public:
     Instrument(int blockSize);
     ~Instrument();
     std::string name;
     int blockSize;
-    std::vector<Oscillator*> oscillators;
+    vector<Oscillator*> oscillators;
     Envelope env;
 
     int envelopeMoment = 0;

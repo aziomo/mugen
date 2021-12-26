@@ -56,7 +56,7 @@ void MusicBox::writePressedKeysToBuffer() {
             zeroOutArray(newBlock, blockSize);
             for (int i = 0; i < KEYBOARD_SIZE; i++) {
                 if (pressedNotes[i].isPlaying) {
-                    instruments.front()->addToBufferBlock(newBlock, &pressedNotes[i], globalTime);
+                    instruments.at(currentInstrument)->addToBufferBlock(newBlock, &pressedNotes[i], globalTime);
                 }
             }
             globalTime += timeStep * blockSize;

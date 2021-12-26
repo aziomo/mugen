@@ -23,8 +23,10 @@ public:
     int w = SET_WINDOW_WIDTH;
     int h = SET_WINDOW_HEIGHT;
     SDL_Renderer* renderer = nullptr;
+    TTF_Font* largeFont = nullptr;
     TTF_Font* mainFont = nullptr;
     TTF_Font* smallFont = nullptr;
+    TTF_Font* tinyFont = nullptr;
 
     InstrumentMenu* instrumentMenu;
     GraphPainter* graphPainter;
@@ -41,6 +43,8 @@ private:
     void quitSDL();
 
     void renderBorders();
+
+    void renderTabs() const;
 };
 
 #endif //MUGEN_CPP_MAINWINDOW_H

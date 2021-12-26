@@ -12,24 +12,28 @@ public:
     ~CheckboxControl() override {};
     InstrumentMenu* menu;
     int borderSize = 2;
+    bool horizontal;
     void switchCheck();
     void render(int x, int y);
-    void loadTextures(std::string text, Texture* checkTexture, MainWindow* window);
 
     void triggerOnCheck();
 
     void (InstrumentMenu::*onCheck)();
 
     SDL_Renderer* rend;
-    SDL_Rect highlightRect, bgRect, checkBgRect, checkBorderRect;
+    SDL_Rect highlightRect, bgRect, checkboxBgRect, checkboxBorderRect, renderArea;
+
 
     Texture* labelTexture;
     Texture* checkTexture;
 
-    void renderCheck(int x, int y);
+    void renderCheckbox(int x, int y);
+
+    void loadTextures(Texture *labelTexture, MainWindow *window, bool horizontal = true);
 
 private:
     void activate() override;
+
 };
 
 

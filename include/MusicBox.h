@@ -31,7 +31,7 @@ public:
     void startPlaying();
     void stopPlaying();
     int getRootCPosition() const;
-    std::vector<Instrument*> instruments;
+    vector<Instrument*> instruments;
     int currentInstrument = 0;
     int blockSize;
 //private:

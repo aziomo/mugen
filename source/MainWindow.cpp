@@ -25,8 +25,10 @@ void MainWindow::initSDL() {
             printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         }
         TTF_Init();
+        largeFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 32);
         mainFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 26);
-        smallFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 16);
+        smallFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 20);
+        tinyFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 16);
         if (mainFont == nullptr) {
             printf("font fucked up\n");
         }
@@ -51,18 +53,44 @@ void MainWindow::renderBorders() {
     SDL_RenderDrawRect(renderer, &waveformMenuBorder);
 }
 
+void MainWindow::renderTabs() const{
+    SDL_Rect firstTab, secondTab, thirdTab;
+    firstTab = {borderSize,borderSize,
+                mainArea.w / 3,
+                h / 13
+    };
+    secondTab = {borderSize + (w -borderSize*2) / 3,
+                 borderSize,
+                 mainArea.w / 3,
+                 h / 13
+    };
+    thirdTab = {borderSize + (w - borderSize*2)*2/3,
+                borderSize,
+                mainArea.w / 3,
+                h / 13
+    };
+    SDL_SetRenderDrawColor(renderer, 0x33, 0x33, 0x33, 0x33);
+    SDL_RenderFillRect(renderer, &secondTab);
+    SDL_RenderFillRect(renderer, &thirdTab);
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+
+//    SDL_RenderDrawRect(renderer, &firstTab);
+    SDL_RenderDrawRect(renderer, &secondTab);
+    SDL_RenderDrawRect(renderer, &thirdTab);
+}
+
 void MainWindow::render() {
     SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     SDL_RenderFillRect(renderer, &windowArea);
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
     SDL_RenderFillRect(renderer, &mainArea);
+    renderTabs();
     instrumentMenu->render();
     SDL_RenderPresent(renderer);
 }
 
 void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *keyPressState) {
-
 
     if (keyState[SDL_SCANCODE_Z] && !lastKeyState[SDL_SCANCODE_Z])
         mBox->pressNoteKey(0);

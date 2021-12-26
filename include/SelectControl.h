@@ -39,7 +39,7 @@ public:
 private:
     SDL_Renderer* rend;
     int borderSize = 2;
-    std::vector<Texture*> optionsImages;
+    vector<Texture*> optionsImages;
     Texture* arrowTexture;
     SDL_Rect highlightRect, bgRect;
     SelectorType type;

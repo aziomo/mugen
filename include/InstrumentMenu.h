@@ -9,6 +9,7 @@
 #include "SelectControl.h"
 #include "Direction.h"
 #include "CheckboxControl.h"
+#include "ItemList.h"
 #include <vector>
 
 class MainWindow;
@@ -31,6 +32,10 @@ public:
     int currentOsc = 0;
 
     SDL_Color textColor;
+
+    ItemList* itemList;
+    bool listFocused = false;
+
     SelectControl oscSelector,
         mainWaveSelector, mainFreqSelector, mainAmpSelector,
         lfoWaveSelector, lfoFreqSelector, lfoAmpSelector,
@@ -45,12 +50,13 @@ public:
             {nullptr,       nullptr,           nullptr,           nullptr,          &envDecaySelector},
             {nullptr,       nullptr,           nullptr,           nullptr,          &envReleaseSelector}
     };
-    std::vector<Texture*> waveImages {&sineImg, &squareImg, &triangleImg, &sawDownImg, &noiseImg};
+    vector<Texture*> waveImages {&sineImg, &squareImg, &triangleImg, &sawDownImg, &noiseImg};
     int focusedControlCol = 2;
     int focusedControlRow = 0;
-    Texture screenTitle,
+    Texture instrumentName,
+    instrumentsTab, compositionTab, optionsTab,
     // waveform creator textures
-        oscCounter,
+        oscLabel, oscCounter,
         wavetypeLabel,
         sineImg, squareImg, triangleImg,
         sawDownImg, sawUpImg, noiseImg,
@@ -97,6 +103,12 @@ public:
     void selectNextOsc();
 
     void updateSelectorValues();
+
+    int xByPercent(SDL_Rect *rect, double percent) const;
+
+    int yByPercent(SDL_Rect *rect, double percent) const;
+
+    void selectItemFromList(int index);
 };
 
 #endif //MUGEN_CPP_WAVEFORMMENU_H

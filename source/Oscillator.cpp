@@ -1,5 +1,6 @@
 #include "../include/Oscillator.h"
 
+using std::abs;
 
 Oscillator::Oscillator(int sampleRate, WaveformType waveformType) {
     setWaveformType(waveformType);
@@ -25,17 +26,17 @@ void Oscillator::setupLfoLookup(WaveformType type) {
     double currentY = YofX(currentX, type);
 
     double maxSample = 0.0;
-    double minSample = std::abs(currentY);
+    double minSample = abs(currentY);
 
     for (int i = 0; i < lookupTableSize; i++) {
         currentX += xIncrement;
         currentY += YofX(currentX, type);
 
-        if (maxSample < std::abs(currentY)) {
-            maxSample = std::abs(currentY);
+        if (maxSample < abs(currentY)) {
+            maxSample = abs(currentY);
         }
-        if (minSample > std::abs(currentY)) {
-            minSample = std::abs(currentY);
+        if (minSample > abs(currentY)) {
+            minSample = abs(currentY);
         }
     }
 

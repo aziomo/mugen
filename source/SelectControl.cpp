@@ -35,7 +35,7 @@ void SelectControl::loadTextControl(SelectorType selectorType, Texture* textText
     mainTexture = textTexture;
 }
 
-void SelectControl::loadImageControl(std::vector<Texture*> imageTextures, MainWindow* window) {
+void SelectControl::loadImageControl(vector<Texture*> imageTextures, MainWindow* window) {
     menu = window->instrumentMenu;
     this->type = SelectorType::WAVETYPE;
     this->rend = window->renderer;

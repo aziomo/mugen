@@ -3,10 +3,14 @@
 #include <iomanip>
 #include <sstream>
 
+using std::string;
+using std::to_string;
+
 InstrumentMenu::InstrumentMenu(MainWindow *mainWindow) {
     window = mainWindow;
     renderer = mainWindow->renderer;
     musicBox = mainWindow->mBox;
+    itemList = new ItemList(this->renderer, window->smallFont, window->mainArea.w / 5, window->mainArea.h * 1 / 2, 4);
 }
 
 InstrumentMenu::~InstrumentMenu() {
@@ -21,6 +25,9 @@ void InstrumentMenu::init() {
     textColor = {255, 255, 255};
     editedInstrument = musicBox->instruments.front();
     editedOsc = editedInstrument->oscillators.front();
+
+    itemList->addItem("Instrument 1");
+    itemList->addItem("+ New instrument");
     helpMessage = "[ENTER] SELECT | [2] ADD OSC | [3] DEL OSC | [F4] QUIT";
     loadTextures();
     loadControls();
@@ -65,39 +72,18 @@ void InstrumentMenu::updateSelectorValues() {
 
 void InstrumentMenu::loadTextures() {
     setTextTexture(&undefinedLabel, "-");
-    setTextTexture(&screenTitle, "INSTRUMENT CREATOR");
-    setTextTexture(&oscCounter, "OSCILLATOR " + std::to_string(currentOsc + 1) + " of " +
-                                std::to_string(musicBox->instruments.size()));
-    setTextTexture(&wavetypeLabel, "WAVE");
+    setTextTexture(&instrumentsTab, "INSTRUMENTS");
+    setTextTexture(&compositionTab, "COMPOSITION");
+    setTextTexture(&optionsTab, "OPTIONS");
 
+    setTextTexture(&instrumentName, "Instrument 1", window->largeFont);
+
+    setTextTexture(&oscLabel, "OSCILLATOR");
+    setTextTexture(&wavetypeLabel, "WAVE");
     setTextTexture(&frequencyLabel, "FREQ");
     setTextTexture(&amplitudeLabel, "AMP");
-    setTextTexture(&mainFreqValue, doubleToStr(editedOsc->freqModifier, 2));
-    setTextTexture(&mainAmpValue, doubleToStr(editedOsc->ampModifier, 2));
 
-    setTextTexture(&lfoFreqValue, "-");
-    setTextTexture(&lfoAmpValue, "-");
-    lfoWaveSelector.loadTextControl(SelectorType::WAVETYPE, &undefinedLabel, window);
-
-
-    setTextTexture(&envelopeLabel, "ENVELOPE");
-
-    setTextTexture(&durationsLabel, "DURATIONS");
-    setTextTexture(&attackLabel, "Attack");
-    setTextTexture(&decayLabel, "Decay");
-    setTextTexture(&releaseLabel, "Release");
-
-    setTextTexture(&levelsLabel, "LEVELS");
-    setTextTexture(&initialLabel, "Initial");
-    setTextTexture(&sustainLabel, "Sustain");
-
-    setTextTexture(&attackValue, "0.0");
-    setTextTexture(&decayValue, "0.0");
-    setTextTexture(&sustainValue, "0.0");
-    setTextTexture(&releaseValue, "0.0");
-    setTextTexture(&initialValue, "0.0");
-
-    setTextTexture(&helpBar, helpMessage, window->smallFont);
+    setTextTexture(&helpBar, helpMessage, window->tinyFont);
     setImageTexture(&arrowImg, assets_dir + "arrow.png");
     setImageTexture(&sineImg, assets_dir + "sine.png");
     setImageTexture(&squareImg, assets_dir + "square.png");
@@ -106,31 +92,32 @@ void InstrumentMenu::loadTextures() {
     setImageTexture(&sawUpImg, assets_dir + "sawtoothup.png");
     setImageTexture(&noiseImg, assets_dir + "noise.png");
 
-    setTextTexture(&lfoLabel, "LFO");
-
     setImageTexture(&checkImg, assets_dir + "check.png");
-    lfoCheckBox.loadTextures("LFO", &lfoLabel, window);
+    setTextTexture(&lfoLabel, "LFO");
+    lfoCheckBox.loadTextures(&lfoLabel, window, true);
 
-
-    //debug controls
-    setTextTexture(&debugBlocksLeftLabel, "0");
-    setTextTexture(&debugMaxSampleLabel, "0.0");
-    setTextTexture(&debugCurrentFrequencyLabel, "0.0");
-    setTextTexture(&debugEnvelopeMomentLabel, "0");
+    setTextTexture(&envelopeLabel, "ENVELOPE");
+    setTextTexture(&durationsLabel, "DURATIONS");
+    setTextTexture(&attackLabel, "Attack");
+    setTextTexture(&decayLabel, "Decay");
+    setTextTexture(&releaseLabel, "Release");
+    setTextTexture(&levelsLabel, "LEVELS");
+    setTextTexture(&initialLabel, "Initial");
+    setTextTexture(&sustainLabel, "Sustain");
 }
 
 void InstrumentMenu::updateTextures() {
     // waveform textures
     setWaveImage(&mainWaveSelector, editedOsc->waveType);
-    setTextTexture(&oscCounter, "OSCILLATOR " + std::to_string(currentOsc + 1) + " OF " +
-                                std::to_string(editedInstrument->oscillators.size()));
-    setTextTexture(&mainFreqValue, doubleToStr(editedOsc->freqModifier, 2));
-    setTextTexture(&mainAmpValue, doubleToStr(editedOsc->ampModifier, 2));
+    setTextTexture(&oscCounter, to_string(currentOsc + 1) + " of " +
+                                to_string(editedInstrument->oscillators.size()));
+    setTextTexture(&mainFreqValue, "x"+doubleToStr(editedOsc->freqModifier, 2));
+    setTextTexture(&mainAmpValue, "x"+doubleToStr(editedOsc->ampModifier, 2));
 
     if (editedOsc->lfo != nullptr) {
         setWaveImage(&lfoWaveSelector, editedOsc->lfo->waveType);
         setTextTexture(&lfoFreqValue, doubleToStr(editedOsc->lfo->currentFrequency, 2) + "Hz");
-        setTextTexture(&lfoAmpValue, doubleToStr(editedOsc->lfo->ampModifier, 2));
+        setTextTexture(&lfoAmpValue, "x"+doubleToStr(editedOsc->lfo->ampModifier, 2));
         lfoCheckBox.isChecked = true;
     } else {
         setTextTexture(&lfoFreqValue, "-");
@@ -146,26 +133,37 @@ void InstrumentMenu::updateTextures() {
     setTextTexture(&sustainValue, doubleToStr(editedInstrument->env.sustainAmplitude, 2));
     setTextTexture(&releaseValue, doubleToStr(editedInstrument->env.releaseDuration, 2));
 
-
     // debug controls
-    setTextTexture(&debugBlocksLeftLabel, std::to_string(musicBox->blocksAvailable));
-    setTextTexture(&debugMaxSampleLabel, std::to_string(musicBox->maxSample));
-    if (musicBox->instruments.front()->oscillators.front()->lfo != nullptr)
-        setTextTexture(&debugCurrentFrequencyLabel, std::to_string(sin(
-                musicBox->instruments.front()->oscillators.front()->getLfoInterpolatedSample(musicBox->globalTime))));
-    setTextTexture(&debugEnvelopeMomentLabel, std::to_string(musicBox->instruments.front()->envelopeMoment));
+    setTextTexture(&debugBlocksLeftLabel, to_string(musicBox->blocksAvailable));
+    setTextTexture(&debugMaxSampleLabel, to_string(musicBox->maxSample));
+    if (editedOsc->lfo != nullptr)
+        setTextTexture(&debugCurrentFrequencyLabel,
+                       to_string(sin(editedOsc->getLfoInterpolatedSample(musicBox->globalTime))));
+    setTextTexture(&debugEnvelopeMomentLabel, to_string(musicBox->instruments.front()->envelopeMoment));
 }
 
-int InstrumentMenu::xByPercent(Texture *texture, double percent) const {
+int InstrumentMenu::xByPercent(Texture* texture, double percent) const {
     return window->w * percent - texture->w * 0.5;
 }
 
-int InstrumentMenu::yByPercent(Texture *texture, double percent) const {
+int InstrumentMenu::xByPercent(SDL_Rect* rect, double percent) const {
+    return window->w * percent - rect->w * 0.5;
+}
+
+int InstrumentMenu::yByPercent(Texture* texture, double percent) const {
     return window->h * percent - texture->h * 0.5;
+}
+
+int InstrumentMenu::yByPercent(SDL_Rect* rect, double percent) const {
+    return window->h * percent - rect->h * 0.5;
 }
 
 void InstrumentMenu::render() {
     updateTextures();
+    double waveMenuOffsetX = 0.4;
+    double waveMenuOffsetY = 0.175;
+    double envMenuOffsetX = 0.8;
+    double envMenuOffsetY = 0.8;
 
     if (showDebug) {
         debugBlocksLeftLabel.render(xByPercent(&debugBlocksLeftLabel, 0.75),
@@ -178,90 +176,104 @@ void InstrumentMenu::render() {
                                         yByPercent(&debugCurrentFrequencyLabel, 0.90));
     }
 
+    //render tab outlines somehow
+
     // MISC
-    screenTitle.render(xByPercent(&screenTitle, 0.5),
-                       yByPercent(&screenTitle, 0.1));
+    instrumentsTab.render(xByPercent(&instrumentsTab, 0.18),
+                          yByPercent(&instrumentsTab, 0.055));
+    compositionTab.render(xByPercent(&compositionTab, 0.5),
+                          yByPercent(&compositionTab, 0.055));
+    optionsTab.render(xByPercent(&optionsTab, 0.825),
+                      yByPercent(&optionsTab, 0.055));
     helpBar.render(window->borderSize * 2, window->mainArea.h - helpBar.h);
 
+//    instrumentName.render(xByPercent(&instrumentName, 0.5),
+//                          yByPercent(&instrumentName, 0.18));
+
     // MAIN OSCILLATOR LABELS
-    wavetypeLabel.render(xByPercent(&wavetypeLabel, 0.15),
-                         yByPercent(&wavetypeLabel, 0.3));
-    frequencyLabel.render(xByPercent(&frequencyLabel, 0.15 + 0.12),
-                          yByPercent(&frequencyLabel, 0.3));
-    amplitudeLabel.render(xByPercent(&amplitudeLabel, 0.15 + 0.12 * 2),
-                          yByPercent(&amplitudeLabel, 0.3));
+    oscLabel.render(xByPercent(&oscLabel, waveMenuOffsetX + 0.075),
+                    yByPercent(&oscLabel, waveMenuOffsetY + 0.025));
+    wavetypeLabel.render(xByPercent(&wavetypeLabel, waveMenuOffsetX),
+                         yByPercent(&wavetypeLabel, waveMenuOffsetY + 0.17));
+    frequencyLabel.render(xByPercent(&frequencyLabel, waveMenuOffsetX + 0.1),
+                          yByPercent(&frequencyLabel, waveMenuOffsetY + 0.17));
+    amplitudeLabel.render(xByPercent(&amplitudeLabel, waveMenuOffsetX + 0.1 * 2),
+                          yByPercent(&amplitudeLabel, waveMenuOffsetY + 0.17));
 
     // MAIN OSCILLATOR SELECTORS
-    oscSelector.render(xByPercent(&oscCounter, 0.15 + 0.12),
-                       yByPercent(&oscCounter, 0.2));
-    mainWaveSelector.render(xByPercent(mainWaveSelector.mainTexture, 0.15),
-                            yByPercent(mainWaveSelector.mainTexture, 0.4));
-    mainFreqSelector.render(xByPercent(&mainFreqValue, 0.15 + 0.12),
-                            yByPercent(&mainFreqValue, 0.4));
-    mainAmpSelector.render(xByPercent(&mainAmpValue, 0.15 + 0.12 * 2),
-                           yByPercent(&mainFreqValue, 0.4));
+    oscSelector.render(xByPercent(&oscCounter, waveMenuOffsetX + 0.075),
+                       yByPercent(&oscCounter, waveMenuOffsetY + 0.075));
+    mainWaveSelector.render(xByPercent(mainWaveSelector.mainTexture, waveMenuOffsetX),
+                            yByPercent(mainWaveSelector.mainTexture, waveMenuOffsetY + 0.25));
+    mainFreqSelector.render(xByPercent(&mainFreqValue, waveMenuOffsetX + 0.1),
+                            yByPercent(&mainFreqValue, waveMenuOffsetY + 0.25));
+    mainAmpSelector.render(xByPercent(&mainAmpValue, waveMenuOffsetX + 0.1 * 2),
+                           yByPercent(&mainFreqValue, waveMenuOffsetY + 0.25));
 
     // LFO LABELS
-    lfoCheckBox.render(xByPercent(lfoCheckBox.labelTexture, 0.05),
-                       yByPercent(lfoCheckBox.labelTexture, 0.5));
+    lfoCheckBox.render(xByPercent(&lfoCheckBox.renderArea, waveMenuOffsetX - 0.085),
+                       yByPercent(&lfoCheckBox.renderArea, waveMenuOffsetY + 0.35));
 
     // LFO SELECTORS
-    lfoWaveSelector.render(xByPercent(lfoWaveSelector.mainTexture, 0.15),
-                           yByPercent(lfoWaveSelector.mainTexture, 0.5));
-    lfoFreqSelector.render(xByPercent(&lfoFreqValue, 0.15 + 0.12),
-                           yByPercent(&lfoFreqValue, 0.5));
-    lfoAmpSelector.render(xByPercent(&lfoAmpValue, 0.15 + 0.12 * 2),
-                          yByPercent(&lfoAmpValue, 0.5));
+    lfoWaveSelector.render(xByPercent(lfoWaveSelector.mainTexture, waveMenuOffsetX),
+                           yByPercent(lfoWaveSelector.mainTexture, waveMenuOffsetY + 0.35));
+    lfoFreqSelector.render(xByPercent(&lfoFreqValue, waveMenuOffsetX + 0.1),
+                           yByPercent(&lfoFreqValue, waveMenuOffsetY + 0.35));
+    lfoAmpSelector.render(xByPercent(&lfoAmpValue, waveMenuOffsetX + 0.1 * 2),
+                          yByPercent(&lfoAmpValue, waveMenuOffsetY + 0.35));
+
 
     // ENVELOPE LABELS
-    envelopeLabel.render(xByPercent(&envelopeLabel, 0.75),
+    envelopeLabel.render(xByPercent(&envelopeLabel, envMenuOffsetX + 0.05),
                          yByPercent(&envelopeLabel, 0.2));
 
 
-    levelsLabel.render(xByPercent(&levelsLabel, 0.75),
+    levelsLabel.render(xByPercent(&levelsLabel, envMenuOffsetX + 0.05),
                        yByPercent(&levelsLabel, 0.3));
-    initialLabel.render(xByPercent(&initialLabel, 0.7),
+    initialLabel.render(xByPercent(&initialLabel, envMenuOffsetX),
                         yByPercent(&initialLabel, 0.35));
-    sustainLabel.render(xByPercent(&sustainLabel, 0.7),
+    sustainLabel.render(xByPercent(&sustainLabel, envMenuOffsetX),
                         yByPercent(&sustainLabel, 0.4));
 
-    durationsLabel.render(xByPercent(&durationsLabel, 0.75),
+    durationsLabel.render(xByPercent(&durationsLabel, envMenuOffsetX + 0.05),
                           yByPercent(&durationsLabel, 0.5));
-    attackLabel.render(xByPercent(&attackLabel, 0.7),
+    attackLabel.render(xByPercent(&attackLabel, envMenuOffsetX),
                        yByPercent(&attackLabel, 0.55));
-    decayLabel.render(xByPercent(&decayLabel, 0.7),
+    decayLabel.render(xByPercent(&decayLabel, envMenuOffsetX),
                       yByPercent(&decayLabel, 0.6));
-    releaseLabel.render(xByPercent(&releaseLabel, 0.7),
+    releaseLabel.render(xByPercent(&releaseLabel, envMenuOffsetX),
                         yByPercent(&releaseLabel, 0.65));
 
     // ENVELOPE SELECTORS
-    envInitialSelector.render(xByPercent(envInitialSelector.mainTexture, 0.8),
+    envInitialSelector.render(xByPercent(envInitialSelector.mainTexture, envMenuOffsetX + 0.12),
                               yByPercent(envInitialSelector.mainTexture, 0.35));
-    envSustainSelector.render(xByPercent(envSustainSelector.mainTexture, 0.8),
+    envSustainSelector.render(xByPercent(envSustainSelector.mainTexture, envMenuOffsetX + 0.12),
                               yByPercent(envSustainSelector.mainTexture, 0.4));
 
-    envAttackSelector.render(xByPercent(envAttackSelector.mainTexture, 0.8),
+    envAttackSelector.render(xByPercent(envAttackSelector.mainTexture, envMenuOffsetX + 0.12),
                              yByPercent(envAttackSelector.mainTexture, 0.55));
-    envDecaySelector.render(xByPercent(envDecaySelector.mainTexture, 0.8),
+    envDecaySelector.render(xByPercent(envDecaySelector.mainTexture, envMenuOffsetX + 0.12),
                             yByPercent(envDecaySelector.mainTexture, 0.6));
-    envReleaseSelector.render(xByPercent(envReleaseSelector.mainTexture, 0.8),
+    envReleaseSelector.render(xByPercent(envReleaseSelector.mainTexture, envMenuOffsetX + 0.12),
                               yByPercent(envReleaseSelector.mainTexture, 0.65));
+
+    itemList->render(window->borderSize, window->mainArea.h/4);
 }
 
 
-void InstrumentMenu::setTextTexture(Texture *texture, std::string text) const {
+void InstrumentMenu::setTextTexture(Texture* texture, string text) const {
     texture->loadFromText(renderer, text, textColor, window->mainFont);
 }
 
-void InstrumentMenu::setTextTexture(Texture *texture, std::string text, TTF_Font *font) const {
+void InstrumentMenu::setTextTexture(Texture* texture, string text, TTF_Font* font) const {
     texture->loadFromText(renderer, text, textColor, font);
 }
 
-void InstrumentMenu::setImageTexture(Texture *texture, std::string imagePath) const {
+void InstrumentMenu::setImageTexture(Texture *texture, string imagePath) const {
     texture->loadFromFile(renderer, imagePath);
 }
 
-std::string InstrumentMenu::doubleToStr(double d, int precision) {
+string InstrumentMenu::doubleToStr(double d, int precision) {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(precision) << d;
     return stream.str();
@@ -271,7 +283,7 @@ void InstrumentMenu::selectFocusedControl() {
     getFocusedControl()->activate();
 }
 
-Control *InstrumentMenu::getFocusedControl() {
+Control* InstrumentMenu::getFocusedControl() {
     return controlArray[focusedControlRow][focusedControlCol];
 }
 
@@ -309,6 +321,9 @@ void InstrumentMenu::changeControlFocus(Direction direction) {
             }
             break;
         case Direction::LEFT:
+            if (listFocused){
+                break;
+            }
             if (focusedControlCol > 0) {
                 if (controlArray[focusedControlRow][focusedControlCol - 1] != nullptr) {
                     focusedControlCol -= 1;
@@ -321,9 +336,13 @@ void InstrumentMenu::changeControlFocus(Direction direction) {
                         }
                     }
                 }
+            } else {
+                listFocused = true;
+                getFocusedControl()->switchHighlight();
             }
             break;
         case Direction::RIGHT:
+
             if (focusedControlCol < controlMatrixCols - 1) {
                 if (controlArray[focusedControlRow][focusedControlCol + 1] != nullptr) {
                     focusedControlCol += 1;
@@ -350,7 +369,8 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
                 selectFocusedControl();
             }
             editedInstrument->addOscillator();
-            selectNextOsc();
+            while (currentOsc != editedInstrument->oscillators.size()-1)
+                selectNextOsc();
             break;
         case SDLK_3:
             if (editedInstrument->oscillators.size() > 1) {
@@ -367,6 +387,17 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
             drawIntegral = !drawIntegral;
             break;
         case SDLK_UP:
+            if (listFocused){
+                int prevIndex = itemList->selectedIndex;
+                itemList->moveUp();
+                if (prevIndex > itemList->selectedIndex && prevIndex != itemList->items.size()-1){
+                    editedInstrument = musicBox->instruments.at(itemList->selectedIndex);
+                    editedOsc = editedInstrument->oscillators.front();
+                    musicBox->currentInstrument = itemList->selectedIndex;
+                    updateSelectorValues();
+                }
+                break;
+            }
             if (getFocusedControl()->isHighlighted) {
                 changeControlFocus(Direction::UP);
             }
@@ -375,6 +406,17 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
             }
             break;
         case SDLK_DOWN:
+            if (listFocused){
+                int prevIndex = itemList->selectedIndex;
+                itemList->moveDown();
+                if (prevIndex < itemList->selectedIndex && itemList->selectedIndex != itemList->items.size()-1){
+                    editedInstrument = musicBox->instruments.at(itemList->selectedIndex);
+                    editedOsc = editedInstrument->oscillators.front();
+                    musicBox->currentInstrument = itemList->selectedIndex;
+                    updateSelectorValues();
+                }
+                break;
+            }
             if (getFocusedControl()->isHighlighted) {
                 changeControlFocus(Direction::DOWN);
             }
@@ -383,6 +425,7 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
             }
             break;
         case SDLK_LEFT:
+
             if (getFocusedControl()->isHighlighted) {
                 changeControlFocus(Direction::LEFT);
             }
@@ -391,6 +434,13 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
             }
             break;
         case SDLK_RIGHT:
+            if (listFocused){
+                if (itemList->selectedIndex == itemList->items.size()-1)
+                    itemList->moveUp();
+                listFocused = false;
+                getFocusedControl()->switchHighlight();
+                break;
+            }
             if (getFocusedControl()->isHighlighted) {
                 changeControlFocus(Direction::RIGHT);
             }
@@ -400,6 +450,10 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
             break;
 
         case SDLK_RETURN:
+            if (listFocused){
+                selectItemFromList(itemList->selectedIndex);
+                break;
+            }
             selectFocusedControl();
             break;
 
@@ -456,5 +510,15 @@ void InstrumentMenu::selectPrevOsc() {
         updateSelectorValues();
     }
     lfoCheckBox.isChecked = editedOsc->lfo != nullptr;
+}
+
+void InstrumentMenu::selectItemFromList(int index) {
+
+    if (index == itemList->items.size() - 1){
+        musicBox->instruments.push_back(new Instrument(musicBox->blockSize));
+        itemList->removeItem(itemList->items.size() - 1);
+        itemList->addItem("Instrument " + to_string(itemList->items.size()+1));
+        itemList->addItem("+ New instrument");
+    }
 }
 
