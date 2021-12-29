@@ -16,7 +16,8 @@
 class SelectControl : public Control {
 
 public:
-    double* modifiedValue = nullptr;
+    double* modifiedDouble = nullptr;
+    int* modifiedInteger = nullptr;
 
     ~SelectControl() override;
 
@@ -34,9 +35,13 @@ public:
     void loadImageControl(std::vector<Texture *> imageTextures, MainWindow *window);
     void isModifyingLFO(bool isModifying);
     Texture* mainTexture;
-    void setModifiedValue(double* modifiedValue);
+
+    void setModifiedDouble(double* modifiedDouble);
+    void setModifiedInteger(int *modifiedInt);
 
 private:
+    void (*incrementFunction)();
+    void (*decrementFunction)();
     SDL_Renderer* rend;
     int borderSize = 2;
     vector<Texture*> optionsImages;
@@ -48,6 +53,7 @@ private:
 
 
     void setNextWaveType(bool increment = true);
+
 };
 
 

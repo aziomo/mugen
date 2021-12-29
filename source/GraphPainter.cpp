@@ -2,7 +2,7 @@
 // Created by alberto on 12/23/21.
 //
 
-#include "GraphPainter.h"
+#include "../include/GraphPainter.h"
 
 GraphPainter::GraphPainter(MainWindow* window){
     this->window = window;

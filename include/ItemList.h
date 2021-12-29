@@ -10,6 +10,7 @@
 #include <string>
 
 using std::string;
+using std::to_string;
 using std::vector;
 
 
@@ -25,7 +26,7 @@ public:
         this->visibleItems = visibleItems;
         itemWidth = width;
         itemHeight = height / visibleItems;
-        selectedIndex = 0;
+        selectedIndex = -1;
         topDisplayedItemIndex = 0;
     };
 
@@ -35,6 +36,8 @@ public:
 
 
     int w, h, itemWidth, itemHeight;
+
+    bool enumerate = false;
 
     int selectedIndex, topDisplayedItemIndex;
     int visibleItems = 4;
@@ -47,20 +50,41 @@ public:
 
     vector<string> items;
     vector<Texture*> renderedStrings;
-    vector<Texture*> renderedBlackStrings;
+    vector<Texture*> renderedIndexes;
     vector<SDL_Rect> itemContainers;
 
+    void blackenString(Texture* texture, string text){
+        texture->free();
+        texture->loadFromText(renderer, text, blackColor, font);
+    }
+
+    void whitenString(Texture* texture, string text){
+        texture->free();
+        texture->loadFromText(renderer, text, whiteColor, font);
+    }
+
+    string getEnumerationString(int index){
+        if (index < 0 || index > 99)
+            return "XX";
+        if (index < 10)
+            return "0"+ to_string(index);
+        return to_string(index);
+    }
 
     void addItem(string item){
         items.push_back(item);
-        auto* textureW = new Texture();
-        auto* textureB = new Texture();
-
-        textureW->loadFromText(renderer, item, whiteColor, font);
-        textureB->loadFromText(renderer, item, blackColor, font);
-
-        renderedStrings.push_back(textureW);
-        renderedBlackStrings.push_back(textureB);
+        auto* strTexture = new Texture();
+        auto* indexTexture = new Texture();
+        if (items.size() == 1){
+            strTexture->loadFromText(renderer, item, blackColor, font);
+            indexTexture->loadFromText(renderer, getEnumerationString(items.size()), blackColor, font);
+            selectedIndex = 0;
+        } else {
+            strTexture->loadFromText(renderer, item, whiteColor, font);
+            indexTexture->loadFromText(renderer, getEnumerationString(items.size()), whiteColor, font);
+        }
+        renderedStrings.push_back(strTexture);
+        renderedIndexes.push_back(indexTexture);
         updateItemContainers();
     }
 
@@ -69,8 +93,8 @@ public:
             items.erase(items.begin() + index);
             renderedStrings.at(index)->free();
             renderedStrings.erase(renderedStrings.begin() + index);
-            renderedBlackStrings.at(index)->free();
-            renderedBlackStrings.erase(renderedBlackStrings.begin() + index);
+            renderedIndexes.at(index)->free();
+            renderedIndexes.erase(renderedIndexes.begin() + index);
         }
 
         updateItemContainers();
@@ -87,20 +111,37 @@ public:
     }
 
     void moveUp(){
-        if (selectedIndex > 0)
+        if (selectedIndex > 0){
+            whitenString(renderedStrings.at(selectedIndex), items.at(selectedIndex));
+            whitenString(renderedIndexes.at(selectedIndex), items.at(selectedIndex));
             selectedIndex--;
+            blackenString(renderedStrings.at(selectedIndex), items.at(selectedIndex));
+            blackenString(renderedIndexes.at(selectedIndex), items.at(selectedIndex));
+        }
 
         if (selectedIndex < topDisplayedItemIndex)
             topDisplayedItemIndex--;
-
     }
 
     void moveDown(){
-        if (selectedIndex < items.size()-1)
+        if (selectedIndex < items.size()-1){
+            whitenString(renderedStrings.at(selectedIndex), items.at(selectedIndex));
+            whitenString(renderedIndexes.at(selectedIndex), items.at(selectedIndex));
             selectedIndex++;
+            blackenString(renderedStrings.at(selectedIndex), items.at(selectedIndex));
+            blackenString(renderedIndexes.at(selectedIndex), items.at(selectedIndex));
+        }
 
         if (selectedIndex == topDisplayedItemIndex + visibleItems)
             topDisplayedItemIndex++;
+    }
+
+    void setSelectedIndex(int newSelectedIndex){
+        if (!items.empty()){
+            whitenString(renderedStrings.at(selectedIndex), items.at(selectedIndex));
+        }
+        this->selectedIndex = newSelectedIndex;
+        blackenString(renderedStrings.at(selectedIndex), items.at(selectedIndex));
     }
 
 
@@ -116,14 +157,22 @@ public:
             auto itemContainer = &itemContainers.at(i);
             itemContainer->x = x;
             itemContainer->y = y + itemHeight * (i - topDisplayedItemIndex);
+
             if (i == selectedIndex){
                 SDL_RenderFillRect(renderer, itemContainer);
-                auto blackItemString = renderedBlackStrings.at(i);
-                blackItemString->render(itemContainer->x + itemContainer->w/2 - blackItemString->w/2,
-                                   itemContainer->y + itemContainer->h/2 - blackItemString->h/2);
             } else {
                 SDL_RenderDrawRect(renderer, itemContainer);
-                auto itemString = renderedStrings.at(i);
+            }
+            auto itemString = renderedStrings.at(i);
+            if (enumerate){
+                auto itemIndex = renderedIndexes.at(i);
+                itemIndex->render(itemContainer->x + itemIndex->w/2,
+                                  itemContainer->y + itemContainer->h/2 - itemString->h/2);
+
+                itemString->render(itemContainer->x + itemIndex->w + (itemContainer->w - itemIndex->w) / 2 - itemString->w/2,
+                                   itemContainer->y + itemContainer->h/2 - itemString->h/2);
+            }
+            else {
                 itemString->render(itemContainer->x + itemContainer->w/2 - itemString->w/2,
                                    itemContainer->y + itemContainer->h/2 - itemString->h/2);
             }

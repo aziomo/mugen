@@ -1,4 +1,5 @@
 #include "../include/InstrumentMenu.h"
+#include "../include/CompositionMenu.h"
 #include <string>
 #include <iomanip>
 #include <sstream>
@@ -26,6 +27,7 @@ void InstrumentMenu::init() {
     editedInstrument = musicBox->instruments.front();
     editedOsc = editedInstrument->oscillators.front();
 
+    window->compositionMenu->instrumentList->addItem("Instrument 1");
     itemList->addItem("Instrument 1");
     itemList->addItem("+ New instrument");
     helpMessage = "[ENTER] SELECT | [2] ADD OSC | [3] DEL OSC | [F4] QUIT";
@@ -57,17 +59,17 @@ void InstrumentMenu::loadControls() {
 }
 
 void InstrumentMenu::updateSelectorValues() {
-    mainFreqSelector.setModifiedValue(&editedOsc->freqModifier);
-    mainAmpSelector.setModifiedValue(&editedOsc->ampModifier);
+    mainFreqSelector.setModifiedDouble(&editedOsc->freqModifier);
+    mainAmpSelector.setModifiedDouble(&editedOsc->ampModifier);
     if (editedOsc->lfo != nullptr) {
-        lfoFreqSelector.setModifiedValue(&editedOsc->lfo->currentFrequency);
-        lfoAmpSelector.setModifiedValue(&editedOsc->lfo->ampModifier);
+        lfoFreqSelector.setModifiedDouble(&editedOsc->lfo->currentFrequency);
+        lfoAmpSelector.setModifiedDouble(&editedOsc->lfo->ampModifier);
     }
-    envInitialSelector.setModifiedValue(&editedInstrument->env.initialAmplitude);
-    envSustainSelector.setModifiedValue(&editedInstrument->env.sustainAmplitude);
-    envAttackSelector.setModifiedValue(&editedInstrument->env.attackDuration);
-    envDecaySelector.setModifiedValue(&editedInstrument->env.decayDuration);
-    envReleaseSelector.setModifiedValue(&editedInstrument->env.releaseDuration);
+    envInitialSelector.setModifiedDouble(&editedInstrument->env.initialAmplitude);
+    envSustainSelector.setModifiedDouble(&editedInstrument->env.sustainAmplitude);
+    envAttackSelector.setModifiedDouble(&editedInstrument->env.attackDuration);
+    envDecaySelector.setModifiedDouble(&editedInstrument->env.decayDuration);
+    envReleaseSelector.setModifiedDouble(&editedInstrument->env.releaseDuration);
 }
 
 void InstrumentMenu::loadTextures() {
@@ -259,7 +261,6 @@ void InstrumentMenu::render() {
 
     itemList->render(window->borderSize, window->mainArea.h/4);
 }
-
 
 void InstrumentMenu::setTextTexture(Texture* texture, string text) const {
     texture->loadFromText(renderer, text, textColor, window->mainFont);
@@ -517,8 +518,11 @@ void InstrumentMenu::selectItemFromList(int index) {
     if (index == itemList->items.size() - 1){
         musicBox->instruments.push_back(new Instrument(musicBox->blockSize));
         itemList->removeItem(itemList->items.size() - 1);
-        itemList->addItem("Instrument " + to_string(itemList->items.size()+1));
+        int newInstrumentIndex = itemList->items.size()+1;
+        itemList->addItem("Instrument " + to_string(newInstrumentIndex));
         itemList->addItem("+ New instrument");
+        itemList->setSelectedIndex(newInstrumentIndex-1);
+        window->compositionMenu->instrumentList->addItem("Instrument " + to_string(newInstrumentIndex));
     }
 }
 

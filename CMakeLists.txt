@@ -12,7 +12,7 @@ add_executable(mugen main.cpp
         source/MainWindow.cpp   include/MainWindow.h
         include/WaveformType.h
         include/Texture.h
-        source/SelectControl.cpp include/SelectControl.h source/Instrument.cpp include/Instrument.h include/SelectorType.h include/Direction.h source/CheckboxControl.cpp include/CheckboxControl.h include/Control.h source/Envelope.cpp include/Envelope.h include/GraphPainter.cpp include/GraphPainter.h include/ItemList.cpp include/ItemList.h)
+        source/SelectControl.cpp include/SelectControl.h source/Instrument.cpp include/Instrument.h include/SelectorType.h include/Direction.h source/CheckboxControl.cpp include/CheckboxControl.h include/Control.h source/Envelope.cpp include/Envelope.h source/GraphPainter.cpp include/GraphPainter.h source/ItemList.cpp include/ItemList.h source/CompositionMenu.cpp include/CompositionMenu.h source/Timeline.cpp include/Timeline.h source/Segment.cpp include/Segment.h)
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2TTF REQUIRED)

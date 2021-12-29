@@ -15,8 +15,12 @@ SelectControl::~SelectControl(){
     mainTexture = nullptr;
 }
 
-void SelectControl::setModifiedValue(double* modifiedValue){
-    this->modifiedValue = modifiedValue;
+void SelectControl::setModifiedDouble(double* modifiedDouble){
+    this->modifiedDouble = modifiedDouble;
+}
+
+void SelectControl::setModifiedInteger(int* modifiedInt){
+    this->modifiedInteger = modifiedInt;
 }
 
 void SelectControl::switchEditing(){
@@ -69,23 +73,28 @@ void SelectControl::render(int x, int y) {
 
 void SelectControl::increment(bool largeIncrement) {
     switch(type){
-        case SelectorType::INSTRUMENT:
+        case SelectorType::FUNCTION:
+            incrementFunction();
             break;
         case SelectorType::OSCILLATOR:
             menu->selectNextOsc();
             break;
         case SelectorType::WAVETYPE:
             setNextWaveType(); break;
+        case SelectorType::INTEGER:
+            *modifiedInteger += 1;
+            break;
         case SelectorType::FINEDOUBLE:
-            *modifiedValue += largeIncrement ? 0.1 : 0.01; break;
+            *modifiedDouble += largeIncrement ? 0.1 : 0.01; break;
         case SelectorType::DOUBLE:
-            *modifiedValue += 0.1; break;
+            *modifiedDouble += 0.1; break;
     }
 }
 
 void SelectControl::decrement(bool largeDecrement) {
     switch(type){
-        case SelectorType::INSTRUMENT:
+        case SelectorType::FUNCTION:
+            decrementFunction();
             break;
         case SelectorType::OSCILLATOR:
             menu->selectPrevOsc();
@@ -93,15 +102,18 @@ void SelectControl::decrement(bool largeDecrement) {
         case SelectorType::WAVETYPE:
             setNextWaveType(false); break;
         case SelectorType::FINEDOUBLE:
-            *modifiedValue -= largeDecrement ? 0.1 : 0.01;
-            if (*modifiedValue < 0)
-                *modifiedValue = 0;
+            *modifiedDouble -= largeDecrement ? 0.1 : 0.01;
+            if (*modifiedDouble < 0)
+                *modifiedDouble = 0;
             break;
-
         case SelectorType::DOUBLE:
-            *modifiedValue -= 0.1;
-            if (*modifiedValue < 0)
-                *modifiedValue = 0;
+            *modifiedDouble -= 0.1;
+            if (*modifiedDouble < 0)
+                *modifiedDouble = 0;
+            break;
+        case SelectorType::INTEGER:
+            if (*modifiedDouble > 0)
+                *modifiedInteger -= 1;
             break;
     }
 }

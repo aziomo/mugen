@@ -1,12 +1,17 @@
 #include "../include/MainWindow.h"
+#include "../include/CompositionMenu.h"
 #include "../include/InstrumentMenu.h"
+#include "../include/GraphPainter.h"
 
 MainWindow::MainWindow(MusicBox *musicBox) {
     this->mBox = musicBox;
     initSDL();
-    instrumentMenu = new InstrumentMenu(this);
-    instrumentMenu->init();
+    loadTextures();
+    compositionMenu = new CompositionMenu(this);
     graphPainter = new GraphPainter(this);
+    instrumentMenu = new InstrumentMenu(this);
+    compositionMenu->init();
+    instrumentMenu->init();
 }
 
 MainWindow::~MainWindow() {
@@ -53,7 +58,7 @@ void MainWindow::renderBorders() {
     SDL_RenderDrawRect(renderer, &waveformMenuBorder);
 }
 
-void MainWindow::renderTabs() const{
+void MainWindow::renderTabs() {
     SDL_Rect firstTab, secondTab, thirdTab;
     firstTab = {borderSize,borderSize,
                 mainArea.w / 3,
@@ -69,14 +74,29 @@ void MainWindow::renderTabs() const{
                 mainArea.w / 3,
                 h / 13
     };
-    SDL_SetRenderDrawColor(renderer, 0x33, 0x33, 0x33, 0x33);
-    SDL_RenderFillRect(renderer, &secondTab);
-    SDL_RenderFillRect(renderer, &thirdTab);
-    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-//    SDL_RenderDrawRect(renderer, &firstTab);
-    SDL_RenderDrawRect(renderer, &secondTab);
-    SDL_RenderDrawRect(renderer, &thirdTab);
+    SDL_SetRenderDrawColor(renderer, 0x33, 0x33, 0x33, 0x33);
+    if (openTab != 1)
+        SDL_RenderFillRect(renderer, &firstTab);
+    if (openTab != 2)
+        SDL_RenderFillRect(renderer, &secondTab);
+    if (openTab != 3)
+        SDL_RenderFillRect(renderer, &thirdTab);
+
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    if (openTab != 1)
+        SDL_RenderDrawRect(renderer, &firstTab);
+    if (openTab != 2)
+        SDL_RenderDrawRect(renderer, &secondTab);
+    if (openTab != 3)
+        SDL_RenderDrawRect(renderer, &thirdTab);
+
+    instrumentsTab.render(xByPercent(&instrumentsTab, 0.18),
+                          yByPercent(&instrumentsTab, 0.055));
+    compositionTab.render(xByPercent(&compositionTab, 0.5),
+                          yByPercent(&compositionTab, 0.055));
+    optionsTab.render(xByPercent(&optionsTab, 0.825),
+                      yByPercent(&optionsTab, 0.055));
 }
 
 void MainWindow::render() {
@@ -86,7 +106,12 @@ void MainWindow::render() {
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
     SDL_RenderFillRect(renderer, &mainArea);
     renderTabs();
-    instrumentMenu->render();
+
+    if (openTab == 1)
+        instrumentMenu->render();
+    if (openTab == 2) {
+        compositionMenu->render();
+    }
     SDL_RenderPresent(renderer);
 }
 
@@ -177,6 +202,12 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
     if (!keyState[SDL_SCANCODE_SLASH] && lastKeyState[SDL_SCANCODE_SLASH])
         mBox->releaseNoteKey(16);
 
+    if (keyState[SDL_SCANCODE_F1] && !lastKeyState[SDL_SCANCODE_F1])
+        openTab = 1;
+    if (keyState[SDL_SCANCODE_F2] && !lastKeyState[SDL_SCANCODE_F2])
+        openTab = 2;
+    if (keyState[SDL_SCANCODE_F3] && !lastKeyState[SDL_SCANCODE_F3])
+        openTab = 3;
 
     if (keyState[SDL_SCANCODE_2] && !lastKeyState[SDL_SCANCODE_2])
         instrumentMenu->handleKeyPress(SDLK_2);
@@ -221,4 +252,18 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
     if (keyState[SDL_SCANCODE_RETURN] && !lastKeyState[SDL_SCANCODE_RETURN])
         instrumentMenu->handleKeyPress(SDLK_RETURN);
 
+}
+
+void MainWindow::loadTextures() {
+    instrumentsTab.loadFromText(renderer, "INSTRUMENTS", textColor, mainFont);
+    compositionTab.loadFromText(renderer, "COMPOSITION", textColor, mainFont);
+    optionsTab.loadFromText(renderer, "OPTIONS", textColor, mainFont);
+}
+
+int MainWindow::xByPercent(Texture* texture, double percent) const {
+    return w * percent - texture->w * 0.5;
+}
+
+int MainWindow::yByPercent(Texture* texture, double percent) const {
+    return h * percent - texture->h * 0.5;
 }

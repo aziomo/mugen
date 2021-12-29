@@ -5,12 +5,12 @@
 #include <SDL2/SDL_ttf.h>
 #include "MusicBox.h"
 #include "Texture.h"
-#include "GraphPainter.h"
 
 #define SET_WINDOW_WIDTH   (1000)
 #define SET_WINDOW_HEIGHT  (700)
 
 class InstrumentMenu;
+class CompositionMenu;
 class GraphPainter;
 
 class MainWindow {
@@ -29,6 +29,7 @@ public:
     TTF_Font* tinyFont = nullptr;
 
     InstrumentMenu* instrumentMenu;
+    CompositionMenu* compositionMenu;
     GraphPainter* graphPainter;
     MusicBox* mBox;
     int borderSize = 10;
@@ -37,14 +38,21 @@ public:
     void handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int* keyPressState);
 
 private:
+    Texture instrumentsTab, compositionTab, optionsTab;
+    SDL_Color textColor = {255, 255, 255};
+    int openTab = 2;
     SDL_Rect windowArea = {0, 0, w, h};
     SDL_Window* window = nullptr;
 
     void quitSDL();
 
     void renderBorders();
+    void loadTextures();
+    void renderTabs();
 
-    void renderTabs() const;
+    int xByPercent(Texture *texture, double percent) const;
+
+    int yByPercent(Texture *texture, double percent) const;
 };
 
 #endif //MUGEN_CPP_MAINWINDOW_H

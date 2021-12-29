@@ -1,12 +1,17 @@
 #ifndef MUGEN_CPP_TEXTURE_H
 #define MUGEN_CPP_TEXTURE_H
 
+
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 #include <cstdio>
 #include <string>
 
+typedef int Alignment;
+
+constexpr Alignment CENTER = 1, TO_LEFT = 0, TO_RIGHT = 2, TO_TOP = 0, TO_BOTTOM = 2;
 
 static std::string assets_dir = "../assets/";
 
