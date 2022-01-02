@@ -141,23 +141,20 @@ void InstrumentMenu::updateTextures() {
     if (editedOsc->lfo != nullptr)
         setTextTexture(&debugCurrentFrequencyLabel,
                        to_string(sin(editedOsc->getLfoInterpolatedSample(musicBox->globalTime))));
-    setTextTexture(&debugEnvelopeMomentLabel, to_string(musicBox->instruments.front()->envelopeMoment));
+
 }
 
-int InstrumentMenu::xByPercent(Texture* texture, double percent) const {
-    return window->w * percent - texture->w * 0.5;
+int InstrumentMenu::xByPercent(Texture* texture, double percent, Alignment align) const {
+    window->xByPercent(texture, percent, align);
 }
-
-int InstrumentMenu::xByPercent(SDL_Rect* rect, double percent) const {
-    return window->w * percent - rect->w * 0.5;
+int InstrumentMenu::xByPercent(SDL_Rect* rect, double percent, Alignment align) const {
+    window->xByPercent(rect, percent, align);
 }
-
-int InstrumentMenu::yByPercent(Texture* texture, double percent) const {
-    return window->h * percent - texture->h * 0.5;
+int InstrumentMenu::yByPercent(Texture* texture, double percent, Alignment align) const {
+    window->yByPercent(texture, percent, align);
 }
-
-int InstrumentMenu::yByPercent(SDL_Rect* rect, double percent) const {
-    return window->h * percent - rect->h * 0.5;
+int InstrumentMenu::yByPercent(SDL_Rect* rect, double percent, Alignment align) const {
+    window->yByPercent(rect, percent, align);
 }
 
 void InstrumentMenu::render() {
@@ -517,6 +514,7 @@ void InstrumentMenu::selectItemFromList(int index) {
 
     if (index == itemList->items.size() - 1){
         musicBox->instruments.push_back(new Instrument(musicBox->blockSize));
+        musicBox->instruments.back()->index = musicBox->instruments.size()-1;
         itemList->removeItem(itemList->items.size() - 1);
         int newInstrumentIndex = itemList->items.size()+1;
         itemList->addItem("Instrument " + to_string(newInstrumentIndex));

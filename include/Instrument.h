@@ -21,8 +21,7 @@ public:
     int blockSize;
     vector<Oscillator*> oscillators;
     Envelope env;
-
-    int envelopeMoment = 0;
+    int index = 1;
 
     void addOscillator();
     void removeOscillator();

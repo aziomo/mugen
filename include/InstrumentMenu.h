@@ -93,9 +93,6 @@ public:
     void changeControlFocus(Direction direction);
     Control* getFocusedControl();
 
-    int xByPercent(Texture *texture, double percent) const;
-    int yByPercent(Texture *texture, double percent) const;
-
     void setLFO();
 
 
@@ -104,9 +101,10 @@ public:
 
     void updateSelectorValues();
 
-    int xByPercent(SDL_Rect *rect, double percent) const;
-
-    int yByPercent(SDL_Rect *rect, double percent) const;
+    int xByPercent(Texture *texture, double percent, Alignment align = CENTER) const;
+    int xByPercent(SDL_Rect *rect, double percent, Alignment align = CENTER) const;
+    int yByPercent(Texture *texture, double percent, Alignment align = CENTER) const;
+    int yByPercent(SDL_Rect *rect, double percent, Alignment align = CENTER) const;
 
     void selectItemFromList(int index);
 };

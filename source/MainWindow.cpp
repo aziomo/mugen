@@ -3,6 +3,10 @@
 #include "../include/InstrumentMenu.h"
 #include "../include/GraphPainter.h"
 
+#define INST_MENU 1
+#define COMP_MENU 2
+#define OPTI_MENU 3
+
 MainWindow::MainWindow(MusicBox *musicBox) {
     this->mBox = musicBox;
     initSDL();
@@ -76,19 +80,19 @@ void MainWindow::renderTabs() {
     };
 
     SDL_SetRenderDrawColor(renderer, 0x33, 0x33, 0x33, 0x33);
-    if (openTab != 1)
+    if (openTab != INST_MENU)
         SDL_RenderFillRect(renderer, &firstTab);
-    if (openTab != 2)
+    if (openTab != COMP_MENU)
         SDL_RenderFillRect(renderer, &secondTab);
-    if (openTab != 3)
+    if (openTab != OPTI_MENU)
         SDL_RenderFillRect(renderer, &thirdTab);
 
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    if (openTab != 1)
+    if (openTab != INST_MENU)
         SDL_RenderDrawRect(renderer, &firstTab);
-    if (openTab != 2)
+    if (openTab != COMP_MENU)
         SDL_RenderDrawRect(renderer, &secondTab);
-    if (openTab != 3)
+    if (openTab != OPTI_MENU)
         SDL_RenderDrawRect(renderer, &thirdTab);
 
     instrumentsTab.render(xByPercent(&instrumentsTab, 0.18),
@@ -107,9 +111,9 @@ void MainWindow::render() {
     SDL_RenderFillRect(renderer, &mainArea);
     renderTabs();
 
-    if (openTab == 1)
+    if (openTab == INST_MENU)
         instrumentMenu->render();
-    if (openTab == 2) {
+    if (openTab == COMP_MENU) {
         compositionMenu->render();
     }
     SDL_RenderPresent(renderer);
@@ -210,47 +214,51 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
         openTab = 3;
 
     if (keyState[SDL_SCANCODE_2] && !lastKeyState[SDL_SCANCODE_2])
-        instrumentMenu->handleKeyPress(SDLK_2);
+        passKeyPressToMenu(openTab, SDLK_2);
+
     if (keyState[SDL_SCANCODE_3] && !lastKeyState[SDL_SCANCODE_3])
-        instrumentMenu->handleKeyPress(SDLK_3);
+        passKeyPressToMenu(openTab, SDLK_3);
 
     if (keyState[SDL_SCANCODE_W] && !lastKeyState[SDL_SCANCODE_W])
-        instrumentMenu->handleKeyPress(SDLK_w);
+        passKeyPressToMenu(openTab, SDLK_w);
 
     if (keyState[SDL_SCANCODE_I] && !lastKeyState[SDL_SCANCODE_I])
-        instrumentMenu->handleKeyPress(SDLK_i);
+        passKeyPressToMenu(openTab, SDLK_i);
 
 
     if (keyState[SDL_SCANCODE_UP] && !lastKeyState[SDL_SCANCODE_UP])
-        instrumentMenu->handleKeyPress(SDLK_UP);
+        passKeyPressToMenu(openTab, SDLK_UP);
     if (keyState[SDL_SCANCODE_UP] && lastKeyState[SDL_SCANCODE_UP] && keyPressState[SDL_SCANCODE_UP]++ > 10)
-        instrumentMenu->handleKeyPress(SDLK_UP);
+        passKeyPressToMenu(openTab, SDLK_UP);
     if (!keyState[SDL_SCANCODE_UP] && lastKeyState[SDL_SCANCODE_UP])
         keyPressState[SDL_SCANCODE_UP] = 0;
 
     if (keyState[SDL_SCANCODE_DOWN] && !lastKeyState[SDL_SCANCODE_DOWN])
-        instrumentMenu->handleKeyPress(SDLK_DOWN);
+        passKeyPressToMenu(openTab, SDLK_DOWN);
     if (keyState[SDL_SCANCODE_DOWN] && lastKeyState[SDL_SCANCODE_DOWN] && keyPressState[SDL_SCANCODE_DOWN]++ > 10)
-        instrumentMenu->handleKeyPress(SDLK_DOWN);
+        passKeyPressToMenu(openTab, SDLK_DOWN);
     if (!keyState[SDL_SCANCODE_DOWN] && lastKeyState[SDL_SCANCODE_DOWN])
         keyPressState[SDL_SCANCODE_DOWN] = 0;
 
     if (keyState[SDL_SCANCODE_LEFT] && !lastKeyState[SDL_SCANCODE_LEFT])
-        instrumentMenu->handleKeyPress(SDLK_LEFT);
+        passKeyPressToMenu(openTab, SDLK_LEFT);
     if (keyState[SDL_SCANCODE_LEFT] && lastKeyState[SDL_SCANCODE_LEFT] && keyPressState[SDL_SCANCODE_LEFT]++ > 10)
-        instrumentMenu->handleKeyPress(SDLK_LEFT);
+        passKeyPressToMenu(openTab, SDLK_LEFT);
     if (!keyState[SDL_SCANCODE_LEFT] && lastKeyState[SDL_SCANCODE_LEFT])
         keyPressState[SDL_SCANCODE_LEFT] = 0;
 
     if (keyState[SDL_SCANCODE_RIGHT] && !lastKeyState[SDL_SCANCODE_RIGHT])
-        instrumentMenu->handleKeyPress(SDLK_RIGHT);
+        passKeyPressToMenu(openTab, SDLK_RIGHT);
     if (keyState[SDL_SCANCODE_RIGHT] && lastKeyState[SDL_SCANCODE_RIGHT] && keyPressState[SDL_SCANCODE_RIGHT]++ > 10)
-        instrumentMenu->handleKeyPress(SDLK_RIGHT);
+        passKeyPressToMenu(openTab, SDLK_RIGHT);
     if (!keyState[SDL_SCANCODE_RIGHT] && lastKeyState[SDL_SCANCODE_RIGHT])
         keyPressState[SDL_SCANCODE_RIGHT] = 0;
 
+    if (keyState[SDL_SCANCODE_SPACE] && !lastKeyState[SDL_SCANCODE_SPACE])
+        passKeyPressToMenu(openTab, SDLK_SPACE);
+
     if (keyState[SDL_SCANCODE_RETURN] && !lastKeyState[SDL_SCANCODE_RETURN])
-        instrumentMenu->handleKeyPress(SDLK_RETURN);
+        passKeyPressToMenu(openTab, SDLK_RETURN);
 
 }
 
@@ -260,10 +268,59 @@ void MainWindow::loadTextures() {
     optionsTab.loadFromText(renderer, "OPTIONS", textColor, mainFont);
 }
 
-int MainWindow::xByPercent(Texture* texture, double percent) const {
-    return w * percent - texture->w * 0.5;
+int MainWindow::xByPercent(Texture* texture, double percent, Alignment align) const {
+    switch (align) {
+        case TO_RIGHT:
+            return w * percent;
+        case TO_LEFT:
+            return w * percent - texture->w;
+        case CENTER:
+        default:
+            return w * percent - texture->w * 0.5;
+    }
+}
+int MainWindow::xByPercent(SDL_Rect* rect, double percent, Alignment align) const {
+    switch (align) {
+        case TO_RIGHT:
+            return w * percent;
+        case TO_LEFT:
+            return w * percent - rect->w;
+        case CENTER:
+        default:
+            return w * percent - rect->w * 0.5;
+    }
+}
+int MainWindow::yByPercent(Texture* texture, double percent, Alignment align) const {
+    switch (align) {
+        case TO_TOP:
+            return w * percent - texture->h;
+        case TO_BOTTOM:
+            return w * percent;
+        case CENTER:
+        default:
+            return w * percent - texture->h * 0.5;
+    }
+}
+int MainWindow::yByPercent(SDL_Rect* rect, double percent, Alignment align) const {
+    switch (align) {
+        case TO_TOP:
+            return w * percent - rect->h;
+        case TO_BOTTOM:
+            return w * percent;
+        case CENTER:
+        default:
+            return w * percent - rect->h * 0.5;
+    }
 }
 
-int MainWindow::yByPercent(Texture* texture, double percent) const {
-    return h * percent - texture->h * 0.5;
+void MainWindow::passKeyPressToMenu(int menu, SDL_Keycode key){
+    switch (menu) {
+        case INST_MENU:
+            instrumentMenu->handleKeyPress(key); break;
+        case COMP_MENU:
+            compositionMenu->handleKeyPress(key); break;
+        case OPTI_MENU:
+        default:
+            break;
+    }
 }

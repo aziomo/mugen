@@ -38,17 +38,20 @@ public:
 
     void setModifiedDouble(double* modifiedDouble);
     void setModifiedInteger(int *modifiedInt);
+    void setIncrementFunction(void (CompositionMenu::*function)());
+    void setDecrementFunction(void (CompositionMenu::*function)());
 
 private:
-    void (*incrementFunction)();
-    void (*decrementFunction)();
+    void (CompositionMenu::*incrementFunction)();
+    void (CompositionMenu::*decrementFunction)();
     SDL_Renderer* rend;
     int borderSize = 2;
     vector<Texture*> optionsImages;
     Texture* arrowTexture;
     SDL_Rect highlightRect, bgRect;
     SelectorType type;
-    InstrumentMenu* menu;
+    InstrumentMenu* instrumentMenu;
+    CompositionMenu* compositionMenu;
     bool modifyLFO = false;
 
 

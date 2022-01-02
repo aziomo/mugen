@@ -12,7 +12,7 @@ MusicBox::MusicBox() {
     timeStep = 1.0 / 44100.0;
     globalTime = 0.0;
     for (int i = 0; i < KEYBOARD_SIZE; i++) {
-        pressedNotes[i].frequency = midiToFrequency(getRootCPosition() + i);
+        pressedNotes[i].frequency = midiToFreq(getRootCPosition() + i);
     }
 }
 
@@ -46,7 +46,7 @@ void MusicBox::writePressedKeysToBuffer() {
     if (blocksAvailable < maxBlockCount) {
         bool anyPlaying = false;
         for (auto note: pressedNotes)
-            if (note.isPlaying) {
+            if (note.isAudible) {
                 anyPlaying = true;
                 break;
             }
@@ -55,7 +55,7 @@ void MusicBox::writePressedKeysToBuffer() {
             float *newBlock = new float[blockSize];
             zeroOutArray(newBlock, blockSize);
             for (int i = 0; i < KEYBOARD_SIZE; i++) {
-                if (pressedNotes[i].isPlaying) {
+                if (pressedNotes[i].isAudible) {
                     instruments.at(currentInstrument)->addToBufferBlock(newBlock, &pressedNotes[i], globalTime);
                 }
             }
@@ -66,13 +66,18 @@ void MusicBox::writePressedKeysToBuffer() {
     }
 }
 
-
-double MusicBox::midiToFrequency(int midiNote) {
-    double c5, c0, a4 = 440.0;
-    c5 = a4 * pow(SEMITONE_RATIO, 3.0);
-    c0 = c5 * pow(0.5, 5.0);
-    return c0 * pow(SEMITONE_RATIO, (double) midiNote);
+void MusicBox::writeBitsToBuffer(vector<Bit*> *bits){
+    auto *newBlock = new float[blockSize];
+    zeroOutArray(newBlock, blockSize);
+    for (auto bit : *bits) {
+        bit->instrument->addToBufferBlock(newBlock, &bit->note, globalTime);
+    }
+    globalTime += timeStep * blockSize;
+    blocksBuffer.push(newBlock);
+    blocksAvailable++;
 }
+
+
 
 void MusicBox::copyBlock(float *source, float *destination) {
     for (int i = 0; i < blockSize; i++) {
@@ -135,12 +140,10 @@ void MusicBox::closeFile() {
 }
 
 void MusicBox::pressNoteKey(int keyPosition) {
-    pressedNotes[keyPosition].isPlaying = true;
-    pressedNotes[keyPosition].isPressed = true;
+    pressedNotes[keyPosition].isAudible = true;
     pressedNotes[keyPosition].pressedOnTime = globalTime;
 }
 
 void MusicBox::releaseNoteKey(int keyPosition) {
-    pressedNotes[keyPosition].isPressed = false;
     pressedNotes[keyPosition].releasedOnTime = globalTime;
 }

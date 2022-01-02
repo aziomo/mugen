@@ -37,22 +37,26 @@ public:
 
     void handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int* keyPressState);
 
+    int xByPercent(Texture *texture, double percent, Alignment align = CENTER) const;
+    int xByPercent(SDL_Rect *rect, double percent, Alignment align = CENTER) const;
+    int yByPercent(Texture *texture, double percent, Alignment align = CENTER) const;
+    int yByPercent(SDL_Rect *rect, double percent, Alignment align = CENTER) const;
+
 private:
     Texture instrumentsTab, compositionTab, optionsTab;
     SDL_Color textColor = {255, 255, 255};
     int openTab = 2;
     SDL_Rect windowArea = {0, 0, w, h};
+
     SDL_Window* window = nullptr;
 
     void quitSDL();
-
     void renderBorders();
     void loadTextures();
+
     void renderTabs();
 
-    int xByPercent(Texture *texture, double percent) const;
-
-    int yByPercent(Texture *texture, double percent) const;
+    void passKeyPressToMenu(int menu, SDL_Keycode);
 };
 
 #endif //MUGEN_CPP_MAINWINDOW_H

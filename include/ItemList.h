@@ -63,13 +63,7 @@ public:
         texture->loadFromText(renderer, text, whiteColor, font);
     }
 
-    string getEnumerationString(int index){
-        if (index < 0 || index > 99)
-            return "XX";
-        if (index < 10)
-            return "0"+ to_string(index);
-        return to_string(index);
-    }
+
 
     void addItem(string item){
         items.push_back(item);
@@ -77,11 +71,11 @@ public:
         auto* indexTexture = new Texture();
         if (items.size() == 1){
             strTexture->loadFromText(renderer, item, blackColor, font);
-            indexTexture->loadFromText(renderer, getEnumerationString(items.size()), blackColor, font);
+            indexTexture->loadFromText(renderer, getTwoDigitString(items.size()), blackColor, font);
             selectedIndex = 0;
         } else {
             strTexture->loadFromText(renderer, item, whiteColor, font);
-            indexTexture->loadFromText(renderer, getEnumerationString(items.size()), whiteColor, font);
+            indexTexture->loadFromText(renderer, getTwoDigitString(items.size()), whiteColor, font);
         }
         renderedStrings.push_back(strTexture);
         renderedIndexes.push_back(indexTexture);

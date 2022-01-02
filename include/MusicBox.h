@@ -7,6 +7,7 @@
 #include "Oscillator.h"
 #include "AudioAPI.h"
 #include "Instrument.h"
+#include "Segment.h"
 #include <thread>
 #include <atomic>
 #include <mutex>
@@ -14,7 +15,6 @@
 #include <condition_variable>
 #include <sndfile.h>
 
-const double SEMITONE_RATIO = pow(2.0, 1.0 / 12.0);
 
 class MusicBox {
 public:
@@ -49,8 +49,6 @@ public:
     std::thread readThread, writeThread;
     AudioAPI* audioApi;
 
-    static double midiToFrequency(int midiNote);
-
     void copyBlock(float *source, float *destination);
 
     void writePressedKeysToBuffer();
@@ -70,6 +68,9 @@ public:
     void pressNoteKey(int keyPosition);
 
     void releaseNoteKey(int keyPosition);
+
+    void writeBitsToBuffer(vector<Bit*> *bits);
+
 };
 
 

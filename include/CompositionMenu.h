@@ -26,17 +26,27 @@ public:
     MainWindow* window;
     MusicBox* musicBox;
     ItemList* instrumentList;
-
     Timeline* timeline;
-
     SelectControl tempoSelector, segmentsSelector, rowsSelector;
 
     const static int controlMatrixRows = 3, controlMatrixCols = 1;
+
+    int focusedControlRow = 0, focusedControlCol = 0;
     Control* controlArray[controlMatrixRows][controlMatrixCols] = {
             {&segmentsSelector},
             {&rowsSelector},
             {&tempoSelector}
     };
+
+    bool isTimelineFocused = false;
+    int focusedSegment = 0;
+    int focusedRow = 0;
+    int focusedBit = 0;
+
+    vector<Bit*> bitsPlayed;
+
+
+
 
     Texture instrumentListLabel,
             segmentsLabel, rowsLabel, tempoLabel,
@@ -64,6 +74,26 @@ public:
     int yByPercent(SDL_Rect *rect, double percent, Alignment align = CENTER) const;
 
     void loadControls();
+
+    void addSegment();
+
+    void removeSegment();
+
+    void addRow();
+
+    void removeRow();
+
+    void handleKeyPress(SDL_Keycode key);
+
+    Control* getFocusedControl();
+
+    void changeControlFocus(Direction direction);
+
+    void selectFocusedControl();
+
+    void loadExampleBits();
+
+    void playbackTimeline();
 };
 
 

@@ -21,7 +21,7 @@ int main() {
         lastKeyState[i] = state[i];
     }
 
-//    musicBox->startPlaying();
+    musicBox->startPlaying();
     while (!quit){
         SDL_PumpEvents();
 

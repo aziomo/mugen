@@ -5,6 +5,7 @@
 #include <sstream>
 #include "../include/SelectControl.h"
 #include "../include/InstrumentMenu.h"
+#include "../include/CompositionMenu.h"
 
 SelectControl::~SelectControl(){
     rend = nullptr;
@@ -32,7 +33,9 @@ void SelectControl::isModifyingLFO(bool isModifying){
 }
 
 void SelectControl::loadTextControl(SelectorType selectorType, Texture* textTexture, MainWindow* window) {
-    menu = window->instrumentMenu;
+
+    instrumentMenu = window->instrumentMenu;
+    compositionMenu = window->compositionMenu;
     this->type = selectorType;
     this->rend = window->renderer;
     this->arrowTexture = &window->instrumentMenu->arrowImg;
@@ -40,7 +43,7 @@ void SelectControl::loadTextControl(SelectorType selectorType, Texture* textText
 }
 
 void SelectControl::loadImageControl(vector<Texture*> imageTextures, MainWindow* window) {
-    menu = window->instrumentMenu;
+    instrumentMenu = window->instrumentMenu;
     this->type = SelectorType::WAVETYPE;
     this->rend = window->renderer;
     this->arrowTexture = &window->instrumentMenu->arrowImg;
@@ -74,10 +77,10 @@ void SelectControl::render(int x, int y) {
 void SelectControl::increment(bool largeIncrement) {
     switch(type){
         case SelectorType::FUNCTION:
-            incrementFunction();
+            (compositionMenu->*incrementFunction)();
             break;
         case SelectorType::OSCILLATOR:
-            menu->selectNextOsc();
+            instrumentMenu->selectNextOsc();
             break;
         case SelectorType::WAVETYPE:
             setNextWaveType(); break;
@@ -94,10 +97,10 @@ void SelectControl::increment(bool largeIncrement) {
 void SelectControl::decrement(bool largeDecrement) {
     switch(type){
         case SelectorType::FUNCTION:
-            decrementFunction();
+            (compositionMenu->*decrementFunction)();
             break;
         case SelectorType::OSCILLATOR:
-            menu->selectPrevOsc();
+            instrumentMenu->selectPrevOsc();
             break;
         case SelectorType::WAVETYPE:
             setNextWaveType(false); break;
@@ -112,14 +115,14 @@ void SelectControl::decrement(bool largeDecrement) {
                 *modifiedDouble = 0;
             break;
         case SelectorType::INTEGER:
-            if (*modifiedDouble > 0)
+            if (*modifiedInteger > 0)
                 *modifiedInteger -= 1;
             break;
     }
 }
 
 void SelectControl::setNextWaveType(bool increment){
-    WaveformType previousWave = modifyLFO ? menu->editedOsc->lfo->waveType : menu->editedOsc->waveType;
+    WaveformType previousWave = modifyLFO ? instrumentMenu->editedOsc->lfo->waveType : instrumentMenu->editedOsc->waveType;
     WaveformType nextWave;
 
     switch (previousWave) {
@@ -138,16 +141,24 @@ void SelectControl::setNextWaveType(bool increment){
     }
 
     if (modifyLFO){
-        menu->editedOsc->lfo->setWaveformType(nextWave);
-        menu->editedOsc->setupLfoLookup(menu->editedOsc->lfo->waveType);
+        instrumentMenu->editedOsc->lfo->setWaveformType(nextWave);
+        instrumentMenu->editedOsc->setupLfoLookup(instrumentMenu->editedOsc->lfo->waveType);
     } else {
-        menu->editedOsc->setWaveformType(nextWave);
+        instrumentMenu->editedOsc->setWaveformType(nextWave);
     }
 }
 
 void SelectControl::activate() {
-    if (!modifyLFO || menu->lfoCheckBox.isChecked){
+    if (!modifyLFO || instrumentMenu->lfoCheckBox.isChecked){
         switchHighlight();
         switchEditing();
     }
+}
+
+void SelectControl::setIncrementFunction(void (CompositionMenu::*function)()) {
+    incrementFunction = function;
+}
+
+void SelectControl::setDecrementFunction(void (CompositionMenu::*function)()) {
+    decrementFunction = function;
 }

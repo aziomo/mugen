@@ -15,6 +15,14 @@ constexpr Alignment CENTER = 1, TO_LEFT = 0, TO_RIGHT = 2, TO_TOP = 0, TO_BOTTOM
 
 static std::string assets_dir = "../assets/";
 
+static std::string getTwoDigitString(int number){
+    if (number < 0 || number > 99)
+        return "XX";
+    if (number < 10)
+        return "0"+ std::to_string(number);
+    return std::to_string(number);
+}
+
 class Texture {
 public:
     Texture(){
