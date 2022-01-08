@@ -18,6 +18,7 @@ public:
         this->colWidth = colWidth;
         this->width = renderedCols * colWidth;
         this->height = height;
+        middleColX = (renderedCols / 2) * colWidth - renderedCols / 2;
         for (int i = 0; i < 100; i++){
             allSegs.push_back(new Segment(startingColCount, i));
         }
@@ -27,7 +28,7 @@ public:
 
     bool timelineFocused = false;
     int focusedSegmentIndex = 0;
-    int focusedColInd = 0;
+    int focusedColIndex = 0;
     int focusedBitIndex = 0;
     bool editingMode = false;
 
@@ -35,7 +36,7 @@ public:
     TTF_Font* font;
     SDL_Renderer* renderer;
     SDL_Color black = {0x00, 0x00, 0x00, 0xFF};
-    SDL_Color grey = {0x55, 0x55, 0x55, 0xFF};
+    SDL_Color grey = {0x77, 0x77, 0x77, 0xFF};
     SDL_Color white = {0xFF, 0xFF, 0xFF, 0xFF};
     SDL_Rect outline;
     string dashdash = "--";
@@ -44,218 +45,159 @@ public:
     int colWidth = 45;
     int renderedCols;
     int tempo = 150;
+    int middleColX;
     vector<Segment*> songSegs;
     vector<Segment*> allSegs;
 
+    Texture bitInstrumentLabel, bitNoteLabel;
+
     void render(int x, int y) {
-
-
         outline = {x, y, width - renderedCols + 1, height - 3};
-
-        Texture bitInst, bitNote;
-
-        bool leftHalfReady = false;
-        bool rightHalfReady = false;
-
-        int middleColX = (renderedCols / 2) * colWidth - renderedCols / 2;
-
-
-
-        if (focusedSegmentIndex == 0) {
-            leftHalfReady = true;
-        }
-        if (focusedSegmentIndex == songSegs.size()-1) {
-            rightHalfReady = true;
-        }
-
-
-        int renderedSegmentIndex = focusedSegmentIndex - 1;
-
-        int leftColumnsLeftToRender = renderedCols/2 - focusedColInd;
-        if (leftColumnsLeftToRender < 0) {
-            leftColumnsLeftToRender = 0;
-        }
-        int leftColumnsRendered = 0;
-
-        SDL_SetRenderDrawColor(renderer, 0x44, 0x44, 0x44, 0xFF);
-
-        while (!leftHalfReady){
-
-            if (leftColumnsRendered == leftColumnsLeftToRender) break;
-            if (leftColumnsRendered && leftColumnsRendered % segColumns() == 0){
-                renderedSegmentIndex--;
-                if (renderedSegmentIndex < 0) {
-                    break;
-                }
-            }
-
-            int renderedColumnIndex = segColumns()-1 - (leftColumnsRendered % segColumns());
-
-            SDL_Rect colOutline = {x + middleColX - (focusedColInd * (colWidth-1)) - (leftColumnsRendered+1) * (colWidth-1),   y, colWidth, height};
-            for (int j = 0; j < 5; j++){
-                SDL_Rect bitOutline = {colOutline.x, colOutline.y + (colOutline.h / 5) * j, colWidth, colOutline.h / 5 - 1};
-                SDL_RenderDrawRect(renderer, &bitOutline);
-
-                auto renderedBit = songSegs.at(renderedSegmentIndex)->cols.at(renderedColumnIndex)->bits[j];
-
-                if (renderedBit != nullptr){
-                    setGreyStr(&bitNote, freqToSymbol(renderedBit->note.frequency));
-                    setGreyStr(&bitInst, getTwoDigitString(renderedBit->instrument->index));
-                }
-                else {
-                    setGreyStr(&bitNote, dashdash);
-                    setGreyStr(&bitInst, dashdash);
-                }
-                bitNote.render(bitOutline.x + bitOutline.w/2 - bitNote.w/2, bitOutline.y + bitOutline.h/2 - bitNote.h);
-                bitInst.render(bitOutline.x + bitOutline.w/2 - bitInst.w/2, bitOutline.y + bitOutline.h/2);
-
-            }
-
-            leftColumnsRendered++;
-        }
-
-
-        renderedSegmentIndex = focusedSegmentIndex + 1;
-
-        int rightColumnsLeftToRender = (renderedCols/2)+1- (segColumns() - focusedColInd);
-        if (rightColumnsLeftToRender > renderedCols/2) {
-            rightColumnsLeftToRender = renderedCols/2;
-        }
-        int rightColumnsRendered = 0;
-
-        while (!rightHalfReady){
-            if (rightColumnsRendered == rightColumnsLeftToRender) break;
-            if (rightColumnsRendered && rightColumnsRendered % segColumns() == 0){
-                renderedSegmentIndex++;
-                if (renderedSegmentIndex == songSegs.size()) {
-                    break;
-                }
-            }
-
-            int renderedColumnIndex = segColumns()-1 - (rightColumnsRendered % segColumns());
-
-            SDL_Rect colOutline = {x + middleColX + (rightColumnsRendered+1) * (colWidth-1) + (segColumns()-1) * (colWidth-1) - (focusedColInd * (colWidth-1)),   y, colWidth, height};
-            for (int j = 0; j < 5; j++){
-                SDL_Rect bitOutline = {colOutline.x, colOutline.y + (colOutline.h / 5) * j, colWidth, colOutline.h / 5 - 1};
-                SDL_RenderDrawRect(renderer, &bitOutline);
-
-                auto renderedBit = songSegs.at(renderedSegmentIndex)->cols.at(renderedColumnIndex)->bits[j];
-
-                if (renderedBit != nullptr){
-                    setGreyStr(&bitNote, freqToSymbol(renderedBit->note.frequency));
-                    setGreyStr(&bitInst, getTwoDigitString(renderedBit->instrument->index));
-                }
-                else {
-                    setGreyStr(&bitNote, dashdash);
-                    setGreyStr(&bitInst, dashdash);
-                }
-                bitNote.render(bitOutline.x + bitOutline.w/2 - bitNote.w/2, bitOutline.y + bitOutline.h/2 - bitNote.h);
-                bitInst.render(bitOutline.x + bitOutline.w/2 - bitInst.w/2, bitOutline.y + bitOutline.h/2);
-
-            }
-
-            rightColumnsRendered++;
-        }
-
+        SDL_SetRenderDrawColor(renderer, 0x55, 0x55, 0x55, 0xFF);
+        renderLeftUnfocusedSegments(x, y);
+        renderRightUnfocusedSegments(x, y);
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderDrawRect(renderer, &outline);
+        renderFocusedSegmentLeftSide(x, y);
+        renderFocusedSegmentRightSide(x, y);
+    }
 
-        for (int i = focusedColInd; i < segColumns(); i++){
+    void renderLeftUnfocusedSegments(int x, int y){
+        if (focusedSegmentIndex > 0){
+            int renderedSegmentIndex = focusedSegmentIndex - 1;
+            int leftColumnsLeftToRender = renderedCols/2 - focusedColIndex;
+            if (leftColumnsLeftToRender < 0) leftColumnsLeftToRender = 0;
+            int leftColumnsRendered = 0;
 
-            SDL_Rect colOutline = {x + middleColX + (i * (colWidth - 1)) - (focusedColInd * (colWidth - 1)), y, colWidth, height};
+            while (true){
+                if (leftColumnsRendered == leftColumnsLeftToRender) break;
+                if (leftColumnsRendered && leftColumnsRendered % segColumns() == 0){
+                    if (--renderedSegmentIndex < 0) break;
+                }
+                int renderedColumnIndex = segColumns()-1 - (leftColumnsRendered % segColumns());
+                SDL_Rect colOutline = {x + middleColX - (focusedColIndex * (colWidth - 1)) - (leftColumnsRendered + 1) * (colWidth - 1), y, colWidth, height};
 
-
-            for (int j = 0; j < 5; j++){
-                SDL_Rect bitOutline = {colOutline.x, colOutline.y + (colOutline.h / 5) * j,
-                                       colWidth, colOutline.h / 5 - 1};
-
-                bool bitFocused = (focusedColInd == i && focusedBitIndex == j);
-
-                if (timelineFocused && bitFocused){
-                    if (!editingMode){
-                        SDL_SetRenderDrawColor(renderer, 0x40, 0x40, 0x40, 0xFF); // grey
-                    }
-                    SDL_RenderFillRect(renderer, &bitOutline);
-                    if (!editingMode){
-                        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-                    }
+                for (int j = 0; j < 5; j++){
+                    SDL_Rect bitOutline = {colOutline.x, colOutline.y + (colOutline.h / 5) * j, colWidth, colOutline.h / 5 - 1};
+                    SDL_RenderDrawRect(renderer, &bitOutline);
+                    auto renderedBit = songSegs.at(renderedSegmentIndex)->cols.at(renderedColumnIndex)->bits[j];
+                    setBitLabels(renderedBit, false);
+                    renderBitLabels(&bitOutline);
                 }
 
-                SDL_RenderDrawRect(renderer, &bitOutline);
-                auto renderedBit = songSegs.at(focusedSegmentIndex)->cols.at(i)->bits[j];
-
-                if (renderedBit != nullptr){
-                    if (bitFocused && editingMode){
-                        setBlackStr(&bitNote, freqToSymbol(renderedBit->note.frequency));
-                        setBlackStr(&bitInst, getTwoDigitString(renderedBit->instrument->index));
-                    } else {
-                        setWhiteStr(&bitNote, freqToSymbol(renderedBit->note.frequency));
-                        setWhiteStr(&bitInst, getTwoDigitString(renderedBit->instrument->index));
-                    }
-                }
-                else {
-                    if (bitFocused && editingMode){
-                        setBlackStr(&bitNote, dashdash);
-                        setBlackStr(&bitInst, dashdash);
-                    } else {
-                        setWhiteStr(&bitNote, dashdash);
-                        setWhiteStr(&bitInst, dashdash);
-                    }
-                }
-                bitNote.render(bitOutline.x + bitOutline.w/2 - bitNote.w/2, bitOutline.y + bitOutline.h/2 - bitNote.h);
-                bitInst.render(bitOutline.x + bitOutline.w/2 - bitInst.w/2, bitOutline.y + bitOutline.h/2);
-            }
-
-        }
-
-        for (int i = focusedColInd - 1; i >= 0; i--){
-
-            SDL_Rect colOutline = {x + middleColX + (i * (colWidth - 1)) - (focusedColInd * (colWidth - 1)), y, colWidth, height};
-
-            for (int j = 0; j < 5; j++){
-                SDL_Rect bitOutline = {colOutline.x, colOutline.y + (colOutline.h / 5) * j,
-                                       colWidth, colOutline.h / 5 - 1};
-
-                bool bitFocused = (focusedColInd == i && focusedBitIndex == j);
-                if (timelineFocused && bitFocused){
-                    if (!editingMode){
-                        SDL_SetRenderDrawColor(renderer, 0x40, 0x40, 0x40, 0xFF); // grey
-                    }
-                    SDL_RenderFillRect(renderer, &bitOutline);
-                    if (!editingMode){
-                        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-                    }
-                }
-                SDL_RenderDrawRect(renderer, &bitOutline);
-                auto renderedBit = songSegs.at(focusedSegmentIndex)->cols.at(i)->bits[j];
-
-                if (renderedBit != nullptr){
-                    if (bitFocused && editingMode){
-                        setBlackStr(&bitNote, freqToSymbol(renderedBit->note.frequency));
-                        setBlackStr(&bitInst, getTwoDigitString(renderedBit->instrument->index));
-                    } else {
-                        setWhiteStr(&bitNote, freqToSymbol(renderedBit->note.frequency));
-                        setWhiteStr(&bitInst, getTwoDigitString(renderedBit->instrument->index));
-                    }
-                }
-                else {
-                    if (bitFocused && editingMode){
-                        setBlackStr(&bitNote, dashdash);
-                        setBlackStr(&bitInst, dashdash);
-                    } else {
-                        setWhiteStr(&bitNote, dashdash);
-                        setWhiteStr(&bitInst, dashdash);
-                    }
-
-                }
-
-                bitNote.render(bitOutline.x + bitOutline.w/2 - bitNote.w/2, bitOutline.y + bitOutline.h/2 - bitNote.h);
-                bitInst.render(bitOutline.x + bitOutline.w/2 - bitInst.w/2, bitOutline.y + bitOutline.h/2);
+                leftColumnsRendered++;
             }
         }
+    }
+
+    void renderRightUnfocusedSegments(int x, int y){
+
+        if (focusedSegmentIndex < songSegs.size()-1)
+        {
+            int rightColumnsLeftToRender = (renderedCols/2)+1- (segColumns() - focusedColIndex);
+            if (rightColumnsLeftToRender > renderedCols/2) rightColumnsLeftToRender = renderedCols/2;
+            int rightColumnsRendered = 0;
+            int renderedSegmentIndex = focusedSegmentIndex + 1;
+
+            while (true){
+                if (rightColumnsRendered == rightColumnsLeftToRender) break;
+                if (rightColumnsRendered && rightColumnsRendered % segColumns() == 0){
+                    if (++renderedSegmentIndex == songSegs.size()) break;
+                }
+                int renderedColumnIndex = rightColumnsRendered % segColumns();
+                SDL_Rect colOutline = {x + middleColX + (rightColumnsRendered+1) * (colWidth-1) + (segColumns()-1) * (colWidth-1) - (focusedColIndex * (colWidth - 1)), y, colWidth, height};
+
+                for (int j = 0; j < 5; j++) {
+                    SDL_Rect bitOutline = {colOutline.x, colOutline.y + (colOutline.h / 5) * j, colWidth, colOutline.h / 5 - 1};
+                    SDL_RenderDrawRect(renderer, &bitOutline);
+                    auto renderedBit = songSegs.at(renderedSegmentIndex)->cols.at(renderedColumnIndex)->bits[j];
+                    setBitLabels(renderedBit, false);
+                    renderBitLabels(&bitOutline);
+                }
+
+                rightColumnsRendered++;
+            }
+        }
+    }
+
+    void renderFocusedSegmentLeftSide(int x, int y){
+        for (int i = focusedColIndex - 1; i >= 0; i--){
+            SDL_Rect colOutline = {x + middleColX + (i * (colWidth - 1)) - (focusedColIndex * (colWidth - 1)), y, colWidth, height};
+            for (int j = 0; j < 5; j++){
+                SDL_Rect bitOutline = {colOutline.x, colOutline.y + (colOutline.h / 5) * j, colWidth, colOutline.h / 5 - 1};
+                bool bitFocused = (focusedColIndex == i && focusedBitIndex == j);
+                if (timelineFocused && bitFocused){
+                    renderBitBackground(&bitOutline);
+                }
+                SDL_RenderDrawRect(renderer, &bitOutline);
+                auto renderedBit = songSegs.at(focusedSegmentIndex)->cols.at(i)->bits[j];
+                setBitLabels(renderedBit, true, bitFocused);
+                renderBitLabels(&bitOutline);
+            }
+        }
+    }
 
 
+    void renderFocusedSegmentRightSide(int x, int y){
+        for (int i = focusedColIndex; i < segColumns(); i++){
+            SDL_Rect colOutline = {x + middleColX + (i * (colWidth - 1)) - (focusedColIndex * (colWidth - 1)), y, colWidth, height};
+            for (int j = 0; j < 5; j++){
+                SDL_Rect bitOutline = {colOutline.x, colOutline.y + (colOutline.h / 5) * j, colWidth, colOutline.h / 5 - 1};
+                bool bitFocused = (focusedColIndex == i && focusedBitIndex == j);
+                if (timelineFocused && bitFocused){
+                    renderBitBackground(&bitOutline);
+                }
+                SDL_RenderDrawRect(renderer, &bitOutline);
+                auto renderedBit = songSegs.at(focusedSegmentIndex)->cols.at(i)->bits[j];
+                setBitLabels(renderedBit, true, bitFocused);
+                renderBitLabels(&bitOutline);
+            }
+        }
+    }
 
+    void renderBitBackground(SDL_Rect* bitOutline) const{
+        if (!editingMode){
+            SDL_SetRenderDrawColor(renderer, 0x40, 0x40, 0x40, 0xFF); // grey
+        }
+        SDL_RenderFillRect(renderer, bitOutline);
+        if (!editingMode){
+            SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        }
+    }
+
+    void setBitLabels(Bit* renderedBit, bool segmentFocused, bool bitFocused = false){
+        if (segmentFocused) {
+            if (renderedBit != nullptr){
+                if (bitFocused && editingMode){
+                    setBlackStr(&bitNoteLabel, freqToSymbol(renderedBit->note.frequency));
+                    setBlackStr(&bitInstrumentLabel, getTwoDigitString(renderedBit->instrument->index));
+                } else {
+                    setWhiteStr(&bitNoteLabel, freqToSymbol(renderedBit->note.frequency));
+                    setWhiteStr(&bitInstrumentLabel, getTwoDigitString(renderedBit->instrument->index));
+                }
+            } else {
+                if (bitFocused && editingMode){
+                    setBlackStr(&bitNoteLabel, dashdash);
+                    setBlackStr(&bitInstrumentLabel, dashdash);
+                } else {
+                    setWhiteStr(&bitNoteLabel, dashdash);
+                    setWhiteStr(&bitInstrumentLabel, dashdash);
+                }
+            }
+        } else {
+            if (renderedBit != nullptr){
+                setGreyStr(&bitNoteLabel, freqToSymbol(renderedBit->note.frequency));
+                setGreyStr(&bitInstrumentLabel, getTwoDigitString(renderedBit->instrument->index));
+            } else {
+                setGreyStr(&bitNoteLabel, dashdash);
+                setGreyStr(&bitInstrumentLabel, dashdash);
+            }
+        }
+    }
+
+    void renderBitLabels(SDL_Rect* bitOutline) {
+        bitNoteLabel.render(bitOutline->x + bitOutline->w / 2 - bitNoteLabel.w / 2, bitOutline->y + bitOutline->h / 2 - bitNoteLabel.h);
+        bitInstrumentLabel.render(bitOutline->x + bitOutline->w / 2 - bitInstrumentLabel.w / 2, bitOutline->y + bitOutline->h / 2);
     }
 
     void setBlackStr(Texture* texture, const string& text) const{
@@ -281,20 +223,20 @@ public:
                     focusedBitIndex++;
                 break;
             case Direction::LEFT:
-                if (focusedColInd > 0){
-                    focusedColInd--;
+                if (focusedColIndex > 0){
+                    focusedColIndex--;
                 } else if (focusedSegmentIndex > 0) {
                     focusedSegmentIndex--;
-                    focusedColInd = segColumns() - 1;
+                    focusedColIndex = segColumns() - 1;
                 }
                 break;
             case Direction::RIGHT:
-                if (focusedColInd < segColumns() - 1){
-                    focusedColInd++;
+                if (focusedColIndex < segColumns() - 1){
+                    focusedColIndex++;
                 }
                 else if (focusedSegmentIndex < songSegs.size() - 1){
                     focusedSegmentIndex++;
-                    focusedColInd = 0;
+                    focusedColIndex = 0;
                 }
                 break;
         }

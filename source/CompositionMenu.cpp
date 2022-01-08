@@ -176,7 +176,7 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
             break;
         case SDLK_SPACE:
             if (timeline->editingMode){
-                timeline->focusedColInd++;
+                timeline->focusedColIndex++;
             } else {
                 playbackTimeline();
             }
@@ -205,21 +205,21 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
         case SDLK_l:
         case SDLK_PERIOD:
             if (timeline->editingMode){
-                auto* bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColInd)->bits[timeline->focusedBitIndex];
+                auto* bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex)->bits[timeline->focusedBitIndex];
                 if (*bitPtr == nullptr){
                     *bitPtr = new Bit(musicBox->keyToNoteValue(key), musicBox->instruments.front());
                 } else {
                     (*bitPtr)->note.frequency = midiToFreq(musicBox->keyToNoteValue(key));
                 }
-                timeline->focusedColInd++;
+                timeline->focusedColIndex++;
             }
             break;
         case SDLK_DELETE:
             if (timeline->editingMode){
-                auto* bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColInd)->bits[timeline->focusedBitIndex];
+                auto* bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex)->bits[timeline->focusedBitIndex];
                 delete *bitPtr;
                 *bitPtr = nullptr;
-                timeline->focusedColInd++;
+                timeline->focusedColIndex++;
             }
             break;
 
