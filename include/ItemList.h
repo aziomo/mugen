@@ -43,24 +43,22 @@ public:
     int visibleItems = 4;
 
     TTF_Font* font;
-    SDL_Color whiteColor = {0xFF, 0xFF, 0xFF, 0xFF};
-    SDL_Color blackColor = {0x00, 0x00, 0x00, 0xFF};
+    SDL_Color white = {0xFF, 0xFF, 0xFF, 0xFF};
+    SDL_Color black = {0x00, 0x00, 0x00, 0xFF};
     SDL_Renderer* renderer;
     Texture* arrowTexture;
 
     vector<string> items;
     vector<Texture*> renderedStrings;
-    vector<Texture*> renderedIndexes;
+    vector<Texture*> renderedIndices;
     vector<SDL_Rect> itemContainers;
 
-    void blackenString(Texture* texture, string text){
-        texture->free();
-        texture->loadFromText(renderer, text, blackColor, font);
+    void setBlackStr(Texture* texture, const string& text) const{
+        texture->loadFromText(renderer, text, black, font);
     }
 
-    void whitenString(Texture* texture, string text){
-        texture->free();
-        texture->loadFromText(renderer, text, whiteColor, font);
+    void setWhiteStr(Texture* texture, string text) const{
+        texture->loadFromText(renderer, text, white, font);
     }
 
 
@@ -70,15 +68,15 @@ public:
         auto* strTexture = new Texture();
         auto* indexTexture = new Texture();
         if (items.size() == 1){
-            strTexture->loadFromText(renderer, item, blackColor, font);
-            indexTexture->loadFromText(renderer, getTwoDigitString(items.size()), blackColor, font);
+            strTexture->loadFromText(renderer, item, black, font);
+            indexTexture->loadFromText(renderer, getTwoDigitString(items.size()), black, font);
             selectedIndex = 0;
         } else {
-            strTexture->loadFromText(renderer, item, whiteColor, font);
-            indexTexture->loadFromText(renderer, getTwoDigitString(items.size()), whiteColor, font);
+            strTexture->loadFromText(renderer, item, white, font);
+            indexTexture->loadFromText(renderer, getTwoDigitString(items.size()), white, font);
         }
         renderedStrings.push_back(strTexture);
-        renderedIndexes.push_back(indexTexture);
+        renderedIndices.push_back(indexTexture);
         updateItemContainers();
     }
 
@@ -87,8 +85,8 @@ public:
             items.erase(items.begin() + index);
             renderedStrings.at(index)->free();
             renderedStrings.erase(renderedStrings.begin() + index);
-            renderedIndexes.at(index)->free();
-            renderedIndexes.erase(renderedIndexes.begin() + index);
+            renderedIndices.at(index)->free();
+            renderedIndices.erase(renderedIndices.begin() + index);
         }
 
         updateItemContainers();
@@ -106,11 +104,11 @@ public:
 
     void moveUp(){
         if (selectedIndex > 0){
-            whitenString(renderedStrings.at(selectedIndex), items.at(selectedIndex));
-            whitenString(renderedIndexes.at(selectedIndex), items.at(selectedIndex));
+            setWhiteStr(renderedStrings.at(selectedIndex), items.at(selectedIndex));
+            setWhiteStr(renderedIndices.at(selectedIndex), items.at(selectedIndex));
             selectedIndex--;
-            blackenString(renderedStrings.at(selectedIndex), items.at(selectedIndex));
-            blackenString(renderedIndexes.at(selectedIndex), items.at(selectedIndex));
+            setBlackStr(renderedStrings.at(selectedIndex), items.at(selectedIndex));
+            setBlackStr(renderedIndices.at(selectedIndex), items.at(selectedIndex));
         }
 
         if (selectedIndex < topDisplayedItemIndex)
@@ -119,11 +117,11 @@ public:
 
     void moveDown(){
         if (selectedIndex < items.size()-1){
-            whitenString(renderedStrings.at(selectedIndex), items.at(selectedIndex));
-            whitenString(renderedIndexes.at(selectedIndex), items.at(selectedIndex));
+            setWhiteStr(renderedStrings.at(selectedIndex), items.at(selectedIndex));
+            setWhiteStr(renderedIndices.at(selectedIndex), items.at(selectedIndex));
             selectedIndex++;
-            blackenString(renderedStrings.at(selectedIndex), items.at(selectedIndex));
-            blackenString(renderedIndexes.at(selectedIndex), items.at(selectedIndex));
+            setBlackStr(renderedStrings.at(selectedIndex), items.at(selectedIndex));
+            setBlackStr(renderedIndices.at(selectedIndex), items.at(selectedIndex));
         }
 
         if (selectedIndex == topDisplayedItemIndex + visibleItems)
@@ -132,10 +130,10 @@ public:
 
     void setSelectedIndex(int newSelectedIndex){
         if (!items.empty()){
-            whitenString(renderedStrings.at(selectedIndex), items.at(selectedIndex));
+            setWhiteStr(renderedStrings.at(selectedIndex), items.at(selectedIndex));
         }
         this->selectedIndex = newSelectedIndex;
-        blackenString(renderedStrings.at(selectedIndex), items.at(selectedIndex));
+        setBlackStr(renderedStrings.at(selectedIndex), items.at(selectedIndex));
     }
 
 
@@ -159,7 +157,7 @@ public:
             }
             auto itemString = renderedStrings.at(i);
             if (enumerate){
-                auto itemIndex = renderedIndexes.at(i);
+                auto itemIndex = renderedIndices.at(i);
                 itemIndex->render(itemContainer->x + itemIndex->w/2,
                                   itemContainer->y + itemContainer->h/2 - itemString->h/2);
 
@@ -173,9 +171,6 @@ public:
 
         }
     }
-
-
-
 
 
 

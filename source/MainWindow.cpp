@@ -12,7 +12,6 @@ MainWindow::MainWindow(MusicBox *musicBox) {
     initSDL();
     loadTextures();
     compositionMenu = new CompositionMenu(this);
-    graphPainter = new GraphPainter(this);
     instrumentMenu = new InstrumentMenu(this);
     compositionMenu->init();
     instrumentMenu->init();
@@ -54,12 +53,6 @@ void MainWindow::quitSDL() {
     renderer = nullptr;
     IMG_Quit();
     SDL_Quit();
-}
-
-void MainWindow::renderBorders() {
-    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    SDL_Rect waveformMenuBorder = {0, 0, windowArea.w * 5 / 9, windowArea.h * 3 / 5};
-    SDL_RenderDrawRect(renderer, &waveformMenuBorder);
 }
 
 void MainWindow::renderTabs() {
@@ -121,88 +114,122 @@ void MainWindow::render() {
 
 void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *keyPressState) {
 
-    if (keyState[SDL_SCANCODE_Z] && !lastKeyState[SDL_SCANCODE_Z])
+    if (keyState[SDL_SCANCODE_Z] && !lastKeyState[SDL_SCANCODE_Z]){
+        passKeyPressToMenu(openTab, SDLK_z);
         mBox->pressNoteKey(0);
+    }
     if (!keyState[SDL_SCANCODE_Z] && lastKeyState[SDL_SCANCODE_Z])
         mBox->releaseNoteKey(0);
 
-    if (keyState[SDL_SCANCODE_S] && !lastKeyState[SDL_SCANCODE_S])
+    if (keyState[SDL_SCANCODE_S] && !lastKeyState[SDL_SCANCODE_S]){
+        passKeyPressToMenu(openTab, SDLK_s);
         mBox->pressNoteKey(1);
+    }
     if (!keyState[SDL_SCANCODE_S] && lastKeyState[SDL_SCANCODE_S])
         mBox->releaseNoteKey(1);
 
-    if (keyState[SDL_SCANCODE_X] && !lastKeyState[SDL_SCANCODE_X])
+    if (keyState[SDL_SCANCODE_X] && !lastKeyState[SDL_SCANCODE_X]){
+        passKeyPressToMenu(openTab, SDLK_x);
         mBox->pressNoteKey(2);
+    }
     if (!keyState[SDL_SCANCODE_X] && lastKeyState[SDL_SCANCODE_X])
         mBox->releaseNoteKey(2);
 
-    if (keyState[SDL_SCANCODE_D] && !lastKeyState[SDL_SCANCODE_D])
+    if (keyState[SDL_SCANCODE_D] && !lastKeyState[SDL_SCANCODE_D]){
+        passKeyPressToMenu(openTab, SDLK_d);
         mBox->pressNoteKey(3);
+    }
     if (!keyState[SDL_SCANCODE_D] && lastKeyState[SDL_SCANCODE_D])
         mBox->releaseNoteKey(3);
 
-    if (keyState[SDL_SCANCODE_C] && !lastKeyState[SDL_SCANCODE_C])
+    if (keyState[SDL_SCANCODE_C] && !lastKeyState[SDL_SCANCODE_C]){
+        passKeyPressToMenu(openTab, SDLK_c);
         mBox->pressNoteKey(4);
+    }
     if (!keyState[SDL_SCANCODE_C] && lastKeyState[SDL_SCANCODE_C])
         mBox->releaseNoteKey(4);
 
-    if (keyState[SDL_SCANCODE_V] && !lastKeyState[SDL_SCANCODE_V])
+    if (keyState[SDL_SCANCODE_V] && !lastKeyState[SDL_SCANCODE_V]){
+        passKeyPressToMenu(openTab, SDLK_v);
         mBox->pressNoteKey(5);
+    }
     if (!keyState[SDL_SCANCODE_V] && lastKeyState[SDL_SCANCODE_V])
         mBox->releaseNoteKey(5);
 
-    if (keyState[SDL_SCANCODE_G] && !lastKeyState[SDL_SCANCODE_G])
+    if (keyState[SDL_SCANCODE_G] && !lastKeyState[SDL_SCANCODE_G]){
+        passKeyPressToMenu(openTab, SDLK_v);
         mBox->pressNoteKey(6);
+    }
     if (!keyState[SDL_SCANCODE_G] && lastKeyState[SDL_SCANCODE_G])
         mBox->releaseNoteKey(6);
 
-    if (keyState[SDL_SCANCODE_B] && !lastKeyState[SDL_SCANCODE_B])
+    if (keyState[SDL_SCANCODE_B] && !lastKeyState[SDL_SCANCODE_B]){
+        passKeyPressToMenu(openTab, SDLK_b);
         mBox->pressNoteKey(7);
+    }
     if (!keyState[SDL_SCANCODE_B] && lastKeyState[SDL_SCANCODE_B])
         mBox->releaseNoteKey(7);
 
-    if (keyState[SDL_SCANCODE_H] && !lastKeyState[SDL_SCANCODE_H])
+    if (keyState[SDL_SCANCODE_H] && !lastKeyState[SDL_SCANCODE_H]){
+        passKeyPressToMenu(openTab, SDLK_h);
         mBox->pressNoteKey(8);
+    }
     if (!keyState[SDL_SCANCODE_H] && lastKeyState[SDL_SCANCODE_H])
         mBox->releaseNoteKey(8);
 
-    if (keyState[SDL_SCANCODE_N] && !lastKeyState[SDL_SCANCODE_N])
+    if (keyState[SDL_SCANCODE_N] && !lastKeyState[SDL_SCANCODE_N]){
+        passKeyPressToMenu(openTab, SDLK_n);
         mBox->pressNoteKey(9);
+    }
     if (!keyState[SDL_SCANCODE_N] && lastKeyState[SDL_SCANCODE_N])
         mBox->releaseNoteKey(9);
 
-    if (keyState[SDL_SCANCODE_J] && !lastKeyState[SDL_SCANCODE_J])
+    if (keyState[SDL_SCANCODE_J] && !lastKeyState[SDL_SCANCODE_J]){
+        passKeyPressToMenu(openTab, SDLK_j);
         mBox->pressNoteKey(10);
+    }
     if (!keyState[SDL_SCANCODE_J] && lastKeyState[SDL_SCANCODE_J])
         mBox->releaseNoteKey(10);
 
-    if (keyState[SDL_SCANCODE_M] && !lastKeyState[SDL_SCANCODE_M])
+    if (keyState[SDL_SCANCODE_M] && !lastKeyState[SDL_SCANCODE_M]){
+        passKeyPressToMenu(openTab, SDLK_m);
         mBox->pressNoteKey(11);
+    }
     if (!keyState[SDL_SCANCODE_M] && lastKeyState[SDL_SCANCODE_M])
         mBox->releaseNoteKey(11);
 
-    if (keyState[SDL_SCANCODE_COMMA] && !lastKeyState[SDL_SCANCODE_COMMA])
+    if (keyState[SDL_SCANCODE_COMMA] && !lastKeyState[SDL_SCANCODE_COMMA]){
+        passKeyPressToMenu(openTab, SDLK_COMMA);
         mBox->pressNoteKey(12);
+    }
     if (!keyState[SDL_SCANCODE_COMMA] && lastKeyState[SDL_SCANCODE_COMMA])
         mBox->releaseNoteKey(12);
 
-    if (keyState[SDL_SCANCODE_L] && !lastKeyState[SDL_SCANCODE_L])
+    if (keyState[SDL_SCANCODE_L] && !lastKeyState[SDL_SCANCODE_L]){
+        passKeyPressToMenu(openTab, SDLK_l);
         mBox->pressNoteKey(13);
+    }
     if (!keyState[SDL_SCANCODE_L] && lastKeyState[SDL_SCANCODE_L])
         mBox->releaseNoteKey(13);
 
-    if (keyState[SDL_SCANCODE_PERIOD] && !lastKeyState[SDL_SCANCODE_PERIOD])
+    if (keyState[SDL_SCANCODE_PERIOD] && !lastKeyState[SDL_SCANCODE_PERIOD]){
+        passKeyPressToMenu(openTab, SDLK_PERIOD);
         mBox->pressNoteKey(14);
+    }
     if (!keyState[SDL_SCANCODE_PERIOD] && lastKeyState[SDL_SCANCODE_PERIOD])
         mBox->releaseNoteKey(14);
 
-    if (keyState[SDL_SCANCODE_SEMICOLON] && !lastKeyState[SDL_SCANCODE_SEMICOLON])
+    if (keyState[SDL_SCANCODE_SEMICOLON] && !lastKeyState[SDL_SCANCODE_SEMICOLON]){
+        passKeyPressToMenu(openTab, SDLK_SEMICOLON);
         mBox->pressNoteKey(15);
+    }
     if (!keyState[SDL_SCANCODE_SEMICOLON] && lastKeyState[SDL_SCANCODE_SEMICOLON])
         mBox->releaseNoteKey(15);
 
-    if (keyState[SDL_SCANCODE_SLASH] && !lastKeyState[SDL_SCANCODE_SLASH])
+    if (keyState[SDL_SCANCODE_SLASH] && !lastKeyState[SDL_SCANCODE_SLASH]){
+        passKeyPressToMenu(openTab, SDLK_SEMICOLON);
         mBox->pressNoteKey(16);
+    }
     if (!keyState[SDL_SCANCODE_SLASH] && lastKeyState[SDL_SCANCODE_SLASH])
         mBox->releaseNoteKey(16);
 
@@ -254,11 +281,17 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
     if (!keyState[SDL_SCANCODE_RIGHT] && lastKeyState[SDL_SCANCODE_RIGHT])
         keyPressState[SDL_SCANCODE_RIGHT] = 0;
 
+    if (keyState[SDL_SCANCODE_TAB] && !lastKeyState[SDL_SCANCODE_TAB])
+        passKeyPressToMenu(openTab, SDLK_TAB);
+
     if (keyState[SDL_SCANCODE_SPACE] && !lastKeyState[SDL_SCANCODE_SPACE])
         passKeyPressToMenu(openTab, SDLK_SPACE);
 
     if (keyState[SDL_SCANCODE_RETURN] && !lastKeyState[SDL_SCANCODE_RETURN])
         passKeyPressToMenu(openTab, SDLK_RETURN);
+
+    if (keyState[SDL_SCANCODE_DELETE] && !lastKeyState[SDL_SCANCODE_DELETE])
+        passKeyPressToMenu(openTab, SDLK_DELETE);
 
 }
 
@@ -293,23 +326,23 @@ int MainWindow::xByPercent(SDL_Rect* rect, double percent, Alignment align) cons
 int MainWindow::yByPercent(Texture* texture, double percent, Alignment align) const {
     switch (align) {
         case TO_TOP:
-            return w * percent - texture->h;
+            return h * percent - texture->h;
         case TO_BOTTOM:
-            return w * percent;
+            return h * percent;
         case CENTER:
         default:
-            return w * percent - texture->h * 0.5;
+            return h * percent - texture->h * 0.5;
     }
 }
 int MainWindow::yByPercent(SDL_Rect* rect, double percent, Alignment align) const {
     switch (align) {
         case TO_TOP:
-            return w * percent - rect->h;
+            return h * percent - rect->h;
         case TO_BOTTOM:
-            return w * percent;
+            return h * percent;
         case CENTER:
         default:
-            return w * percent - rect->h * 0.5;
+            return h * percent - rect->h * 0.5;
     }
 }
 
@@ -324,3 +357,5 @@ void MainWindow::passKeyPressToMenu(int menu, SDL_Keycode key){
             break;
     }
 }
+
+

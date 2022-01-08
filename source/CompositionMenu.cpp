@@ -1,6 +1,3 @@
-//
-// Created by alberto on 12/27/21.
-//
 #include "../include/CompositionMenu.h"
 
 using std::string;
@@ -11,9 +8,10 @@ CompositionMenu::CompositionMenu(MainWindow *mainWindow) {
     musicBox = mainWindow->mBox;
     window = mainWindow;
     renderer = mainWindow->renderer;
-    timeline = new Timeline(this->renderer, window->smallFont, window->mainArea.w - window->borderSize*2, window->mainArea.h/3, 8);
+    timeline = new Timeline(this->renderer, window->smallFont, 21, 45, window->mainArea.h*2/5, 8);
     instrumentList = new ItemList(this->renderer, window->tinyFont, window->mainArea.w / 5, window->mainArea.w /5, 8);
     instrumentList->enumerate = true;
+    segmentManager = new SegmentManager(timeline, 100, 100, 4);
 }
 
 void CompositionMenu::init(){
@@ -25,52 +23,56 @@ void CompositionMenu::init(){
 
 void CompositionMenu::render(){
     updateTextures();
-    timeline->render(window->borderSize*2, window->mainArea.h/2);
-    instrumentList->render(window->mainArea.w * 4/5, window->mainArea.h * 1/5);
-    instrumentListLabel.render(window->mainArea.w * 4/5, window->mainArea.h * 1/5 - instrumentListLabel.h);
+    timeline->render(xByPercent(&timeline->outline, 0.5),
+            window->mainArea.h/2);
+    segmentManager->render(xByPercent(&segmentManager->outline, 0.1),
+                           window->mainArea.h * 1/5);
+    instrumentList->render(window->mainArea.w * 4/5,
+                           window->mainArea.h * 1/5);
+    instrumentListLabel.render(window->mainArea.w * 4/5,
+                               window->mainArea.h * 1/5 - instrumentListLabel.h);
     segmentsLabel.render(xByPercent(&segmentsLabel, 0.45, TO_LEFT),
                          yByPercent(&segmentsLabel, 0.15));
-    rowsLabel.render(xByPercent(&rowsLabel, 0.45, TO_LEFT),
-                         yByPercent(&rowsLabel, 0.2));
+    colsLabel.render(xByPercent(&colsLabel, 0.45, TO_LEFT),
+                     yByPercent(&colsLabel, 0.2));
     tempoLabel.render(xByPercent(&tempoLabel, 0.45, TO_LEFT),
                          yByPercent(&tempoLabel, 0.25));
-
     segmentsSelector.render(xByPercent(&segmentsValue, 0.47, TO_RIGHT),
                          yByPercent(&segmentsValue, 0.15));
 
-    rowsSelector.render(xByPercent(&rowsValue, 0.47, TO_RIGHT),
-                     yByPercent(&rowsLabel, 0.2));
+    colsSelector.render(xByPercent(&colsValue, 0.47, TO_RIGHT),
+                        yByPercent(&colsLabel, 0.2));
 
     tempoSelector.render(xByPercent(&tempoValue, 0.47, TO_RIGHT),
                       yByPercent(&tempoValue, 0.25));
 
 }
 
-void CompositionMenu::addSegment(){
-    timeline->segments.emplace_back(timeline->segments.front().rows.size());
+void CompositionMenu::addSegment() {
+    timeline->songSegs.push_back(timeline->allSegs.front());
 }
 
 void CompositionMenu::removeSegment(){
-    if (timeline->segments.size() > 1){
-        timeline->segments.pop_back();
+    if (timeline->songSegs.size() > 1){
+        timeline->songSegs.pop_back();
     }
 }
 
-void CompositionMenu::addRow(){
-    for (auto& segment : timeline->segments)
-        segment.rows.emplace_back();
+void CompositionMenu::addColumn(){
+    for (auto& segment : timeline->allSegs)
+        segment->cols.push_back(new Column());
 }
 
-void CompositionMenu::removeRow(){
-    if (timeline->segments.front().rows.size() > 1)
-        for (auto& segment : timeline->segments)
-            segment.rows.pop_back();
+void CompositionMenu::removeColumn(){
+    if (timeline->allSegs.front()->cols.size() > 1)
+        for (auto& segment : timeline->allSegs)
+            segment->cols.pop_back();
 }
 
 
 void CompositionMenu::loadTextures() {
     setTextTexture(&segmentsLabel, "Segments:", window->mainFont);
-    setTextTexture(&rowsLabel, "Rows:", window->mainFont);
+    setTextTexture(&colsLabel, "Columns:", window->mainFont);
     setTextTexture(&tempoLabel, "Tempo:", window->mainFont);
     setTextTexture(&instrumentListLabel, "Instrument list", window->mainFont);
 }
@@ -81,84 +83,144 @@ void CompositionMenu::loadControls(){
     segmentsSelector.loadTextControl(SelectorType::FUNCTION, &segmentsValue, window);
     segmentsSelector.setIncrementFunction(&CompositionMenu::addSegment);
     segmentsSelector.setDecrementFunction(&CompositionMenu::removeSegment);
-    rowsSelector.loadTextControl(SelectorType::FUNCTION, &rowsValue, window);
-    rowsSelector.setIncrementFunction(&CompositionMenu::addRow);
-    rowsSelector.setDecrementFunction(&CompositionMenu::removeRow);
+    colsSelector.loadTextControl(SelectorType::FUNCTION, &colsValue, window);
+    colsSelector.setIncrementFunction(&CompositionMenu::addColumn);
+    colsSelector.setDecrementFunction(&CompositionMenu::removeColumn);
 
     segmentsSelector.isHighlighted = true;
-
 }
 
 void CompositionMenu::updateTextures() {
-    setTextTexture(&segmentsValue, to_string(timeline->segments.size()), window->mainFont);
-    setTextTexture(&rowsValue, to_string(timeline->segments.front().rows.size()), window->mainFont);
+    setTextTexture(&segmentsValue, to_string(timeline->songSegs.size()), window->mainFont);
+    setTextTexture(&colsValue, to_string(timeline->songSegs.front()->cols.size()), window->mainFont);
     setTextTexture(&tempoValue, to_string(timeline->tempo), window->mainFont);
 }
 
-
-void CompositionMenu::setTextTexture(Texture* texture, string text) const {
+void CompositionMenu::setTextTexture(Texture* texture, const string& text) const {
     texture->loadFromText(renderer, text, textColor, window->mainFont);
 }
-
-void CompositionMenu::setTextTexture(Texture* texture, string text, TTF_Font* font) const {
+void CompositionMenu::setTextTexture(Texture* texture, const string& text, TTF_Font* font) const {
     texture->loadFromText(renderer, text, textColor, font);
 }
-
 int CompositionMenu::xByPercent(Texture* texture, double percent, Alignment align) const {
-    window->xByPercent(texture, percent, align);
+    return window->xByPercent(texture, percent, align);
 }
 int CompositionMenu::xByPercent(SDL_Rect* rect, double percent, Alignment align) const {
-    window->xByPercent(rect, percent, align);
+    return window->xByPercent(rect, percent, align);
 }
 int CompositionMenu::yByPercent(Texture* texture, double percent, Alignment align) const {
-    window->yByPercent(texture, percent, align);
+    return window->yByPercent(texture, percent, align);
 }
 int CompositionMenu::yByPercent(SDL_Rect* rect, double percent, Alignment align) const {
-    window->yByPercent(rect, percent, align);
+    return window->yByPercent(rect, percent, align);
 }
 
 void CompositionMenu::handleKeyPress(SDL_Keycode key) {
     switch (key) {
         case SDLK_UP:
-            if (getFocusedControl()->isHighlighted) {
-                changeControlFocus(Direction::UP);
+            if (isTimelineFocused){
+                timeline->move(Direction::UP);
             }
-            if (getFocusedControl()->isEditing) {
-                getFocusedControl()->increment(true);
+            else {
+                if (getFocusedControl()->isHighlighted) {
+                    changeControlFocus(Direction::UP);
+                }
+                if (getFocusedControl()->isEditing) {
+                    getFocusedControl()->increment(true);
+                }
             }
+
             break;
         case SDLK_DOWN:
-            if (getFocusedControl()->isHighlighted) {
-                changeControlFocus(Direction::DOWN);
+            if (isTimelineFocused){
+                timeline->move(Direction::DOWN);
             }
-            if (getFocusedControl()->isEditing) {
-                getFocusedControl()->decrement(true);
+            else {
+                if (getFocusedControl()->isHighlighted) {
+                    changeControlFocus(Direction::DOWN);
+                }
+                if (getFocusedControl()->isEditing) {
+                    getFocusedControl()->decrement(true);
+                }
             }
             break;
         case SDLK_LEFT:
-
-            if (getFocusedControl()->isHighlighted) {
-                changeControlFocus(Direction::LEFT);
+            if (isTimelineFocused){
+                timeline->move(Direction::LEFT);
             }
-            if (getFocusedControl()->isEditing) {
-                getFocusedControl()->decrement(false);
+            else {
+                if (getFocusedControl()->isHighlighted) {
+                    changeControlFocus(Direction::LEFT);
+                }
+                if (getFocusedControl()->isEditing) {
+                    getFocusedControl()->decrement(false);
+                }
             }
             break;
         case SDLK_RIGHT:
-            if (getFocusedControl()->isHighlighted) {
-                changeControlFocus(Direction::RIGHT);
+            if (isTimelineFocused){
+                timeline->move(Direction::RIGHT);
             }
-            if (getFocusedControl()->isEditing) {
-                getFocusedControl()->increment(false);
+            else {
+                if (getFocusedControl()->isHighlighted) {
+                    changeControlFocus(Direction::RIGHT);
+                }
+                if (getFocusedControl()->isEditing) {
+                    getFocusedControl()->increment(false);
+                }
             }
             break;
 
+        case SDLK_TAB:
+            switchTimelineFocus();
+            break;
         case SDLK_SPACE:
-            playbackTimeline();
+            if (timeline->editingMode){
+                timeline->focusedColInd++;
+            } else {
+                playbackTimeline();
+            }
+            break;
+        case SDLK_RETURN:
+            if (isTimelineFocused){
+                timeline->editingMode = !timeline->editingMode;
+            } else {
+                selectFocusedControl();
+            }
             break;
 
-        case SDLK_RETURN:
-            selectFocusedControl();
+        case SDLK_z:
+        case SDLK_s:
+        case SDLK_x:
+        case SDLK_d:
+        case SDLK_c:
+        case SDLK_v:
+        case SDLK_g:
+        case SDLK_b:
+        case SDLK_h:
+        case SDLK_n:
+        case SDLK_j:
+        case SDLK_m:
+        case SDLK_COMMA:
+        case SDLK_l:
+        case SDLK_PERIOD:
+            if (timeline->editingMode){
+                auto* bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColInd)->bits[timeline->focusedBitIndex];
+                if (*bitPtr == nullptr){
+                    *bitPtr = new Bit(musicBox->keyToNoteValue(key), musicBox->instruments.front());
+                } else {
+                    (*bitPtr)->note.frequency = midiToFreq(musicBox->keyToNoteValue(key));
+                }
+                timeline->focusedColInd++;
+            }
+            break;
+        case SDLK_DELETE:
+            if (timeline->editingMode){
+                auto* bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColInd)->bits[timeline->focusedBitIndex];
+                delete *bitPtr;
+                *bitPtr = nullptr;
+                timeline->focusedColInd++;
+            }
             break;
 
         default:
@@ -243,16 +305,14 @@ void CompositionMenu::selectFocusedControl() {
 }
 
 void CompositionMenu::loadExampleBits() {
-    auto* rows = &timeline->segments.front().rows;
-    auto* firstRow = &rows->front();
+    auto* cols = &timeline->songSegs.front()->cols;
     auto* instrument = musicBox->instruments.front();
 
-    for (int i = 0; i < rows->size(); i++){
-        auto* bit = new Bit(60 - i * 3, instrument);
-        rows->at(i).bits[0] = bit;
+    for (int i = 0; i < cols->size(); i++){
+        timeline->songSegs.front()->cols.at(i)->bits[0] = new Bit(60 - i * 3, instrument);
         if (i % 2 == 1) {
             auto* bitto = new Bit(80 - i * 3, instrument);
-            rows->at(i).bits[1] = bitto;
+            cols->at(i)->bits[1] = bitto;
         }
     }
 
@@ -262,20 +322,20 @@ void CompositionMenu::playbackTimeline(){
 
     double globalTime = musicBox->globalTime;
     double beginTime = globalTime;
-    double timeBetweenRows = 0.5;
+    double timeBetweenCols = 0.5;
     double timeElapsed = 0.0;
-    double lastRowTriggerTime = -timeBetweenRows;
+    double lastColTriggerTime = -timeBetweenCols;
 
-    double songLength = timeline->segments.front().rows.size() * timeBetweenRows;
+    double songLength = timeline->songSegs.front()->cols.size() * timeBetweenCols * timeline->songSegs.size();
 
     while (timeElapsed < songLength){
 
-        if (timeElapsed - lastRowTriggerTime > timeBetweenRows){
+        if (timeElapsed - lastColTriggerTime > timeBetweenCols){
 
-            int rowsElapsed = timeElapsed / timeBetweenRows;
-            Row* currentRow = &timeline->segments.front().rows.at(rowsElapsed);
+            int colsElapsed = timeElapsed / timeBetweenCols;
+            Column* currentCol = timeline->songSegs.front()->cols.at(colsElapsed);
 
-            for (auto bit : currentRow->bits){
+            for (auto bit : currentCol->bits){
                 if (bit != nullptr){
 
                     bit->note.pressedOnTime = globalTime;
@@ -284,16 +344,16 @@ void CompositionMenu::playbackTimeline(){
                 }
             }
 
-            if (rowsElapsed > 0){
-                Row* previousRow = &timeline->segments.front().rows.at(rowsElapsed-1);
-                for (auto bit : previousRow->bits){
+            if (colsElapsed > 0){
+                Column* previousCol = timeline->songSegs.front()->cols.at(colsElapsed - 1);
+                for (auto bit : previousCol->bits){
                     if (bit != nullptr){
                         bit->note.releasedOnTime = globalTime;
                     }
                 }
             }
 
-            lastRowTriggerTime = timeElapsed;
+            lastColTriggerTime = timeElapsed;
         }
 
         auto bit = bitsPlayed.begin();
@@ -317,4 +377,15 @@ void CompositionMenu::playbackTimeline(){
     }
     bitsPlayed.clear();
 
+}
+
+void CompositionMenu::switchTimelineFocus() {
+    getFocusedControl()->switchHighlight();
+    if (isTimelineFocused){
+        isTimelineFocused = false;
+        timeline->timelineFocused = false;
+    } else {
+        isTimelineFocused = true;
+        timeline->timelineFocused = true;
+    }
 }

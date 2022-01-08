@@ -74,9 +74,7 @@ void InstrumentMenu::updateSelectorValues() {
 
 void InstrumentMenu::loadTextures() {
     setTextTexture(&undefinedLabel, "-");
-    setTextTexture(&instrumentsTab, "INSTRUMENTS");
-    setTextTexture(&compositionTab, "COMPOSITION");
-    setTextTexture(&optionsTab, "OPTIONS");
+
 
     setTextTexture(&instrumentName, "Instrument 1", window->largeFont);
 
@@ -145,16 +143,16 @@ void InstrumentMenu::updateTextures() {
 }
 
 int InstrumentMenu::xByPercent(Texture* texture, double percent, Alignment align) const {
-    window->xByPercent(texture, percent, align);
+    return window->xByPercent(texture, percent, align);
 }
 int InstrumentMenu::xByPercent(SDL_Rect* rect, double percent, Alignment align) const {
-    window->xByPercent(rect, percent, align);
+    return window->xByPercent(rect, percent, align);
 }
 int InstrumentMenu::yByPercent(Texture* texture, double percent, Alignment align) const {
-    window->yByPercent(texture, percent, align);
+    return window->yByPercent(texture, percent, align);
 }
 int InstrumentMenu::yByPercent(SDL_Rect* rect, double percent, Alignment align) const {
-    window->yByPercent(rect, percent, align);
+    return window->yByPercent(rect, percent, align);
 }
 
 void InstrumentMenu::render() {
@@ -178,12 +176,6 @@ void InstrumentMenu::render() {
     //render tab outlines somehow
 
     // MISC
-    instrumentsTab.render(xByPercent(&instrumentsTab, 0.18),
-                          yByPercent(&instrumentsTab, 0.055));
-    compositionTab.render(xByPercent(&compositionTab, 0.5),
-                          yByPercent(&compositionTab, 0.055));
-    optionsTab.render(xByPercent(&optionsTab, 0.825),
-                      yByPercent(&optionsTab, 0.055));
     helpBar.render(window->borderSize * 2, window->mainArea.h - helpBar.h);
 
 //    instrumentName.render(xByPercent(&instrumentName, 0.5),
@@ -259,11 +251,11 @@ void InstrumentMenu::render() {
     itemList->render(window->borderSize, window->mainArea.h/4);
 }
 
-void InstrumentMenu::setTextTexture(Texture* texture, string text) const {
+void InstrumentMenu::setTextTexture(Texture* texture, const string& text) const {
     texture->loadFromText(renderer, text, textColor, window->mainFont);
 }
 
-void InstrumentMenu::setTextTexture(Texture* texture, string text, TTF_Font* font) const {
+void InstrumentMenu::setTextTexture(Texture* texture, const string& text, TTF_Font* font) const {
     texture->loadFromText(renderer, text, textColor, font);
 }
 

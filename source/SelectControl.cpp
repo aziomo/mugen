@@ -1,7 +1,3 @@
-//
-// Created by alberto on 11/21/21.
-//
-
 #include <sstream>
 #include "../include/SelectControl.h"
 #include "../include/InstrumentMenu.h"

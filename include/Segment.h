@@ -1,7 +1,3 @@
-//
-// Created by alberto on 12/27/21.
-//
-
 #ifndef MUGEN_SEGMENT_H
 #define MUGEN_SEGMENT_H
 
@@ -20,17 +16,20 @@ struct Bit {
     }
 };
 
-struct Row {
+struct Column {
+    Column() : bits(){}
     Bit* bits[5];
 };
 
 struct Segment {
-    Segment(int rowsAmount){
-        for (int i = 0; i < rowsAmount; i++)
-            rows.emplace_back();
+    Segment(int rowsAmount, int index){
+        for (int i = 0; i < rowsAmount; i++){
+            cols.push_back(new Column());
+        }
+        this->index = index;
     }
-
-    vector<Row> rows;
+    int index;
+    vector<Column*> cols;
 };
 
 

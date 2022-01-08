@@ -30,7 +30,6 @@ public:
 
     InstrumentMenu* instrumentMenu;
     CompositionMenu* compositionMenu;
-    GraphPainter* graphPainter;
     MusicBox* mBox;
     int borderSize = 10;
     SDL_Rect mainArea = {borderSize, borderSize, w - borderSize * 2, h - borderSize * 2};
@@ -51,7 +50,6 @@ private:
     SDL_Window* window = nullptr;
 
     void quitSDL();
-    void renderBorders();
     void loadTextures();
 
     void renderTabs();

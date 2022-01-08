@@ -1,7 +1,3 @@
-//
-// Created by alberto on 12/27/21.
-//
-
 #ifndef MUGEN_COMPOSITIONMENU_H
 #define MUGEN_COMPOSITIONMENU_H
 
@@ -13,6 +9,7 @@
 #include <vector>
 #include "MainWindow.h"
 #include "SelectControl.h"
+#include "SegmentManager.h"
 
 class MainWindow;
 
@@ -27,40 +24,32 @@ public:
     MusicBox* musicBox;
     ItemList* instrumentList;
     Timeline* timeline;
-    SelectControl tempoSelector, segmentsSelector, rowsSelector;
+    SegmentManager* segmentManager;
+
+    SelectControl tempoSelector, segmentsSelector, colsSelector;
 
     const static int controlMatrixRows = 3, controlMatrixCols = 1;
 
     int focusedControlRow = 0, focusedControlCol = 0;
     Control* controlArray[controlMatrixRows][controlMatrixCols] = {
             {&segmentsSelector},
-            {&rowsSelector},
+            {&colsSelector},
             {&tempoSelector}
     };
 
     bool isTimelineFocused = false;
-    int focusedSegment = 0;
-    int focusedRow = 0;
-    int focusedBit = 0;
 
     vector<Bit*> bitsPlayed;
 
-
-
-
     Texture instrumentListLabel,
-            segmentsLabel, rowsLabel, tempoLabel,
-            segmentsValue, rowsValue, tempoValue;
-
-
-
+            segmentsLabel, colsLabel, tempoLabel,
+            segmentsValue, colsValue, tempoValue;
 
     void render();
 
+    void setTextTexture(Texture *texture, const string& text) const;
 
-    void setTextTexture(Texture *texture, string text) const;
-
-    void setTextTexture(Texture *texture, string text, TTF_Font *font) const;
+    void setTextTexture(Texture *texture, const string& text, TTF_Font *font) const;
 
     void loadTextures();
 
@@ -79,9 +68,9 @@ public:
 
     void removeSegment();
 
-    void addRow();
+    void addColumn();
 
-    void removeRow();
+    void removeColumn();
 
     void handleKeyPress(SDL_Keycode key);
 
@@ -94,6 +83,8 @@ public:
     void loadExampleBits();
 
     void playbackTimeline();
+
+    void switchTimelineFocus();
 };
 
 

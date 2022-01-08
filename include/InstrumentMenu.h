@@ -22,7 +22,7 @@ public:
     void init();
     void render();
 
-    void setTextTexture(Texture* texture, std::string text) const;
+    void setTextTexture(Texture* texture, const std::string& text) const;
 
     void selectFocusedControl();
 
@@ -54,7 +54,6 @@ public:
     int focusedControlCol = 2;
     int focusedControlRow = 0;
     Texture instrumentName,
-    instrumentsTab, compositionTab, optionsTab,
     // waveform creator textures
         oscLabel, oscCounter,
         wavetypeLabel,
@@ -88,7 +87,7 @@ public:
     void handleKeyPress(SDL_Keycode key);
     void updateTextures();
     void loadControls();
-    void setTextTexture(Texture *texture, std::string text, TTF_Font *font) const;
+    void setTextTexture(Texture *texture, const std::string& text, TTF_Font *font) const;
     void setWaveImage(SelectControl* control, WaveformType wavetype);
     void changeControlFocus(Direction direction);
     Control* getFocusedControl();

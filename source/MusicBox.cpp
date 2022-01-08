@@ -147,3 +147,40 @@ void MusicBox::pressNoteKey(int keyPosition) {
 void MusicBox::releaseNoteKey(int keyPosition) {
     pressedNotes[keyPosition].releasedOnTime = globalTime;
 }
+
+int MusicBox::keyToNoteValue(SDL_Keycode key){
+    switch (key){
+        case SDLK_z:
+            return getRootCPosition() + 0;
+        case SDLK_s:
+            return getRootCPosition() + 1;
+        case SDLK_x:
+            return getRootCPosition() + 2;
+        case SDLK_d:
+            return getRootCPosition() + 3;
+        case SDLK_c:
+            return getRootCPosition() + 4;
+        case SDLK_v:
+            return getRootCPosition() + 5;
+        case SDLK_g:
+            return getRootCPosition() + 6;
+        case SDLK_b:
+            return getRootCPosition() + 7;
+        case SDLK_h:
+            return getRootCPosition() + 8;
+        case SDLK_n:
+            return getRootCPosition() + 9;
+        case SDLK_j:
+            return getRootCPosition() + 10;
+        case SDLK_m:
+            return getRootCPosition() + 11;
+        case SDLK_COMMA:
+            return getRootCPosition() + 12;
+        case SDLK_l:
+            return getRootCPosition() + 13;
+        case SDLK_PERIOD:
+            return getRootCPosition() + 14;
+        default:
+            return 0;
+    }
+}

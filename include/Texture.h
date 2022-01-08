@@ -57,7 +57,7 @@ public:
         }
     }
 
-    void loadFromText(SDL_Renderer* pRenderer, std::string textValue, SDL_Color textColor, TTF_Font* font){
+    void loadFromText(SDL_Renderer* pRenderer, const std::string& textValue, SDL_Color textColor, TTF_Font* font){
         renderer = pRenderer;
         free();
         SDL_Surface* textSurface = TTF_RenderUTF8_Blended(font, textValue.c_str(), textColor);

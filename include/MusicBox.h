@@ -18,6 +18,7 @@
 
 class MusicBox {
 public:
+
     MusicBox();
     ~MusicBox();
     bool isRunning;
@@ -71,6 +72,7 @@ public:
 
     void writeBitsToBuffer(vector<Bit*> *bits);
 
+    int keyToNoteValue(SDL_Keycode key);
 };
 
 

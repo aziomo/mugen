@@ -1,7 +1,3 @@
-//
-// Created by alberto on 12/19/21.
-//
-
 #ifndef MUGEN_ENVELOPE_H
 #define MUGEN_ENVELOPE_H
 
