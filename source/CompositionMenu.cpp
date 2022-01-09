@@ -9,9 +9,8 @@ CompositionMenu::CompositionMenu(MainWindow *mainWindow) {
     window = mainWindow;
     renderer = mainWindow->renderer;
     timeline = new Timeline(this->renderer, window->smallFont, 21, 45, window->mainArea.h*2/5, 8);
-    instrumentList = new ItemList(this->renderer, window->tinyFont, window->mainArea.w / 5, window->mainArea.w /5, 8);
-    instrumentList->enumerate = true;
-    segmentManager = new SegmentManager(timeline, 100, 100, 4);
+    instrumentList = new ItemList(this->renderer, window->tinyFont, window->mainArea.w/5, window->mainArea.w/6, 6, true);
+    segmentManager = new SegmentManager(timeline, window->smallFont, window->mainArea.w/12, window->mainArea.w/6, 5);
 }
 
 void CompositionMenu::init(){
@@ -27,24 +26,24 @@ void CompositionMenu::render(){
             window->mainArea.h/2);
     segmentManager->render(xByPercent(&segmentManager->outline, 0.1),
                            window->mainArea.h * 1/5);
-    instrumentList->render(window->mainArea.w * 4/5,
+    instrumentList->render(xByPercent(&instrumentList->outline, 0.864),
                            window->mainArea.h * 1/5);
-    instrumentListLabel.render(window->mainArea.w * 4/5,
+    instrumentListLabel.render(xByPercent(&instrumentList->outline, 0.864),
                                window->mainArea.h * 1/5 - instrumentListLabel.h);
-    segmentsLabel.render(xByPercent(&segmentsLabel, 0.45, TO_LEFT),
-                         yByPercent(&segmentsLabel, 0.15));
-    colsLabel.render(xByPercent(&colsLabel, 0.45, TO_LEFT),
-                     yByPercent(&colsLabel, 0.2));
-    tempoLabel.render(xByPercent(&tempoLabel, 0.45, TO_LEFT),
-                         yByPercent(&tempoLabel, 0.25));
-    segmentsSelector.render(xByPercent(&segmentsValue, 0.50, CENTER),
-                         yByPercent(&segmentsValue, 0.15));
 
-    colsSelector.render(xByPercent(&colsValue, 0.50, CENTER),
-                        yByPercent(&colsLabel, 0.2));
 
-    tempoSelector.render(xByPercent(&tempoValue, 0.50, CENTER),
-                      yByPercent(&tempoValue, 0.25));
+    segmentsLabel.render(xByPercent(&segmentsLabel, 0.5, TO_LEFT),
+                         yByPercent(&segmentsLabel, 0.23));
+    segmentsSelector.render(xByPercent(&segmentsValue, 0.55, CENTER),
+                            yByPercent(&segmentsValue, 0.23));
+    colsLabel.render(xByPercent(&colsLabel, 0.5, TO_LEFT),
+                     yByPercent(&colsLabel, 0.28));
+    colsSelector.render(xByPercent(&colsValue, 0.55, CENTER),
+                        yByPercent(&colsLabel, 0.28));
+    tempoLabel.render(xByPercent(&tempoLabel, 0.5, TO_LEFT),
+                         yByPercent(&tempoLabel, 0.33));
+    tempoSelector.render(xByPercent(&tempoValue, 0.55, CENTER),
+                      yByPercent(&tempoValue, 0.33));
 
 }
 
@@ -80,7 +79,7 @@ void CompositionMenu::loadTextures() {
     setTextTexture(&segmentsLabel, "Segments:", window->mainFont);
     setTextTexture(&colsLabel, "Columns:", window->mainFont);
     setTextTexture(&tempoLabel, "Tempo:", window->mainFont);
-    setTextTexture(&instrumentListLabel, "Instrument list", window->mainFont);
+    setTextTexture(&instrumentListLabel, "Current instrument", window->smallFont);
 }
 
 void CompositionMenu::loadControls(){
@@ -128,21 +127,20 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
                 timeline->move(Direction::UP);
             }
             else {
-                if (getFocusedControl()->isHighlighted) {
+                if (getFocusedControl()->isHighlighted || isSegmentListFocused || isInstrumentListFocused) {
                     changeControlFocus(Direction::UP);
                 }
                 if (getFocusedControl()->isEditing) {
                     getFocusedControl()->increment(true);
                 }
             }
-
             break;
         case SDLK_DOWN:
             if (isTimelineFocused){
                 timeline->move(Direction::DOWN);
             }
             else {
-                if (getFocusedControl()->isHighlighted) {
+                if (getFocusedControl()->isHighlighted || isSegmentListFocused || isInstrumentListFocused) {
                     changeControlFocus(Direction::DOWN);
                 }
                 if (getFocusedControl()->isEditing) {
@@ -155,7 +153,7 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
                 timeline->move(Direction::LEFT);
             }
             else {
-                if (getFocusedControl()->isHighlighted) {
+                if (getFocusedControl()->isHighlighted || isInstrumentListFocused) {
                     changeControlFocus(Direction::LEFT);
                 }
                 if (getFocusedControl()->isEditing) {
@@ -168,7 +166,7 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
                 timeline->move(Direction::RIGHT);
             }
             else {
-                if (getFocusedControl()->isHighlighted) {
+                if (getFocusedControl()->isHighlighted || isSegmentListFocused ) {
                     changeControlFocus(Direction::RIGHT);
                 }
                 if (getFocusedControl()->isEditing) {
@@ -216,7 +214,7 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
             if (timeline->editingMode){
                 auto* bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex)->bits[timeline->focusedBitIndex];
                 if (*bitPtr == nullptr){
-                    *bitPtr = new Bit(musicBox->keyToNoteValue(key), musicBox->instruments.front());
+                    *bitPtr = new Bit(musicBox->keyToNoteValue(key), musicBox->instruments.at(instrumentList->selectedIndex));
                 } else {
                     (*bitPtr)->note.frequency = midiToFreq(musicBox->keyToNoteValue(key));
                 }
@@ -229,6 +227,17 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
                 delete *bitPtr;
                 *bitPtr = nullptr;
                 timeline->focusedColIndex++;
+            }
+            break;
+
+        case SDLK_PAGEUP:
+            if (isSegmentListFocused){
+                segmentManager->segmentUp();
+            }
+            break;
+        case SDLK_PAGEDOWN:
+            if (isSegmentListFocused){
+                segmentManager->segmentDown();
             }
             break;
 
@@ -245,7 +254,14 @@ void CompositionMenu::changeControlFocus(Direction direction) {
     getFocusedControl()->switchHighlight();
     switch (direction) {
         case Direction::UP:
-            if (focusedControlRow > 0) {
+            if (isSegmentListFocused){
+                segmentManager->moveUp();
+            }
+            else if (isInstrumentListFocused){
+                instrumentList->moveUp();
+                musicBox->currentInstrument = instrumentList->selectedIndex;
+            }
+            else if (focusedControlRow > 0) {
                 if (controlArray[focusedControlRow - 1][focusedControlCol] != nullptr) {
                     focusedControlRow -= 1;
                 } else {
@@ -260,7 +276,14 @@ void CompositionMenu::changeControlFocus(Direction direction) {
             }
             break;
         case Direction::DOWN:
-            if (focusedControlRow < controlMatrixRows - 1) {
+            if (isSegmentListFocused){
+                segmentManager->moveDown();
+            }
+            else if (isInstrumentListFocused){
+                instrumentList->moveDown();
+                musicBox->currentInstrument = instrumentList->selectedIndex;
+            }
+            else if (focusedControlRow < controlMatrixRows - 1) {
                 if (controlArray[focusedControlRow + 1][focusedControlCol] != nullptr) {
                     focusedControlRow += 1;
                 } else {
@@ -276,6 +299,19 @@ void CompositionMenu::changeControlFocus(Direction direction) {
             break;
         case Direction::LEFT:
 
+            if (isInstrumentListFocused){
+                // exit the list
+                getFocusedControl()->switchHighlight();
+                isInstrumentListFocused = false;
+                instrumentList->isFocused = false;
+            }
+            else if (!isSegmentListFocused){
+                // enter the list
+                getFocusedControl()->switchHighlight();
+                isSegmentListFocused = true;
+                segmentManager->isFocused = true;
+            }
+            // the rest doesn't mean much right now
             if (focusedControlCol > 0) {
                 if (controlArray[focusedControlRow][focusedControlCol - 1] != nullptr) {
                     focusedControlCol -= 1;
@@ -290,7 +326,22 @@ void CompositionMenu::changeControlFocus(Direction direction) {
                 }
             }
             break;
+
         case Direction::RIGHT:
+
+            if (isSegmentListFocused){
+                // exit the list
+                getFocusedControl()->switchHighlight();
+                isSegmentListFocused = false;
+                segmentManager->isFocused = false;
+            }
+            else if (!isInstrumentListFocused){
+                // enter the list
+                getFocusedControl()->switchHighlight();
+                isInstrumentListFocused = true;
+                instrumentList->isFocused = true;
+            }
+            // the rest doesn't mean much right now
             if (focusedControlCol < controlMatrixCols - 1) {
                 if (controlArray[focusedControlRow][focusedControlCol + 1] != nullptr) {
                     focusedControlCol += 1;

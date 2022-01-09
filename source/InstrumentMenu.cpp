@@ -11,7 +11,7 @@ InstrumentMenu::InstrumentMenu(MainWindow *mainWindow) {
     window = mainWindow;
     renderer = mainWindow->renderer;
     musicBox = mainWindow->mBox;
-    itemList = new ItemList(this->renderer, window->smallFont, window->mainArea.w / 5, window->mainArea.h * 1 / 2, 4);
+    instrumentList = new ItemList(this->renderer, window->smallFont, window->mainArea.w / 5, window->mainArea.h * 1 / 2, 4);
 }
 
 InstrumentMenu::~InstrumentMenu() {
@@ -28,9 +28,9 @@ void InstrumentMenu::init() {
     editedOsc = editedInstrument->oscillators.front();
 
     window->compositionMenu->instrumentList->addItem("Instrument 1");
-    itemList->addItem("Instrument 1");
-    itemList->addItem("+ New instrument");
-    helpMessage = "[ENTER] SELECT | [2] ADD OSC | [3] DEL OSC | [F4] QUIT";
+    instrumentList->addItem("Instrument 1");
+    instrumentList->addItem("+ New instrument");
+    helpMessage = "[ENTER] SELECT | [2] ADD OSC | [3] DEL OSC | [F4] QUIT | [ARROW KEYS] NAVIGATE";
     loadTextures();
     loadControls();
 }
@@ -248,7 +248,7 @@ void InstrumentMenu::render() {
     envReleaseSelector.render(xByPercent(envReleaseSelector.mainTexture, envMenuOffsetX + 0.12),
                               yByPercent(envReleaseSelector.mainTexture, 0.65));
 
-    itemList->render(window->borderSize, window->mainArea.h/4);
+    instrumentList->render(window->borderSize, window->mainArea.h / 4);
 }
 
 void InstrumentMenu::setTextTexture(Texture* texture, const string& text) const {
@@ -311,7 +311,7 @@ void InstrumentMenu::changeControlFocus(Direction direction) {
             }
             break;
         case Direction::LEFT:
-            if (listFocused){
+            if (isInstrumentListFocused){
                 break;
             }
             if (focusedControlCol > 0) {
@@ -327,12 +327,12 @@ void InstrumentMenu::changeControlFocus(Direction direction) {
                     }
                 }
             } else {
-                listFocused = true;
+                isInstrumentListFocused = true;
+                instrumentList->isFocused = true;
                 getFocusedControl()->switchHighlight();
             }
             break;
         case Direction::RIGHT:
-
             if (focusedControlCol < controlMatrixCols - 1) {
                 if (controlArray[focusedControlRow][focusedControlCol + 1] != nullptr) {
                     focusedControlCol += 1;
@@ -377,13 +377,13 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
             drawIntegral = !drawIntegral;
             break;
         case SDLK_UP:
-            if (listFocused){
-                int prevIndex = itemList->selectedIndex;
-                itemList->moveUp();
-                if (prevIndex > itemList->selectedIndex && prevIndex != itemList->items.size()-1){
-                    editedInstrument = musicBox->instruments.at(itemList->selectedIndex);
+            if (isInstrumentListFocused){
+                int prevIndex = instrumentList->selectedIndex;
+                instrumentList->moveUp();
+                if (prevIndex > instrumentList->selectedIndex && prevIndex != instrumentList->items.size() - 1){
+                    editedInstrument = musicBox->instruments.at(instrumentList->selectedIndex);
                     editedOsc = editedInstrument->oscillators.front();
-                    musicBox->currentInstrument = itemList->selectedIndex;
+                    musicBox->currentInstrument = instrumentList->selectedIndex;
                     updateSelectorValues();
                 }
                 break;
@@ -396,13 +396,13 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
             }
             break;
         case SDLK_DOWN:
-            if (listFocused){
-                int prevIndex = itemList->selectedIndex;
-                itemList->moveDown();
-                if (prevIndex < itemList->selectedIndex && itemList->selectedIndex != itemList->items.size()-1){
-                    editedInstrument = musicBox->instruments.at(itemList->selectedIndex);
+            if (isInstrumentListFocused){
+                int prevIndex = instrumentList->selectedIndex;
+                instrumentList->moveDown();
+                if (prevIndex < instrumentList->selectedIndex && instrumentList->selectedIndex != instrumentList->items.size() - 1){
+                    editedInstrument = musicBox->instruments.at(instrumentList->selectedIndex);
                     editedOsc = editedInstrument->oscillators.front();
-                    musicBox->currentInstrument = itemList->selectedIndex;
+                    musicBox->currentInstrument = instrumentList->selectedIndex;
                     updateSelectorValues();
                 }
                 break;
@@ -415,7 +415,6 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
             }
             break;
         case SDLK_LEFT:
-
             if (getFocusedControl()->isHighlighted) {
                 changeControlFocus(Direction::LEFT);
             }
@@ -424,10 +423,11 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
             }
             break;
         case SDLK_RIGHT:
-            if (listFocused){
-                if (itemList->selectedIndex == itemList->items.size()-1)
-                    itemList->moveUp();
-                listFocused = false;
+            if (isInstrumentListFocused){
+                if (instrumentList->selectedIndex == instrumentList->items.size() - 1)
+                    instrumentList->moveUp();
+                isInstrumentListFocused = false;
+                instrumentList->isFocused = false;
                 getFocusedControl()->switchHighlight();
                 break;
             }
@@ -440,8 +440,8 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
             break;
 
         case SDLK_RETURN:
-            if (listFocused){
-                selectItemFromList(itemList->selectedIndex);
+            if (isInstrumentListFocused){
+                selectItemFromList(instrumentList->selectedIndex);
                 break;
             }
             selectFocusedControl();
@@ -504,15 +504,18 @@ void InstrumentMenu::selectPrevOsc() {
 
 void InstrumentMenu::selectItemFromList(int index) {
 
-    if (index == itemList->items.size() - 1){
-        musicBox->instruments.push_back(new Instrument(musicBox->blockSize));
-        musicBox->instruments.back()->index = musicBox->instruments.size()-1;
-        itemList->removeItem(itemList->items.size() - 1);
-        int newInstrumentIndex = itemList->items.size()+1;
-        itemList->addItem("Instrument " + to_string(newInstrumentIndex));
-        itemList->addItem("+ New instrument");
-        itemList->setSelectedIndex(newInstrumentIndex-1);
+    if (index == instrumentList->items.size() - 1){
+        auto instrument = new Instrument(musicBox->blockSize);
+        instrument->index = musicBox->instruments.size();
+        musicBox->instruments.push_back(instrument);
+        instrumentList->removeItem(instrumentList->items.size() - 1);
+        int newInstrumentIndex = instrumentList->items.size() + 1;
+        instrumentList->addItem("Instrument " + to_string(newInstrumentIndex));
+        instrumentList->addItem("+ New instrument");
+        instrumentList->setSelectedIndex(newInstrumentIndex - 1);
         window->compositionMenu->instrumentList->addItem("Instrument " + to_string(newInstrumentIndex));
+    } else {
+        musicBox->currentInstrument = index;
     }
 }
 

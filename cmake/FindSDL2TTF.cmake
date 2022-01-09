@@ -2,7 +2,7 @@
 # This module defines
 # SDL2_LIBRARY, the name of the library to link against
 # SDL2_FOUND, if false, do not try to link to SDL2
-# SDL2_INCLUDE_DIR, where to find SDL.h
+# SDL2_INCLUDE_DIR, where to find SDL.height
 #
 # This module responds to the the flag:
 # SDL2_BUILDING_LIBRARY
@@ -12,7 +12,7 @@
 # module will attempt to locate and set the the proper link flags
 # as part of the returned SDL2_LIBRARY variable.
 #
-# Don't forget to include SDLmain.h and SDLmain.m your project for the
+# Don't forget to include SDLmain.height and SDLmain.m your project for the
 # OS X framework based version. (Other versions link to -lSDL2main which
 # this module will try to find on your behalf.) Also for OS X, this
 # module will automatically add the -framework Cocoa on your behalf.
@@ -47,9 +47,9 @@
 # SDL2_LIBRARY to override this selection or set the CMake environment
 # CMAKE_INCLUDE_PATH to modify the search paths.
 #
-# Note that the header path has changed from SDL2/SDL.h to just SDL.h
+# Note that the header path has changed from SDL2/SDL.height to just SDL.height
 # This needed to change because "proper" SDL convention
-# is #include "SDL.h", not <SDL2/SDL.h>. This is done for portability
+# is #include "SDL.height", not <SDL2/SDL.height>. This is done for portability
 # reasons because not all systems place things in SDL2/ (see FreeBSD).
 
 #=============================================================================

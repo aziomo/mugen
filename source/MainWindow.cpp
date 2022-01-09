@@ -281,6 +281,12 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
     if (!keyState[SDL_SCANCODE_RIGHT] && lastKeyState[SDL_SCANCODE_RIGHT])
         keyPressState[SDL_SCANCODE_RIGHT] = 0;
 
+    if (keyState[SDL_SCANCODE_PAGEUP] && !lastKeyState[SDL_SCANCODE_PAGEUP])
+        passKeyPressToMenu(openTab, SDLK_PAGEUP);
+
+    if (keyState[SDL_SCANCODE_PAGEDOWN] && !lastKeyState[SDL_SCANCODE_PAGEDOWN])
+        passKeyPressToMenu(openTab, SDLK_PAGEDOWN);
+
     if (keyState[SDL_SCANCODE_TAB] && !lastKeyState[SDL_SCANCODE_TAB])
         passKeyPressToMenu(openTab, SDLK_TAB);
 

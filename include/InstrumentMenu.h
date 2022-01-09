@@ -33,8 +33,8 @@ public:
 
     SDL_Color textColor;
 
-    ItemList* itemList;
-    bool listFocused = false;
+    ItemList* instrumentList;
+    bool isInstrumentListFocused = false;
 
     SelectControl oscSelector,
         mainWaveSelector, mainFreqSelector, mainAmpSelector,

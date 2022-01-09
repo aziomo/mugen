@@ -5,50 +5,88 @@
 
 class SegmentManager {
 public:
-    SegmentManager(Timeline* timeline, int width, int height, int visibleItems){
+    SegmentManager(Timeline* timeline, TTF_Font* font, int width, int height, int visibleItems){
         this->timeline = timeline;
-        this->renderer = timeline->renderer;
+        this->font = font;
         this->width = width;
         this->height = height;
-        this->visibleItems = visibleItems;
-        topDisplayedItemIndex = 0;
+        this->itemHeight = height / visibleItems;
+        this->renderer = timeline->renderer;
+        isFocused = false;
     }
 
+    TTF_Font* font;
     SDL_Renderer* renderer;
     SDL_Rect outline;
     Timeline* timeline;
-    int width, height, padding = 5;
-    int topDisplayedItemIndex, visibleItems;
+    int width, height;
+    int itemWidth, itemHeight;
+    int visibleItems;
+    bool isFocused;
+
+    Texture segIndex, segNumber;
 
     void render(int x, int y){
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
         outline = {x, y, width, height};
         SDL_RenderDrawRect(renderer, &outline);
 
-        Texture segIndex, segNumber;
-
-
-        for (int i = topDisplayedItemIndex; i < topDisplayedItemIndex + visibleItems; ++i) {
+        for (int i = timeline->focusedSegmentIndex - 2; i < timeline->focusedSegmentIndex + 3; i++) {
             if (i == timeline->songSegs.size()) break;
+            if (i < 0) continue;
+            SDL_Rect itemContainer = {x, y + itemHeight * 2 + itemHeight * (i - timeline->focusedSegmentIndex), width, itemHeight};
 
-            setWhiteStr(&segIndex, getTwoDigitString(i));
-            setWhiteStr(&segNumber, getTwoDigitString(timeline->songSegs.at(i)->index));
+            if (i == timeline->focusedSegmentIndex){
+                if (isFocused){
+                    SDL_RenderFillRect(renderer, &itemContainer);
+                    setBlackStr(&segIndex, getTwoDigitString(i));
+                    setBlackStr(&segNumber, getTwoDigitString(timeline->songSegs.at(i)->index));
+                }
+                else {
+                    SDL_RenderDrawRect(renderer, &itemContainer);
+                    setWhiteStr(&segIndex, getTwoDigitString(i));
+                    setWhiteStr(&segNumber, getTwoDigitString(timeline->songSegs.at(i)->index));
+                }
+            } else {
+                setWhiteStr(&segIndex, getTwoDigitString(i));
+                setWhiteStr(&segNumber, getTwoDigitString(timeline->songSegs.at(i)->index));
+            }
 
-            SDL_Rect container = {x, y + padding + segIndex.h * (i - topDisplayedItemIndex),
-                                  width, segIndex.h};
-
-            segIndex.render(container.x + container.w/4 - segIndex.w/2, container.y);
-            segNumber.render(container.x + container.w*3/4 - segNumber.w/2, container.y);
-
+            segIndex.render(itemContainer.x + itemContainer.w / 4 - segIndex.w / 2, itemContainer.y + itemContainer.h / 2 - segIndex.h / 2 + 1);
+            segNumber.render(itemContainer.x + itemContainer.w * 3 / 4 - segNumber.w / 2, itemContainer.y + itemContainer.h / 2 - segIndex.h / 2 + 1);
         }
     }
 
     void setBlackStr(Texture* texture, const string& text) const{
-        timeline->setBlackStr(texture, text);
+        texture->loadFromText(renderer, text, timeline->black, font);
     }
 
     void setWhiteStr(Texture* texture, const string& text) const{
-        timeline->setWhiteStr(texture, text);
+        texture->loadFromText(renderer, text, timeline->white, font);
+    }
+
+    void moveUp(){
+        if (timeline->focusedSegmentIndex > 0){
+            timeline->focusedSegmentIndex--;
+        }
+    }
+
+    void moveDown(){
+        if (timeline->focusedSegmentIndex < timeline->songSegs.size()-1){
+            timeline->focusedSegmentIndex++;
+        }
+    }
+
+    void segmentUp(){
+        if (timeline->songSegs.at(timeline->focusedSegmentIndex)->index < timeline->allSegs.size()-1){
+            timeline->songSegs.at(timeline->focusedSegmentIndex) = timeline->allSegs.at(timeline->songSegs.at(timeline->focusedSegmentIndex)->index + 1);
+        }
+    }
+
+    void segmentDown(){
+        if (timeline->songSegs.at(timeline->focusedSegmentIndex)->index > 0){
+            timeline->songSegs.at(timeline->focusedSegmentIndex) = timeline->allSegs.at(timeline->songSegs.at(timeline->focusedSegmentIndex)->index - 1);
+        }
     }
 
 };
