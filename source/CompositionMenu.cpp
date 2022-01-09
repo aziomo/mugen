@@ -37,13 +37,13 @@ void CompositionMenu::render(){
                      yByPercent(&colsLabel, 0.2));
     tempoLabel.render(xByPercent(&tempoLabel, 0.45, TO_LEFT),
                          yByPercent(&tempoLabel, 0.25));
-    segmentsSelector.render(xByPercent(&segmentsValue, 0.47, TO_RIGHT),
+    segmentsSelector.render(xByPercent(&segmentsValue, 0.50, CENTER),
                          yByPercent(&segmentsValue, 0.15));
 
-    colsSelector.render(xByPercent(&colsValue, 0.47, TO_RIGHT),
+    colsSelector.render(xByPercent(&colsValue, 0.50, CENTER),
                         yByPercent(&colsLabel, 0.2));
 
-    tempoSelector.render(xByPercent(&tempoValue, 0.47, TO_RIGHT),
+    tempoSelector.render(xByPercent(&tempoValue, 0.50, CENTER),
                       yByPercent(&tempoValue, 0.25));
 
 }
@@ -56,6 +56,9 @@ void CompositionMenu::removeSegment(){
     if (timeline->songSegs.size() > 1){
         timeline->songSegs.pop_back();
     }
+    if (timeline->focusedSegmentIndex == timeline->songSegs.size()){
+        timeline->focusedSegmentIndex--;
+    }
 }
 
 void CompositionMenu::addColumn(){
@@ -64,9 +67,12 @@ void CompositionMenu::addColumn(){
 }
 
 void CompositionMenu::removeColumn(){
-    if (timeline->allSegs.front()->cols.size() > 1)
+    if (timeline->segColumns() > 1)
         for (auto& segment : timeline->allSegs)
             segment->cols.pop_back();
+    if (timeline->focusedColIndex == timeline->segColumns()){
+        timeline->focusedColIndex--;
+    }
 }
 
 
@@ -172,6 +178,9 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
             break;
 
         case SDLK_TAB:
+            if (getFocusedControl()->isEditing){
+                selectFocusedControl();
+            }
             switchTimelineFocus();
             break;
         case SDLK_SPACE:

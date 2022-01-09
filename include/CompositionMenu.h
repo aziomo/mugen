@@ -38,6 +38,8 @@ public:
     };
 
     bool isTimelineFocused = false;
+    bool isSegmentListFocused = false;
+    bool isInstrumentListFocused = false;
 
     vector<Bit*> bitsPlayed;
 

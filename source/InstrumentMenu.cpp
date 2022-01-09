@@ -84,7 +84,7 @@ void InstrumentMenu::loadTextures() {
     setTextTexture(&amplitudeLabel, "AMP");
 
     setTextTexture(&helpBar, helpMessage, window->tinyFont);
-    setImageTexture(&arrowImg, assets_dir + "arrow.png");
+    setImageTexture(&arrowImg, assets_dir + "flat_arrow.png");
     setImageTexture(&sineImg, assets_dir + "sine.png");
     setImageTexture(&squareImg, assets_dir + "square.png");
     setImageTexture(&triangleImg, assets_dir + "triangle.png");

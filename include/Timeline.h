@@ -18,13 +18,12 @@ public:
         this->colWidth = colWidth;
         this->width = renderedCols * colWidth;
         this->height = height;
-        middleColX = (renderedCols / 2) * colWidth - renderedCols / 2;
+        middleColX = (renderedCols/2) * colWidth - renderedCols/2;
         for (int i = 0; i < 100; i++){
             allSegs.push_back(new Segment(startingColCount, i));
         }
         songSegs.push_back(allSegs.front());
     }
-
 
     bool timelineFocused = false;
     int focusedSegmentIndex = 0;
@@ -32,14 +31,13 @@ public:
     int focusedBitIndex = 0;
     bool editingMode = false;
 
-
     TTF_Font* font;
     SDL_Renderer* renderer;
     SDL_Color black = {0x00, 0x00, 0x00, 0xFF};
     SDL_Color grey = {0x77, 0x77, 0x77, 0xFF};
     SDL_Color white = {0xFF, 0xFF, 0xFF, 0xFF};
-    SDL_Rect outline;
     string dashdash = "--";
+    SDL_Rect outline;
 
     int width, height;
     int colWidth = 45;
@@ -63,10 +61,13 @@ public:
     }
 
     void renderLeftUnfocusedSegments(int x, int y){
+        int focusedSegmentRenderedColumns = focusedColIndex;
+        if (focusedSegmentRenderedColumns > renderedCols/2){
+            return;
+        }
         if (focusedSegmentIndex > 0){
             int renderedSegmentIndex = focusedSegmentIndex - 1;
             int leftColumnsLeftToRender = renderedCols/2 - focusedColIndex;
-            if (leftColumnsLeftToRender < 0) leftColumnsLeftToRender = 0;
             int leftColumnsRendered = 0;
 
             while (true){
@@ -92,14 +93,18 @@ public:
 
     void renderRightUnfocusedSegments(int x, int y){
 
+        int focusedSegmentRenderedColumns = segColumns() - focusedColIndex;
+        if (focusedSegmentRenderedColumns > renderedCols/2){
+            return;
+        }
         if (focusedSegmentIndex < songSegs.size()-1)
         {
-            int rightColumnsLeftToRender = (renderedCols/2)+1- (segColumns() - focusedColIndex);
-            if (rightColumnsLeftToRender > renderedCols/2) rightColumnsLeftToRender = renderedCols/2;
+            int rightColumnsLeftToRender = (renderedCols/2)+1- (focusedSegmentRenderedColumns);
             int rightColumnsRendered = 0;
             int renderedSegmentIndex = focusedSegmentIndex + 1;
 
             while (true){
+
                 if (rightColumnsRendered == rightColumnsLeftToRender) break;
                 if (rightColumnsRendered && rightColumnsRendered % segColumns() == 0){
                     if (++renderedSegmentIndex == songSegs.size()) break;
@@ -120,8 +125,13 @@ public:
         }
     }
 
+
     void renderFocusedSegmentLeftSide(int x, int y){
+        int columnsLeftToRender = std::min(focusedColIndex+1, renderedCols/2);
+        int columnsRendered = 0;
+
         for (int i = focusedColIndex - 1; i >= 0; i--){
+            if (columnsRendered == columnsLeftToRender) break;
             SDL_Rect colOutline = {x + middleColX + (i * (colWidth - 1)) - (focusedColIndex * (colWidth - 1)), y, colWidth, height};
             for (int j = 0; j < 5; j++){
                 SDL_Rect bitOutline = {colOutline.x, colOutline.y + (colOutline.h / 5) * j, colWidth, colOutline.h / 5 - 1};
@@ -134,12 +144,16 @@ public:
                 setBitLabels(renderedBit, true, bitFocused);
                 renderBitLabels(&bitOutline);
             }
+            columnsRendered++;
         }
     }
 
-
     void renderFocusedSegmentRightSide(int x, int y){
+        int columnsLeftToRender = std::min((segColumns() - focusedColIndex), (renderedCols/2 + 1));
+        int columnsRendered = 0;
+
         for (int i = focusedColIndex; i < segColumns(); i++){
+            if (columnsRendered == columnsLeftToRender) break;
             SDL_Rect colOutline = {x + middleColX + (i * (colWidth - 1)) - (focusedColIndex * (colWidth - 1)), y, colWidth, height};
             for (int j = 0; j < 5; j++){
                 SDL_Rect bitOutline = {colOutline.x, colOutline.y + (colOutline.h / 5) * j, colWidth, colOutline.h / 5 - 1};
@@ -152,6 +166,7 @@ public:
                 setBitLabels(renderedBit, true, bitFocused);
                 renderBitLabels(&bitOutline);
             }
+            columnsRendered++;
         }
     }
 
