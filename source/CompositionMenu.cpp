@@ -10,7 +10,7 @@ CompositionMenu::CompositionMenu(MainWindow *mainWindow) {
     renderer = mainWindow->renderer;
     timeline = new Timeline(this->renderer, window->smallFont, 21, 45, window->mainArea.h*2/5, 8);
     instrumentList = new ItemList(this->renderer, window->tinyFont, window->mainArea.w/5, window->mainArea.w/6, 6, true);
-    segmentManager = new SegmentManager(timeline, window->smallFont, window->mainArea.w/12, window->mainArea.w/6, 5);
+    segmentManager = new SegmentManager(timeline, window->smallFont, window->mainArea.w/10, window->mainArea.w/6, 5);
 }
 
 void CompositionMenu::init(){
@@ -24,8 +24,10 @@ void CompositionMenu::render(){
     updateTextures();
     timeline->render(xByPercent(&timeline->outline, 0.5),
             window->mainArea.h/2);
-    segmentManager->render(xByPercent(&segmentManager->outline, 0.1),
+    segmentManager->render(xByPercent(&segmentManager->outline, 0.04, TO_RIGHT),
                            window->mainArea.h * 1/5);
+    segmentManagerLabel.render(xByPercent(&segmentManager->outline, 0.04, TO_RIGHT),
+                               window->mainArea.h * 1/5 - segmentManagerLabel.h);
     instrumentList->render(xByPercent(&instrumentList->outline, 0.864),
                            window->mainArea.h * 1/5);
     instrumentListLabel.render(xByPercent(&instrumentList->outline, 0.864),
@@ -80,6 +82,7 @@ void CompositionMenu::loadTextures() {
     setTextTexture(&colsLabel, "Columns:", window->mainFont);
     setTextTexture(&tempoLabel, "Tempo:", window->mainFont);
     setTextTexture(&instrumentListLabel, "Current instrument", window->smallFont);
+    setTextTexture(&segmentManagerLabel, "Segments", window->smallFont);
 }
 
 void CompositionMenu::loadControls(){
@@ -382,7 +385,7 @@ void CompositionMenu::playbackTimeline(){
 
     double globalTime = musicBox->globalTime;
     double beginTime = globalTime;
-    double timeBetweenCols = 0.5;
+    double timeBetweenCols = timeline->tempo / 60.0;
     double timeElapsed = 0.0;
     double lastColTriggerTime = -timeBetweenCols;
 

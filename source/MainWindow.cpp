@@ -283,9 +283,18 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
 
     if (keyState[SDL_SCANCODE_PAGEUP] && !lastKeyState[SDL_SCANCODE_PAGEUP])
         passKeyPressToMenu(openTab, SDLK_PAGEUP);
+    if (keyState[SDL_SCANCODE_PAGEUP] && lastKeyState[SDL_SCANCODE_PAGEUP] && keyPressState[SDL_SCANCODE_PAGEUP]++ > 10)
+        passKeyPressToMenu(openTab, SDLK_PAGEUP);
+    if (!keyState[SDL_SCANCODE_PAGEUP] && lastKeyState[SDL_SCANCODE_PAGEUP])
+        keyPressState[SDL_SCANCODE_PAGEUP] = 0;
 
     if (keyState[SDL_SCANCODE_PAGEDOWN] && !lastKeyState[SDL_SCANCODE_PAGEDOWN])
         passKeyPressToMenu(openTab, SDLK_PAGEDOWN);
+    if (keyState[SDL_SCANCODE_PAGEDOWN] && lastKeyState[SDL_SCANCODE_PAGEDOWN] && keyPressState[SDL_SCANCODE_PAGEDOWN]++ > 10)
+        passKeyPressToMenu(openTab, SDLK_PAGEDOWN);
+    if (!keyState[SDL_SCANCODE_PAGEDOWN] && lastKeyState[SDL_SCANCODE_PAGEDOWN])
+        keyPressState[SDL_SCANCODE_PAGEDOWN] = 0;
+
 
     if (keyState[SDL_SCANCODE_TAB] && !lastKeyState[SDL_SCANCODE_TAB])
         passKeyPressToMenu(openTab, SDLK_TAB);

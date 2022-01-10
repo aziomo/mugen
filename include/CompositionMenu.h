@@ -43,7 +43,7 @@ public:
 
     vector<Bit*> bitsPlayed;
 
-    Texture instrumentListLabel,
+    Texture instrumentListLabel, segmentManagerLabel,
             segmentsLabel, colsLabel, tempoLabel,
             segmentsValue, colsValue, tempoValue;
 
