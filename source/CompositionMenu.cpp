@@ -5,7 +5,7 @@ using std::to_string;
 
 CompositionMenu::CompositionMenu(MainWindow *mainWindow) {
     textColor = {255, 255, 255};
-    musicBox = mainWindow->mBox;
+    musicBox = mainWindow->musicBox;
     window = mainWindow;
     renderer = mainWindow->renderer;
     timeline = new Timeline(this->renderer, window->smallFont, 21, 45, window->mainArea.h*2/5, 8);
@@ -188,7 +188,11 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
             if (timeline->editingMode){
                 timeline->focusedColIndex++;
             } else {
-                playbackTimeline();
+                if (!playbackOn){
+                    playbackTimeline();
+                } else {
+                    stopPlayback();
+                }
             }
             break;
         case SDLK_RETURN:
@@ -233,12 +237,12 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
             }
             break;
 
-        case SDLK_PAGEUP:
+        case SDLK_EQUALS:
             if (isSegmentListFocused){
                 segmentManager->segmentUp();
             }
             break;
-        case SDLK_PAGEDOWN:
+        case SDLK_MINUS:
             if (isSegmentListFocused){
                 segmentManager->segmentDown();
             }
@@ -373,21 +377,37 @@ void CompositionMenu::loadExampleBits() {
 
     for (int i = 0; i < cols->size(); i++){
         timeline->songSegs.front()->cols.at(i)->bits[0] = new Bit(60 - i * 3, instrument);
-        if (i % 2 == 1) {
-            auto* bitto = new Bit(80 - i * 3, instrument);
-            cols->at(i)->bits[1] = bitto;
-        }
+//        if (i % 2 == 1) {
+//            auto* bitto = new Bit(80 - i * 3, instrument);
+//            cols->at(i)->bits[1] = bitto;
+//        }
     }
+    timeline->songSegs.front()->cols.at(1)->bits[1] = new Bit(60, instrument, 3, 0);
+    timeline->songSegs.front()->cols.at(2)->bits[1] = new Bit(60, instrument, 3, 1);
+    timeline->songSegs.front()->cols.at(3)->bits[1] = new Bit(60, instrument, 3, 2);
+    timeline->songSegs.front()->cols.at(4)->bits[1] = new Bit(60, instrument, 3, 3);
 
+}
+
+void CompositionMenu::stopPlayback(){
+    musicBox->stopPlaying();
+    while (!musicBox->blocksBuffer.empty()){
+        musicBox->blocksBuffer.pop();
+    }
+    musicBox->blocksAvailable = 0;
+    musicBox->startPlaying();
+    playbackOn = false;
 }
 
 void CompositionMenu::playbackTimeline(){
 
     double globalTime = musicBox->globalTime;
     double beginTime = globalTime;
-    double timeBetweenCols = timeline->tempo / 60.0;
+    double timeBetweenCols = 60.0 / timeline->tempo;
     double timeElapsed = 0.0;
     double lastColTriggerTime = -timeBetweenCols;
+
+    vector<Bit*> heldBits;
 
     double songLength = timeline->songSegs.front()->cols.size() * timeBetweenCols * timeline->songSegs.size();
 
@@ -398,8 +418,22 @@ void CompositionMenu::playbackTimeline(){
             int colsElapsed = timeElapsed / timeBetweenCols;
             Column* currentCol = timeline->songSegs.front()->cols.at(colsElapsed);
 
+
+            for (auto bit : heldBits){
+                if (bit->holdSection == bit->holdTicks){
+                    bit->note.releasedOnTime = globalTime;
+                    bit->holdSection = 0;
+                }
+                else {
+                    bit->holdSection++;
+                }
+            }
+
             for (auto bit : currentCol->bits){
                 if (bit != nullptr){
+                    if (bit->holdSection == 0 && bit->holdTicks > 0){
+                        heldBits.push_back(bit);
+                    }
 
                     bit->note.pressedOnTime = globalTime;
                     bit->note.isAudible = true;
@@ -410,7 +444,7 @@ void CompositionMenu::playbackTimeline(){
             if (colsElapsed > 0){
                 Column* previousCol = timeline->songSegs.front()->cols.at(colsElapsed - 1);
                 for (auto bit : previousCol->bits){
-                    if (bit != nullptr){
+                    if (bit != nullptr && bit->holdTicks == 0){
                         bit->note.releasedOnTime = globalTime;
                     }
                 }
@@ -419,16 +453,28 @@ void CompositionMenu::playbackTimeline(){
             lastColTriggerTime = timeElapsed;
         }
 
-        auto bit = bitsPlayed.begin();
-        while (bit != bitsPlayed.end()){
-            if (!(*bit)->note.isAudible){
-                bit = bitsPlayed.erase(bit);
+        auto bitIterator = heldBits.begin();
+        while (bitIterator != heldBits.end()){
+            if (!(*bitIterator)->note.isAudible){
+                bitIterator = heldBits.erase(bitIterator);
             } else {
-                ++bit;
+                ++bitIterator;
             }
         }
 
-        musicBox->writeBitsToBuffer(&bitsPlayed);
+        bitIterator = bitsPlayed.begin();
+        while (bitIterator != bitsPlayed.end()){
+            if (!(*bitIterator)->note.isAudible){
+                bitIterator = bitsPlayed.erase(bitIterator);
+            } else {
+                ++bitIterator;
+            }
+        }
+
+        if (musicBox->blocksAvailable < musicBox->maxBlockCount){
+            musicBox->writeBitsToBuffer(&bitsPlayed);
+        }
+
         globalTime = musicBox->globalTime;
         timeElapsed = globalTime - beginTime;
     }

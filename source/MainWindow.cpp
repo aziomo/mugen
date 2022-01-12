@@ -8,7 +8,7 @@
 #define OPTI_MENU 3
 
 MainWindow::MainWindow(MusicBox *musicBox) {
-    this->mBox = musicBox;
+    this->musicBox = musicBox;
     initSDL();
     loadTextures();
     compositionMenu = new CompositionMenu(this);
@@ -19,7 +19,7 @@ MainWindow::MainWindow(MusicBox *musicBox) {
 
 MainWindow::~MainWindow() {
     delete instrumentMenu;
-    mBox = nullptr;
+    musicBox = nullptr;
     quitSDL();
 }
 
@@ -116,122 +116,122 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
 
     if (keyState[SDL_SCANCODE_Z] && !lastKeyState[SDL_SCANCODE_Z]){
         passKeyPressToMenu(openTab, SDLK_z);
-        mBox->pressNoteKey(0);
+        musicBox->pressNoteKey(0);
     }
     if (!keyState[SDL_SCANCODE_Z] && lastKeyState[SDL_SCANCODE_Z])
-        mBox->releaseNoteKey(0);
+        musicBox->releaseNoteKey(0);
 
     if (keyState[SDL_SCANCODE_S] && !lastKeyState[SDL_SCANCODE_S]){
         passKeyPressToMenu(openTab, SDLK_s);
-        mBox->pressNoteKey(1);
+        musicBox->pressNoteKey(1);
     }
     if (!keyState[SDL_SCANCODE_S] && lastKeyState[SDL_SCANCODE_S])
-        mBox->releaseNoteKey(1);
+        musicBox->releaseNoteKey(1);
 
     if (keyState[SDL_SCANCODE_X] && !lastKeyState[SDL_SCANCODE_X]){
         passKeyPressToMenu(openTab, SDLK_x);
-        mBox->pressNoteKey(2);
+        musicBox->pressNoteKey(2);
     }
     if (!keyState[SDL_SCANCODE_X] && lastKeyState[SDL_SCANCODE_X])
-        mBox->releaseNoteKey(2);
+        musicBox->releaseNoteKey(2);
 
     if (keyState[SDL_SCANCODE_D] && !lastKeyState[SDL_SCANCODE_D]){
         passKeyPressToMenu(openTab, SDLK_d);
-        mBox->pressNoteKey(3);
+        musicBox->pressNoteKey(3);
     }
     if (!keyState[SDL_SCANCODE_D] && lastKeyState[SDL_SCANCODE_D])
-        mBox->releaseNoteKey(3);
+        musicBox->releaseNoteKey(3);
 
     if (keyState[SDL_SCANCODE_C] && !lastKeyState[SDL_SCANCODE_C]){
         passKeyPressToMenu(openTab, SDLK_c);
-        mBox->pressNoteKey(4);
+        musicBox->pressNoteKey(4);
     }
     if (!keyState[SDL_SCANCODE_C] && lastKeyState[SDL_SCANCODE_C])
-        mBox->releaseNoteKey(4);
+        musicBox->releaseNoteKey(4);
 
     if (keyState[SDL_SCANCODE_V] && !lastKeyState[SDL_SCANCODE_V]){
         passKeyPressToMenu(openTab, SDLK_v);
-        mBox->pressNoteKey(5);
+        musicBox->pressNoteKey(5);
     }
     if (!keyState[SDL_SCANCODE_V] && lastKeyState[SDL_SCANCODE_V])
-        mBox->releaseNoteKey(5);
+        musicBox->releaseNoteKey(5);
 
     if (keyState[SDL_SCANCODE_G] && !lastKeyState[SDL_SCANCODE_G]){
         passKeyPressToMenu(openTab, SDLK_v);
-        mBox->pressNoteKey(6);
+        musicBox->pressNoteKey(6);
     }
     if (!keyState[SDL_SCANCODE_G] && lastKeyState[SDL_SCANCODE_G])
-        mBox->releaseNoteKey(6);
+        musicBox->releaseNoteKey(6);
 
     if (keyState[SDL_SCANCODE_B] && !lastKeyState[SDL_SCANCODE_B]){
         passKeyPressToMenu(openTab, SDLK_b);
-        mBox->pressNoteKey(7);
+        musicBox->pressNoteKey(7);
     }
     if (!keyState[SDL_SCANCODE_B] && lastKeyState[SDL_SCANCODE_B])
-        mBox->releaseNoteKey(7);
+        musicBox->releaseNoteKey(7);
 
     if (keyState[SDL_SCANCODE_H] && !lastKeyState[SDL_SCANCODE_H]){
         passKeyPressToMenu(openTab, SDLK_h);
-        mBox->pressNoteKey(8);
+        musicBox->pressNoteKey(8);
     }
     if (!keyState[SDL_SCANCODE_H] && lastKeyState[SDL_SCANCODE_H])
-        mBox->releaseNoteKey(8);
+        musicBox->releaseNoteKey(8);
 
     if (keyState[SDL_SCANCODE_N] && !lastKeyState[SDL_SCANCODE_N]){
         passKeyPressToMenu(openTab, SDLK_n);
-        mBox->pressNoteKey(9);
+        musicBox->pressNoteKey(9);
     }
     if (!keyState[SDL_SCANCODE_N] && lastKeyState[SDL_SCANCODE_N])
-        mBox->releaseNoteKey(9);
+        musicBox->releaseNoteKey(9);
 
     if (keyState[SDL_SCANCODE_J] && !lastKeyState[SDL_SCANCODE_J]){
         passKeyPressToMenu(openTab, SDLK_j);
-        mBox->pressNoteKey(10);
+        musicBox->pressNoteKey(10);
     }
     if (!keyState[SDL_SCANCODE_J] && lastKeyState[SDL_SCANCODE_J])
-        mBox->releaseNoteKey(10);
+        musicBox->releaseNoteKey(10);
 
     if (keyState[SDL_SCANCODE_M] && !lastKeyState[SDL_SCANCODE_M]){
         passKeyPressToMenu(openTab, SDLK_m);
-        mBox->pressNoteKey(11);
+        musicBox->pressNoteKey(11);
     }
     if (!keyState[SDL_SCANCODE_M] && lastKeyState[SDL_SCANCODE_M])
-        mBox->releaseNoteKey(11);
+        musicBox->releaseNoteKey(11);
 
     if (keyState[SDL_SCANCODE_COMMA] && !lastKeyState[SDL_SCANCODE_COMMA]){
         passKeyPressToMenu(openTab, SDLK_COMMA);
-        mBox->pressNoteKey(12);
+        musicBox->pressNoteKey(12);
     }
     if (!keyState[SDL_SCANCODE_COMMA] && lastKeyState[SDL_SCANCODE_COMMA])
-        mBox->releaseNoteKey(12);
+        musicBox->releaseNoteKey(12);
 
     if (keyState[SDL_SCANCODE_L] && !lastKeyState[SDL_SCANCODE_L]){
         passKeyPressToMenu(openTab, SDLK_l);
-        mBox->pressNoteKey(13);
+        musicBox->pressNoteKey(13);
     }
     if (!keyState[SDL_SCANCODE_L] && lastKeyState[SDL_SCANCODE_L])
-        mBox->releaseNoteKey(13);
+        musicBox->releaseNoteKey(13);
 
     if (keyState[SDL_SCANCODE_PERIOD] && !lastKeyState[SDL_SCANCODE_PERIOD]){
         passKeyPressToMenu(openTab, SDLK_PERIOD);
-        mBox->pressNoteKey(14);
+        musicBox->pressNoteKey(14);
     }
     if (!keyState[SDL_SCANCODE_PERIOD] && lastKeyState[SDL_SCANCODE_PERIOD])
-        mBox->releaseNoteKey(14);
+        musicBox->releaseNoteKey(14);
 
     if (keyState[SDL_SCANCODE_SEMICOLON] && !lastKeyState[SDL_SCANCODE_SEMICOLON]){
         passKeyPressToMenu(openTab, SDLK_SEMICOLON);
-        mBox->pressNoteKey(15);
+        musicBox->pressNoteKey(15);
     }
     if (!keyState[SDL_SCANCODE_SEMICOLON] && lastKeyState[SDL_SCANCODE_SEMICOLON])
-        mBox->releaseNoteKey(15);
+        musicBox->releaseNoteKey(15);
 
     if (keyState[SDL_SCANCODE_SLASH] && !lastKeyState[SDL_SCANCODE_SLASH]){
         passKeyPressToMenu(openTab, SDLK_SEMICOLON);
-        mBox->pressNoteKey(16);
+        musicBox->pressNoteKey(16);
     }
     if (!keyState[SDL_SCANCODE_SLASH] && lastKeyState[SDL_SCANCODE_SLASH])
-        mBox->releaseNoteKey(16);
+        musicBox->releaseNoteKey(16);
 
     if (keyState[SDL_SCANCODE_F1] && !lastKeyState[SDL_SCANCODE_F1])
         openTab = 1;
@@ -281,20 +281,25 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
     if (!keyState[SDL_SCANCODE_RIGHT] && lastKeyState[SDL_SCANCODE_RIGHT])
         keyPressState[SDL_SCANCODE_RIGHT] = 0;
 
+    if (keyState[SDL_SCANCODE_EQUALS] && !lastKeyState[SDL_SCANCODE_EQUALS])
+        passKeyPressToMenu(openTab, SDLK_EQUALS);
+    if (keyState[SDL_SCANCODE_EQUALS] && lastKeyState[SDL_SCANCODE_EQUALS] && keyPressState[SDL_SCANCODE_EQUALS]++ > 10)
+        passKeyPressToMenu(openTab, SDLK_EQUALS);
+    if (!keyState[SDL_SCANCODE_EQUALS] && lastKeyState[SDL_SCANCODE_EQUALS])
+        keyPressState[SDL_SCANCODE_EQUALS] = 0;
+
+    if (keyState[SDL_SCANCODE_MINUS] && !lastKeyState[SDL_SCANCODE_MINUS])
+        passKeyPressToMenu(openTab, SDLK_MINUS);
+    if (keyState[SDL_SCANCODE_MINUS] && lastKeyState[SDL_SCANCODE_MINUS] && keyPressState[SDL_SCANCODE_MINUS]++ > 10)
+        passKeyPressToMenu(openTab, SDLK_MINUS);
+    if (!keyState[SDL_SCANCODE_MINUS] && lastKeyState[SDL_SCANCODE_MINUS])
+        keyPressState[SDL_SCANCODE_MINUS] = 0;
+
     if (keyState[SDL_SCANCODE_PAGEUP] && !lastKeyState[SDL_SCANCODE_PAGEUP])
-        passKeyPressToMenu(openTab, SDLK_PAGEUP);
-    if (keyState[SDL_SCANCODE_PAGEUP] && lastKeyState[SDL_SCANCODE_PAGEUP] && keyPressState[SDL_SCANCODE_PAGEUP]++ > 10)
-        passKeyPressToMenu(openTab, SDLK_PAGEUP);
-    if (!keyState[SDL_SCANCODE_PAGEUP] && lastKeyState[SDL_SCANCODE_PAGEUP])
-        keyPressState[SDL_SCANCODE_PAGEUP] = 0;
+        musicBox->octaveUp();
 
     if (keyState[SDL_SCANCODE_PAGEDOWN] && !lastKeyState[SDL_SCANCODE_PAGEDOWN])
-        passKeyPressToMenu(openTab, SDLK_PAGEDOWN);
-    if (keyState[SDL_SCANCODE_PAGEDOWN] && lastKeyState[SDL_SCANCODE_PAGEDOWN] && keyPressState[SDL_SCANCODE_PAGEDOWN]++ > 10)
-        passKeyPressToMenu(openTab, SDLK_PAGEDOWN);
-    if (!keyState[SDL_SCANCODE_PAGEDOWN] && lastKeyState[SDL_SCANCODE_PAGEDOWN])
-        keyPressState[SDL_SCANCODE_PAGEDOWN] = 0;
-
+        musicBox->octaveDown();
 
     if (keyState[SDL_SCANCODE_TAB] && !lastKeyState[SDL_SCANCODE_TAB])
         passKeyPressToMenu(openTab, SDLK_TAB);

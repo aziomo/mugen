@@ -30,7 +30,7 @@ public:
 
     InstrumentMenu* instrumentMenu;
     CompositionMenu* compositionMenu;
-    MusicBox* mBox;
+    MusicBox* musicBox;
     int borderSize = 10;
     SDL_Rect mainArea = {borderSize, borderSize, w - borderSize * 2, h - borderSize * 2};
 

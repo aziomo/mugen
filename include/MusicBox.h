@@ -55,8 +55,8 @@ public:
     void writePressedKeysToBuffer();
     bool readBlockFromBuffer(float *outputBlock);
 
-    void bufferWriteLoop();
-    void bufferReadLoop();
+    void bufferInputLoop();
+    void bufferOutputLoop();
 
     void openFile();
     void closeFile();
@@ -73,6 +73,12 @@ public:
     void writeBitsToBuffer(vector<Bit*> *bits);
 
     int keyToNoteValue(SDL_Keycode key);
+
+    void tunePiano();
+
+    void octaveUp();
+
+    void octaveDown();
 };
 
 

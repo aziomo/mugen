@@ -11,9 +11,7 @@ MusicBox::MusicBox() {
     outputFile = nullptr;
     timeStep = 1.0 / 44100.0;
     globalTime = 0.0;
-    for (int i = 0; i < KEYBOARD_SIZE; i++) {
-        pressedNotes[i].frequency = midiToFreq(getRootCPosition() + i);
-    }
+    tunePiano();
 }
 
 MusicBox::~MusicBox() {
@@ -23,10 +21,28 @@ MusicBox::~MusicBox() {
     delete audioApi;
 }
 
+void MusicBox::octaveUp(){
+    if (currentOctave < 8)
+        currentOctave++;
+    tunePiano();
+}
+
+void MusicBox::octaveDown(){
+    if (currentOctave > 0)
+        currentOctave--;
+    tunePiano();
+}
+
+void MusicBox::tunePiano(){
+    for (int i = 0; i < KEYBOARD_SIZE; i++) {
+        pressedNotes[i].frequency = midiToFreq(getRootCPosition() + i);
+    }
+}
+
 void MusicBox::startPlaying() {
     isRunning = true;
-    readThread = std::thread(&MusicBox::bufferReadLoop, this);
-    writeThread = std::thread(&MusicBox::bufferWriteLoop, this);
+    readThread = std::thread(&MusicBox::bufferOutputLoop, this);
+    writeThread = std::thread(&MusicBox::bufferInputLoop, this);
 }
 
 void MusicBox::stopPlaying() {
@@ -85,13 +101,13 @@ void MusicBox::copyBlock(float *source, float *destination) {
     }
 }
 
-void MusicBox::bufferWriteLoop() {
+void MusicBox::bufferInputLoop() {
     while (isRunning) {
         writePressedKeysToBuffer();
     }
 }
 
-void MusicBox::bufferReadLoop() {
+void MusicBox::bufferOutputLoop() {
     float outputBlock[blockSize];
     while (isRunning) {
         if (readBlockFromBuffer(outputBlock)) {

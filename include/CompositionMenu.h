@@ -41,6 +41,8 @@ public:
     bool isSegmentListFocused = false;
     bool isInstrumentListFocused = false;
 
+    bool playbackOn = false;
+
     vector<Bit*> bitsPlayed;
 
     Texture instrumentListLabel, segmentManagerLabel,
@@ -87,6 +89,8 @@ public:
     void playbackTimeline();
 
     void switchTimelineFocus();
+
+    void stopPlayback();
 };
 
 

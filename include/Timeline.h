@@ -79,9 +79,9 @@ public:
                 SDL_Rect colOutline = {x + middleColX - (focusedColIndex * (colWidth - 1)) - (leftColumnsRendered + 1) * (colWidth - 1), y, colWidth, height};
 
                 for (int j = 0; j < 5; j++){
+                    auto renderedBit = songSegs.at(renderedSegmentIndex)->cols.at(renderedColumnIndex)->bits[j];
                     SDL_Rect bitOutline = {colOutline.x, colOutline.y + (colOutline.h / 5) * j, colWidth, colOutline.h / 5 - 1};
                     SDL_RenderDrawRect(renderer, &bitOutline);
-                    auto renderedBit = songSegs.at(renderedSegmentIndex)->cols.at(renderedColumnIndex)->bits[j];
                     setBitLabels(renderedBit, false);
                     renderBitLabels(&bitOutline);
                 }
@@ -156,13 +156,31 @@ public:
             if (columnsRendered == columnsLeftToRender) break;
             SDL_Rect colOutline = {x + middleColX + (i * (colWidth - 1)) - (focusedColIndex * (colWidth - 1)), y, colWidth, height};
             for (int j = 0; j < 5; j++){
+                auto renderedBit = songSegs.at(focusedSegmentIndex)->cols.at(i)->bits[j];
+
                 SDL_Rect bitOutline = {colOutline.x, colOutline.y + (colOutline.h / 5) * j, colWidth, colOutline.h / 5 - 1};
                 bool bitFocused = (focusedColIndex == i && focusedBitIndex == j);
                 if (timelineFocused && bitFocused){
                     renderBitBackground(&bitOutline);
                 }
-                SDL_RenderDrawRect(renderer, &bitOutline);
-                auto renderedBit = songSegs.at(focusedSegmentIndex)->cols.at(i)->bits[j];
+
+                if (renderedBit != nullptr && renderedBit->holdTicks > 0){
+                    SDL_RenderDrawLine(renderer, bitOutline.x, bitOutline.y, // gora
+                                       bitOutline.x + bitOutline.w, bitOutline.y);
+                    SDL_RenderDrawLine(renderer, bitOutline.x, bitOutline.y + bitOutline.h, // dol
+                                       bitOutline.x + bitOutline.w, bitOutline.y + bitOutline.h);
+                    if (renderedBit->holdSection == 0){
+                        SDL_RenderDrawLine(renderer, bitOutline.x, bitOutline.y, // lewo
+                                           bitOutline.x, bitOutline.y + bitOutline.h);
+                    } else if (renderedBit->holdSection == renderedBit->holdTicks) {
+                        SDL_RenderDrawLine(renderer, bitOutline.x + bitOutline.w, bitOutline.y,  // prawo
+                                           bitOutline.x + bitOutline.w, bitOutline.y + bitOutline.h);
+                    }
+                } else {
+                    SDL_RenderDrawRect(renderer, &bitOutline);
+                }
+
+//                SDL_RenderDrawRect(renderer, &bitOutline);
                 setBitLabels(renderedBit, true, bitFocused);
                 renderBitLabels(&bitOutline);
             }

@@ -10,7 +10,7 @@ using std::to_string;
 InstrumentMenu::InstrumentMenu(MainWindow *mainWindow) {
     window = mainWindow;
     renderer = mainWindow->renderer;
-    musicBox = mainWindow->mBox;
+    musicBox = mainWindow->musicBox;
     instrumentList = new ItemList(this->renderer, window->smallFont, window->mainArea.w / 5, window->mainArea.h * 1 / 2, 4);
 }
 

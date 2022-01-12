@@ -13,6 +13,14 @@ struct Bit {
     Bit(int midiNote, Instrument* instrument){
         this->instrument = instrument;
         note.frequency = midiToFreq(midiNote);
+        holdTicks = 0;
+        holdSection = 0;
+    }
+    Bit(int midiNote, Instrument* instrument, int holdTicks, int holdSection){
+        this->instrument = instrument;
+        note.frequency = midiToFreq(midiNote);
+        this->holdTicks = holdTicks;
+        this->holdSection = holdSection;
     }
 };
 
