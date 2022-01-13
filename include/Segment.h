@@ -6,20 +6,20 @@
 
 
 struct Bit {
-    int holdTicks;
+    int holdDuration;
     int holdSection;
     Note note;
     Instrument* instrument;
     Bit(int midiNote, Instrument* instrument){
         this->instrument = instrument;
         note.frequency = midiToFreq(midiNote);
-        holdTicks = 0;
+        holdDuration = 0;
         holdSection = 0;
     }
-    Bit(int midiNote, Instrument* instrument, int holdTicks, int holdSection){
+    Bit(int midiNote, Instrument* instrument, int holdDuration, int holdSection){
         this->instrument = instrument;
         note.frequency = midiToFreq(midiNote);
-        this->holdTicks = holdTicks;
+        this->holdDuration = holdDuration;
         this->holdSection = holdSection;
     }
 };

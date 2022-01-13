@@ -55,6 +55,8 @@ private:
     void renderTabs();
 
     void passKeyPressToMenu(int menu, SDL_Keycode);
+
+    void registerShiftPress(int menu, bool shiftPressed);
 };
 
 #endif //MUGEN_CPP_MAINWINDOW_H

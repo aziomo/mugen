@@ -295,6 +295,12 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
     if (!keyState[SDL_SCANCODE_MINUS] && lastKeyState[SDL_SCANCODE_MINUS])
         keyPressState[SDL_SCANCODE_MINUS] = 0;
 
+    if (keyState[SDL_SCANCODE_LSHIFT] && !lastKeyState[SDL_SCANCODE_LSHIFT])
+        registerShiftPress(openTab, true);
+    if (!keyState[SDL_SCANCODE_LSHIFT])
+        registerShiftPress(openTab, false);
+
+
     if (keyState[SDL_SCANCODE_PAGEUP] && !lastKeyState[SDL_SCANCODE_PAGEUP])
         musicBox->octaveUp();
 
@@ -312,6 +318,8 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
 
     if (keyState[SDL_SCANCODE_DELETE] && !lastKeyState[SDL_SCANCODE_DELETE])
         passKeyPressToMenu(openTab, SDLK_DELETE);
+
+
 
 }
 
@@ -363,6 +371,16 @@ int MainWindow::yByPercent(SDL_Rect* rect, double percent, Alignment align) cons
         case CENTER:
         default:
             return h * percent - rect->h * 0.5;
+    }
+}
+
+void MainWindow::registerShiftPress(int menu, bool shiftPressed)
+{
+    switch (menu) {
+        case COMP_MENU:
+            compositionMenu->registerShiftPress(shiftPressed); break;
+        default:
+            break;
     }
 }
 

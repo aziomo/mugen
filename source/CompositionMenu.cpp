@@ -47,6 +47,9 @@ void CompositionMenu::render(){
     tempoSelector.render(xByPercent(&tempoValue, 0.55, CENTER),
                       yByPercent(&tempoValue, 0.33));
 
+
+    debugShiftPressed.render(xByPercent(&debugShiftPressed, 0.5, CENTER),
+                             yByPercent(&debugShiftPressed, 0.3));
 }
 
 void CompositionMenu::addSegment() {
@@ -99,6 +102,7 @@ void CompositionMenu::loadControls(){
 }
 
 void CompositionMenu::updateTextures() {
+    setTextTexture(&debugShiftPressed, shiftPressed ? "SHIFT ON" : "SHIFT OFF", window->mainFont);
     setTextTexture(&segmentsValue, to_string(timeline->songSegs.size()), window->mainFont);
     setTextTexture(&colsValue, to_string(timeline->songSegs.front()->cols.size()), window->mainFont);
     setTextTexture(&tempoValue, to_string(timeline->tempo), window->mainFont);
@@ -121,6 +125,10 @@ int CompositionMenu::yByPercent(Texture* texture, double percent, Alignment alig
 }
 int CompositionMenu::yByPercent(SDL_Rect* rect, double percent, Alignment align) const {
     return window->yByPercent(rect, percent, align);
+}
+
+void CompositionMenu::registerShiftPress(bool shiftPressed){
+    this->shiftPressed = shiftPressed;
 }
 
 void CompositionMenu::handleKeyPress(SDL_Keycode key) {
@@ -220,20 +228,140 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
         case SDLK_PERIOD:
             if (timeline->editingMode){
                 auto* bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex)->bits[timeline->focusedBitIndex];
-                if (*bitPtr == nullptr){
-                    *bitPtr = new Bit(musicBox->keyToNoteValue(key), musicBox->instruments.at(instrumentList->selectedIndex));
-                } else {
-                    (*bitPtr)->note.frequency = midiToFreq(musicBox->keyToNoteValue(key));
+                if (*bitPtr != nullptr){
+
+                    if ((*bitPtr)->holdDuration > 0){
+
+                        int holdDuration = (*bitPtr)->holdDuration;
+                        int holdSection = (*bitPtr)->holdSection;
+
+                        for (int i = 0; i <= holdDuration - holdSection; i++){
+                            auto* _bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex+i)->bits[timeline->focusedBitIndex];
+                            delete *_bitPtr;
+                            *_bitPtr = nullptr;
+                        }
+                        for (int i = holdSection; i > 0; i--){
+                            auto* _bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex-i)->bits[timeline->focusedBitIndex];
+                            (*_bitPtr)->holdDuration = holdSection-1;
+                        }
+
+
+                        if (shiftPressed && timeline->focusedColIndex > 0
+                            && timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex-1)->bits[timeline->focusedBitIndex]->note.frequency == midiToFreq(musicBox->keyToNoteValue(key)))
+                        {
+                            for (int i = holdSection; i > 0; i--){
+                                auto* _bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex-i)->bits[timeline->focusedBitIndex];
+                                (*_bitPtr)->holdDuration++;
+                            }
+
+                            delete *bitPtr;
+                            *bitPtr = new Bit(musicBox->keyToNoteValue(key), musicBox->instruments.at(instrumentList->selectedIndex), holdSection, holdSection);
+                        }
+                        else
+                        {
+                            delete *bitPtr;
+                            *bitPtr = new Bit(musicBox->keyToNoteValue(key), musicBox->instruments.at(instrumentList->selectedIndex));
+                        }
+
+                    } else {
+                        if (!shiftPressed){
+                            (*bitPtr)->note.frequency = midiToFreq(musicBox->keyToNoteValue(key));
+                        } else {
+                            int holdDuration = 0;
+
+                            if (timeline->focusedColIndex > 0){
+                                auto* comparedBit = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex - 1)->bits[timeline->focusedBitIndex];
+                                if ((*comparedBit) != nullptr && (*comparedBit)->note.frequency == midiToFreq(musicBox->keyToNoteValue(key))){
+
+                                    holdDuration = (*comparedBit)->holdDuration;
+                                    int holdSection = (*comparedBit)->holdSection;
+
+                                    for (int i = holdSection+1; i > 0; i--){
+                                        auto* _bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex-i)->bits[timeline->focusedBitIndex];
+                                        (*_bitPtr)->holdDuration++;
+                                    }
+                                    holdDuration++;
+
+                                }
+                            }
+
+                            delete *bitPtr;
+                            *bitPtr = new Bit(musicBox->keyToNoteValue(key), musicBox->instruments.at(instrumentList->selectedIndex), holdDuration, holdDuration);
+                        }
+
+                    }
+
+                } else { // bitPtr == nullptr
+                    if (!shiftPressed){
+                        *bitPtr = new Bit(musicBox->keyToNoteValue(key), musicBox->instruments.at(instrumentList->selectedIndex));
+                    } else {
+                        int holdDuration = 0;
+
+                        if (timeline->focusedColIndex > 0){
+                            auto* comparedBit = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex - 1)->bits[timeline->focusedBitIndex];
+                            if ((*comparedBit) != nullptr && (*comparedBit)->note.frequency == midiToFreq(musicBox->keyToNoteValue(key))){
+
+                                holdDuration = (*comparedBit)->holdDuration;
+                                int holdSection = (*comparedBit)->holdSection;
+
+                                for (int i = holdSection+1; i > 0; i--){
+                                    auto* _bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex-i)->bits[timeline->focusedBitIndex];
+                                    (*_bitPtr)->holdDuration++;
+                                }
+                                holdDuration++;
+                            }
+                        }
+
+                        *bitPtr = new Bit(musicBox->keyToNoteValue(key), musicBox->instruments.at(instrumentList->selectedIndex), holdDuration, holdDuration);
+                    }
                 }
                 timeline->focusedColIndex++;
+                if (timeline->focusedColIndex == timeline->segColumns()){
+                    if (timeline->focusedSegmentIndex < timeline->songSegs.size()-1){
+                        timeline->focusedSegmentIndex++;
+                        timeline->focusedColIndex = 0;
+                    } else {
+                        timeline->focusedColIndex--;
+                    }
+                }
+
             }
             break;
+
+
+
         case SDLK_DELETE:
             if (timeline->editingMode){
                 auto* bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex)->bits[timeline->focusedBitIndex];
-                delete *bitPtr;
-                *bitPtr = nullptr;
+                if (*bitPtr != nullptr){
+                    if ((*bitPtr)->holdDuration > 0){
+
+                        int holdDuration = (*bitPtr)->holdDuration;
+                        int holdSection = (*bitPtr)->holdSection;
+
+                        for (int i = 0; i <= holdDuration - holdSection; i++){
+                            auto* _bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex+i)->bits[timeline->focusedBitIndex];
+                            delete *_bitPtr;
+                            *_bitPtr = nullptr;
+                        }
+
+                        for (int i = holdSection; i > 0; i--){
+                            auto* _bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex-i)->bits[timeline->focusedBitIndex];
+                            (*_bitPtr)->holdDuration = holdSection-1;
+                        }
+                    }
+                    delete *bitPtr;
+                    *bitPtr = nullptr;
+                }
                 timeline->focusedColIndex++;
+                if (timeline->focusedColIndex == timeline->segColumns()){
+                    if (timeline->focusedSegmentIndex < timeline->songSegs.size()-1){
+                        timeline->focusedSegmentIndex++;
+                        timeline->focusedColIndex = 0;
+                    } else {
+                        timeline->focusedColIndex--;
+                    }
+                }
             }
             break;
 
@@ -382,10 +510,11 @@ void CompositionMenu::loadExampleBits() {
 //            cols->at(i)->bits[1] = bitto;
 //        }
     }
-    timeline->songSegs.front()->cols.at(1)->bits[1] = new Bit(60, instrument, 3, 0);
-    timeline->songSegs.front()->cols.at(2)->bits[1] = new Bit(60, instrument, 3, 1);
-    timeline->songSegs.front()->cols.at(3)->bits[1] = new Bit(60, instrument, 3, 2);
-    timeline->songSegs.front()->cols.at(4)->bits[1] = new Bit(60, instrument, 3, 3);
+    timeline->songSegs.front()->cols.at(1)->bits[1] = new Bit(60, instrument, 4, 0);
+    timeline->songSegs.front()->cols.at(2)->bits[1] = new Bit(60, instrument, 4, 1);
+    timeline->songSegs.front()->cols.at(3)->bits[1] = new Bit(60, instrument, 4, 2);
+    timeline->songSegs.front()->cols.at(4)->bits[1] = new Bit(60, instrument, 4, 3);
+    timeline->songSegs.front()->cols.at(5)->bits[1] = new Bit(60, instrument, 4, 4);
 
 }
 
@@ -419,22 +548,8 @@ void CompositionMenu::playbackTimeline(){
             Column* currentCol = timeline->songSegs.front()->cols.at(colsElapsed);
 
 
-            for (auto bit : heldBits){
-                if (bit->holdSection == bit->holdTicks){
-                    bit->note.releasedOnTime = globalTime;
-                    bit->holdSection = 0;
-                }
-                else {
-                    bit->holdSection++;
-                }
-            }
-
             for (auto bit : currentCol->bits){
-                if (bit != nullptr){
-                    if (bit->holdSection == 0 && bit->holdTicks > 0){
-                        heldBits.push_back(bit);
-                    }
-
+                if (bit != nullptr && bit->holdSection == 0){
                     bit->note.pressedOnTime = globalTime;
                     bit->note.isAudible = true;
                     bitsPlayed.push_back(bit);
@@ -443,11 +558,14 @@ void CompositionMenu::playbackTimeline(){
 
             if (colsElapsed > 0){
                 Column* previousCol = timeline->songSegs.front()->cols.at(colsElapsed - 1);
-                for (auto bit : previousCol->bits){
-                    if (bit != nullptr && bit->holdTicks == 0){
-                        bit->note.releasedOnTime = globalTime;
+                for (int i = 0; i < 5; i++){
+                    auto bit = previousCol->bits[i];
+                    if (bit != nullptr && bit->holdSection == bit->holdDuration){
+                        auto beginBit = timeline->songSegs.front()->cols.at(colsElapsed - bit->holdDuration-1)->bits[i];
+                        beginBit->note.releasedOnTime = globalTime;
                     }
                 }
+
             }
 
             lastColTriggerTime = timeElapsed;

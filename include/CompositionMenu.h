@@ -41,13 +41,16 @@ public:
     bool isSegmentListFocused = false;
     bool isInstrumentListFocused = false;
 
+    bool shiftPressed = false;
+
     bool playbackOn = false;
 
     vector<Bit*> bitsPlayed;
 
     Texture instrumentListLabel, segmentManagerLabel,
             segmentsLabel, colsLabel, tempoLabel,
-            segmentsValue, colsValue, tempoValue;
+            segmentsValue, colsValue, tempoValue,
+            debugShiftPressed;
 
     void render();
 
@@ -91,6 +94,8 @@ public:
     void switchTimelineFocus();
 
     void stopPlayback();
+
+    void registerShiftPress(bool shiftPressed);
 };
 
 
