@@ -60,6 +60,9 @@ void MusicBox::zeroOutArray(T *array, int arraySize) {
 
 void MusicBox::writePressedKeysToBuffer() {
     if (blocksAvailable < maxBlockCount) {
+        std::unique_lock<std::mutex> locker(mu_blocksReadyToRead);
+        if (blocksAvailable == 0)
+            cv_keysPressed.wait(locker);
         bool anyPlaying = false;
         for (auto note: pressedNotes)
             if (note.isAudible) {
@@ -68,6 +71,7 @@ void MusicBox::writePressedKeysToBuffer() {
             }
 
         if (anyPlaying) {
+
             float *newBlock = new float[blockSize];
             zeroOutArray(newBlock, blockSize);
             for (int i = 0; i < KEYBOARD_SIZE; i++) {
@@ -77,7 +81,10 @@ void MusicBox::writePressedKeysToBuffer() {
             }
             globalTime += timeStep * blockSize;
             blocksBuffer.push(newBlock);
+
             blocksAvailable++;
+            if (blocksAvailable == 1)
+                cv_blocksReadyToRead.notify_one();
         }
     }
 }
@@ -110,22 +117,26 @@ void MusicBox::bufferInputLoop() {
 void MusicBox::bufferOutputLoop() {
     float outputBlock[blockSize];
     while (isRunning) {
-        if (readBlockFromBuffer(outputBlock)) {
-            writeBlockToFile(outputBlock);
-            audioApi->writeOut(outputBlock);
-        }
+        readBlockFromBuffer(outputBlock);
+        writeBlockToFile(outputBlock);
+        audioApi->writeOut(outputBlock);
     }
 }
 
 bool MusicBox::readBlockFromBuffer(float *outputBlock) {
-    if (blocksAvailable == 0) {
-        return false;
-    } else {
-        copyBlock(blocksBuffer.front(), outputBlock);
-        blocksBuffer.pop();
-        blocksAvailable--;
-        return true;
-    }
+    std::unique_lock<std::mutex> locker(mu_blocksReadyToRead);
+    if (blocksAvailable == 0)
+        cv_blocksReadyToRead.wait(locker);
+
+//    if (blocksAvailable == 0) {
+//        return false;
+//    } else {
+//
+    copyBlock(blocksBuffer.front(), outputBlock);
+    blocksBuffer.pop();
+    blocksAvailable--;
+    return true;
+//    }
 }
 
 int MusicBox::getRootCPosition() const {
@@ -156,6 +167,7 @@ void MusicBox::closeFile() {
 }
 
 void MusicBox::pressNoteKey(int keyPosition) {
+    cv_keysPressed.notify_one();
     pressedNotes[keyPosition].isAudible = true;
     pressedNotes[keyPosition].pressedOnTime = globalTime;
 }

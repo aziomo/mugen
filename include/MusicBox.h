@@ -37,9 +37,9 @@ public:
     int blockSize;
 //private:
     int maxBlockCount = 4;
-    std::mutex mutexBlocksReadyToRead;
+    std::mutex mu_blocksReadyToRead, mu_keysPressed;
+    std::condition_variable cv_blocksReadyToRead, cv_keysPressed;
     std::queue<float*> blocksBuffer;
-    std::condition_variable blocksReadyToRead;
     std::atomic<int> blocksAvailable;
 
     double globalTime;
