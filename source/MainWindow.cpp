@@ -324,6 +324,8 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
     if (keyState[SDL_SCANCODE_DELETE] && !lastKeyState[SDL_SCANCODE_DELETE])
         passKeyPressToMenu(openTab, SDLK_DELETE);
 
+    if (keyState[SDL_SCANCODE_BACKSPACE] && !lastKeyState[SDL_SCANCODE_BACKSPACE])
+        passKeyPressToMenu(openTab, SDLK_BACKSPACE);
 
 
 }

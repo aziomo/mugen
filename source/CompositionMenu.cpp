@@ -211,6 +211,10 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
             }
             break;
 
+        case SDLK_w:
+            musicBox->outputFile == nullptr ? musicBox->openFile() : musicBox->closeFile();
+            break;
+
         case SDLK_z:
         case SDLK_s:
         case SDLK_x:
@@ -361,6 +365,42 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
                     } else {
                         timeline->focusedColIndex--;
                     }
+                }
+            }
+            break;
+        case SDLK_BACKSPACE:
+            if (timeline->editingMode){
+
+                timeline->focusedColIndex--;
+                if (timeline->focusedColIndex < 0){
+                    if (timeline->focusedSegmentIndex > 0){
+                        timeline->focusedSegmentIndex--;
+                        timeline->focusedColIndex = timeline->segColumns()-1;
+                    } else {
+                        timeline->focusedColIndex++;
+                    }
+                }
+
+                auto* bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex)->bits[timeline->focusedBitIndex];
+                if (*bitPtr != nullptr){
+                    if ((*bitPtr)->holdDuration > 0){
+
+                        int holdDuration = (*bitPtr)->holdDuration;
+                        int holdSection = (*bitPtr)->holdSection;
+
+                        for (int i = 0; i <= holdDuration - holdSection; i++){
+                            auto* _bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex+i)->bits[timeline->focusedBitIndex];
+                            delete *_bitPtr;
+                            *_bitPtr = nullptr;
+                        }
+
+                        for (int i = holdSection; i > 0; i--){
+                            auto* _bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex-i)->bits[timeline->focusedBitIndex];
+                            (*_bitPtr)->holdDuration = holdSection-1;
+                        }
+                    }
+                    delete *bitPtr;
+                    *bitPtr = nullptr;
                 }
             }
             break;
