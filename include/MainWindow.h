@@ -11,6 +11,7 @@
 
 class InstrumentMenu;
 class CompositionMenu;
+class OptionsMenu;
 class GraphPainter;
 
 class MainWindow {
@@ -30,6 +31,7 @@ public:
 
     InstrumentMenu* instrumentMenu;
     CompositionMenu* compositionMenu;
+    OptionsMenu* optionsMenu;
     MusicBox* musicBox;
     int borderSize = 10;
     SDL_Rect mainArea = {borderSize, borderSize, w - borderSize * 2, h - borderSize * 2};

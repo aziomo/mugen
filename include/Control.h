@@ -16,6 +16,7 @@ public:
     }
     virtual void increment(bool largeDecrement){}
     virtual void decrement(bool largeIncrement){}
+    int borderSize = 2;
 };
 
 

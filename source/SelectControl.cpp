@@ -49,8 +49,6 @@ void SelectControl::loadImageControl(vector<Texture*> imageTextures, MainWindow*
 
 void SelectControl::render(int x, int y) {
     if (isHighlighted){
-        if (type == SelectorType::DOUBLE)
-            bool retard = true;
         highlightRect = {x - borderSize*2, y - borderSize*2,
                          mainTexture->w + borderSize * 4,
                          mainTexture->h + borderSize * 4};

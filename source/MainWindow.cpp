@@ -1,6 +1,7 @@
 #include "../include/MainWindow.h"
 #include "../include/CompositionMenu.h"
 #include "../include/InstrumentMenu.h"
+#include "../include/OptionsMenu.h"
 #include "../include/GraphPainter.h"
 
 #define INST_MENU 1
@@ -13,8 +14,10 @@ MainWindow::MainWindow(MusicBox *musicBox) {
     loadTextures();
     compositionMenu = new CompositionMenu(this);
     instrumentMenu = new InstrumentMenu(this);
+    optionsMenu = new OptionsMenu(this);
     compositionMenu->init();
     instrumentMenu->init();
+    optionsMenu->init();
 }
 
 MainWindow::~MainWindow() {
@@ -106,9 +109,11 @@ void MainWindow::render() {
 
     if (openTab == INST_MENU)
         instrumentMenu->render();
-    if (openTab == COMP_MENU) {
+    if (openTab == COMP_MENU)
         compositionMenu->render();
-    }
+    if (openTab == OPTI_MENU)
+        optionsMenu->render();
+
     SDL_RenderPresent(renderer);
 }
 
@@ -391,6 +396,7 @@ void MainWindow::passKeyPressToMenu(int menu, SDL_Keycode key){
         case COMP_MENU:
             compositionMenu->handleKeyPress(key); break;
         case OPTI_MENU:
+            optionsMenu->handleKeyPress(key); break;
         default:
             break;
     }

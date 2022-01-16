@@ -504,18 +504,24 @@ void InstrumentMenu::selectPrevOsc() {
 
 void InstrumentMenu::selectItemFromList(int index) {
 
-    if (index == instrumentList->items.size() - 1){
+    if (index == instrumentList->items.size() - 1){ // == musicBox->instruments.size()
         auto instrument = new Instrument(musicBox->blockSize);
-        instrument->index = musicBox->instruments.size();
-        musicBox->instruments.push_back(instrument);
-        instrumentList->removeItem(instrumentList->items.size() - 1);
-        int newInstrumentIndex = instrumentList->items.size() + 1;
-        instrumentList->addItem("Instrument " + to_string(newInstrumentIndex));
-        instrumentList->addItem("+ New instrument");
-        instrumentList->setSelectedIndex(newInstrumentIndex - 1);
-        window->compositionMenu->instrumentList->addItem("Instrument " + to_string(newInstrumentIndex));
+
+        addInstrument(instrument, index);
+
+        instrumentList->setSelectedIndex(index);
     } else {
         musicBox->currentInstrument = index;
     }
+}
+
+void InstrumentMenu::addInstrument(Instrument* instrument, int index){
+    instrument->index = index;
+    musicBox->instruments.push_back(instrument);
+    int visibleInstrumentIndex = index + 1;
+    instrumentList->items.pop_back();
+    instrumentList->addItem("Instrument " + to_string(visibleInstrumentIndex));
+    instrumentList->addItem("+ New instrument");
+    window->compositionMenu->instrumentList->addItem("Instrument " + to_string(visibleInstrumentIndex));
 }
 

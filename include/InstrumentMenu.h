@@ -106,6 +106,8 @@ public:
     int yByPercent(SDL_Rect *rect, double percent, Alignment align = CENTER) const;
 
     void selectItemFromList(int index);
+
+    void addInstrument(Instrument *instrument, int index);
 };
 
 #endif //MUGEN_CPP_WAVEFORMMENU_H

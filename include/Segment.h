@@ -22,10 +22,18 @@ struct Bit {
         this->holdDuration = holdDuration;
         this->holdSection = holdSection;
     }
+    ~Bit(){
+        instrument = nullptr;
+    }
 };
 
 struct Column {
     Column() : bits(){}
+    ~Column(){
+        for (Bit* bit : bits){
+            delete bit;
+        }
+    }
     Bit* bits[5];
 };
 
@@ -35,6 +43,12 @@ struct Segment {
             cols.push_back(new Column());
         }
         this->index = index;
+    }
+    ~Segment(){
+        while (!cols.empty()){
+            delete cols.back();
+            cols.pop_back();
+        }
     }
     int index;
     vector<Column*> cols;

@@ -25,9 +25,6 @@ public:
     void increment(bool largeIncrement) override;
     void render(int x, int y);
 
-//    bool isHighlighted = false;
-//    bool isEditing = false;
-
     void activate() override;
 
     void switchEditing();
