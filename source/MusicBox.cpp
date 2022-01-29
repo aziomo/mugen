@@ -153,8 +153,7 @@ void MusicBox::openFile() {
         fileInfo.samplerate = 44100;
         fileInfo.channels = 1;
         fileInfo.format = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
-//        fileInfo.format = SF_FORMAT_OGG | SF_FORMAT_FLOAT;
-        outputFile = sf_open("retard.ogg", SFM_WRITE, &fileInfo);
+        outputFile = sf_open("retard.wav", SFM_WRITE, &fileInfo);
         if (outputFile == nullptr) {
             auto errorMessage = sf_strerror(nullptr);
             printf("%s\n", errorMessage);

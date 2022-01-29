@@ -404,12 +404,12 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
             break;
 
         case SDLK_EQUALS:
-            if (isSegmentListFocused){
+            if (isSegmentListFocused || isTimelineFocused){
                 segmentManager->segmentUp();
             }
             break;
         case SDLK_MINUS:
-            if (isSegmentListFocused){
+            if (isSegmentListFocused || isTimelineFocused){
                 segmentManager->segmentDown();
             }
             break;
@@ -598,11 +598,11 @@ void CompositionMenu::playbackTimeline(){
             }
 
             if (colsElapsed > 0){
-                Column* previousCol = timeline->songSegs.front()->cols.at(colsElapsed - 1);
+                Column* previousCol = timeline->songSegs.at(segsElapsed)->cols.at(colsElapsed - 1);
                 for (int i = 0; i < 5; i++){
                     auto bit = previousCol->bits[i];
                     if (bit != nullptr && bit->holdSection == bit->holdDuration){
-                        auto beginBit = timeline->songSegs.front()->cols.at(colsElapsed - bit->holdDuration-1)->bits[i];
+                        auto beginBit = timeline->songSegs.at(segsElapsed)->cols.at(colsElapsed - bit->holdDuration-1)->bits[i];
                         beginBit->note.releasedOnTime = globalTime;
                     }
                 }
@@ -612,16 +612,16 @@ void CompositionMenu::playbackTimeline(){
             lastColTriggerTime = timeElapsed;
         }
 
-        auto bitIterator = heldBits.begin();
-        while (bitIterator != heldBits.end()){
-            if (!(*bitIterator)->note.isAudible){
-                bitIterator = heldBits.erase(bitIterator);
-            } else {
-                ++bitIterator;
-            }
-        }
+//        auto bitIterator = heldBits.begin();
+//        while (bitIterator != heldBits.end()){
+//            if (!(*bitIterator)->note.isAudible){
+//                bitIterator = heldBits.erase(bitIterator);
+//            } else {
+//                ++bitIterator;
+//            }
+//        }
 
-        bitIterator = bitsPlayed.begin();
+        auto bitIterator = bitsPlayed.begin();
         while (bitIterator != bitsPlayed.end()){
             if (!(*bitIterator)->note.isAudible){
                 bitIterator = bitsPlayed.erase(bitIterator);
