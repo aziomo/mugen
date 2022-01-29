@@ -209,12 +209,12 @@ public:
             if (renderedBit != nullptr){
                 if (bitFocused && editingMode){
                     setBlackStr(&bitNoteLabel, freqToSymbol(renderedBit->note.frequency));
-//                    setBlackStr(&bitInstrumentLabel, getTwoDigitString(renderedBit->instrument->index));
-                    setBlackStr(&bitInstrumentLabel,  to_string(renderedBit->holdSection) + to_string(renderedBit->holdDuration));
+                    setBlackStr(&bitInstrumentLabel, getTwoDigitString(renderedBit->instrument->index));
+//                    setBlackStr(&bitInstrumentLabel,  to_string(renderedBit->holdSection) + to_string(renderedBit->holdDuration));
                 } else {
                     setWhiteStr(&bitNoteLabel, freqToSymbol(renderedBit->note.frequency));
-//                    setWhiteStr(&bitInstrumentLabel, getTwoDigitString(renderedBit->instrument->index));
-                    setWhiteStr(&bitInstrumentLabel,  to_string(renderedBit->holdSection) + to_string(renderedBit->holdDuration));
+                    setWhiteStr(&bitInstrumentLabel, getTwoDigitString(renderedBit->instrument->index));
+//                    setWhiteStr(&bitInstrumentLabel,  to_string(renderedBit->holdSection) + to_string(renderedBit->holdDuration));
                 }
             } else {
                 if (bitFocused && editingMode){

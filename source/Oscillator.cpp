@@ -122,7 +122,7 @@ double Oscillator::getSample(double dTime) {
 double Oscillator::getPhase(double dTime) {
     if (lfo != nullptr) {
         return TWOPI * currentFrequency * dTime
-               + lfo->ampModifier * 10.0 / lfo->currentFrequency * getLfoInterpolatedSample(dTime);
+               + lfo->ampModifier * 100.0 / lfo->currentFrequency * getLfoInterpolatedSample(dTime);
     }
     return TWOPI * currentFrequency * dTime;
 }

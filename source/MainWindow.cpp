@@ -232,7 +232,7 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
         musicBox->releaseNoteKey(15);
 
     if (keyState[SDL_SCANCODE_SLASH] && !lastKeyState[SDL_SCANCODE_SLASH]){
-        passKeyPressToMenu(openTab, SDLK_SEMICOLON);
+        passKeyPressToMenu(openTab, SDLK_SLASH);
         musicBox->pressNoteKey(16);
     }
     if (!keyState[SDL_SCANCODE_SLASH] && lastKeyState[SDL_SCANCODE_SLASH])

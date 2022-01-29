@@ -49,8 +49,7 @@ public:
 
     Texture instrumentListLabel, segmentManagerLabel,
             segmentsLabel, colsLabel, tempoLabel,
-            segmentsValue, colsValue, tempoValue,
-            debugShiftPressed;
+            segmentsValue, colsValue, tempoValue;
 
     void render();
 

@@ -30,15 +30,15 @@ int main() {
 
         mainWindow->handleKeyPress(state, lastKeyState, keyPressState);
 
-        if(!state[SDL_SCANCODE_1] && stillPressed){
-            stillPressed = false;
-        }
-
-        if (state[SDL_SCANCODE_1] && !stillPressed )  {
-            stillPressed = true;
-            musicBox->isRunning ?
-                musicBox->stopPlaying() : musicBox->startPlaying();
-        }
+//        if(!state[SDL_SCANCODE_1] && stillPressed){
+//            stillPressed = false;
+//        }
+//
+//        if (state[SDL_SCANCODE_1] && !stillPressed )  {
+//            stillPressed = true;
+//            musicBox->isRunning ?
+//                musicBox->stopPlaying() : musicBox->startPlaying();
+//        }
 
         if (state[SDL_SCANCODE_F4]){
             quit = 1;

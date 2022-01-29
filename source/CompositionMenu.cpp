@@ -16,7 +16,6 @@ CompositionMenu::CompositionMenu(MainWindow *mainWindow) {
 void CompositionMenu::init(){
     loadTextures();
     loadControls();
-    loadExampleBits();
 }
 
 
@@ -48,8 +47,6 @@ void CompositionMenu::render(){
                       yByPercent(&tempoValue, 0.33));
 
 
-    debugShiftPressed.render(xByPercent(&debugShiftPressed, 0.5, CENTER),
-                             yByPercent(&debugShiftPressed, 0.3));
 }
 
 void CompositionMenu::addSegment() {
@@ -102,7 +99,6 @@ void CompositionMenu::loadControls(){
 }
 
 void CompositionMenu::updateTextures() {
-    setTextTexture(&debugShiftPressed, shiftPressed ? "SHIFT ON" : "SHIFT OFF", window->mainFont);
     setTextTexture(&segmentsValue, to_string(timeline->songSegs.size()), window->mainFont);
     setTextTexture(&colsValue, to_string(timeline->songSegs.front()->cols.size()), window->mainFont);
     setTextTexture(&tempoValue, to_string(timeline->tempo), window->mainFont);
@@ -230,6 +226,8 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
         case SDLK_COMMA:
         case SDLK_l:
         case SDLK_PERIOD:
+        case SDLK_SEMICOLON:
+        case SDLK_SLASH:
             if (timeline->editingMode){
                 auto* bitPtr = &timeline->songSegs.at(timeline->focusedSegmentIndex)->cols.at(timeline->focusedColIndex)->bits[timeline->focusedBitIndex];
                 if (*bitPtr != nullptr){
@@ -580,12 +578,15 @@ void CompositionMenu::playbackTimeline(){
 
     double songLength = timeline->songSegs.front()->cols.size() * timeBetweenCols * timeline->songSegs.size();
 
+    int playedSegment = 0;
+
     while (timeElapsed < songLength){
 
         if (timeElapsed - lastColTriggerTime > timeBetweenCols){
 
-            int colsElapsed = timeElapsed / timeBetweenCols;
-            Column* currentCol = timeline->songSegs.front()->cols.at(colsElapsed);
+            int colsElapsed = (int)(timeElapsed / timeBetweenCols) % timeline->segColumns();
+            int segsElapsed = timeElapsed / timeBetweenCols / timeline->segColumns();
+            Column* currentCol = timeline->songSegs.at(segsElapsed)->cols.at(colsElapsed);
 
 
             for (auto bit : currentCol->bits){
@@ -635,6 +636,7 @@ void CompositionMenu::playbackTimeline(){
 
         globalTime = musicBox->globalTime;
         timeElapsed = globalTime - beginTime;
+
     }
 
     for (auto bit : bitsPlayed){

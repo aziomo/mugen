@@ -28,6 +28,7 @@ void OptionsMenu::loadControls(){
     saveSongBtn.loadTextures(&saveSongLabel, window);
     saveProjectBtn.loadTextures(&saveProjectLabel, window);
     loadProjectBtn.loadTextures(&loadProjectLabel, window);
+    saveSongBtn.onPress = &OptionsMenu::saveProject;
     saveProjectBtn.onPress = &OptionsMenu::saveProject;
     loadProjectBtn.onPress = &OptionsMenu::loadProject;
 
@@ -48,7 +49,7 @@ void OptionsMenu::loadProject(){
 
     loadInstruments(projectJson);
 
-//    loadComposition();
+    loadComposition(projectJson);
 
 }
 

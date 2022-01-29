@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "../include/MusicBox.h"
+#include "fdk-aac/aacenc_lib.h"
 
 MusicBox::MusicBox() {
     audioApi = new AudioAPI(FRAMES_PER_BUFFER, 44100.0);
@@ -98,6 +99,9 @@ void MusicBox::writeBitsToBuffer(vector<Bit*> *bits){
     globalTime += timeStep * blockSize;
     blocksBuffer.push(newBlock);
     blocksAvailable++;
+    if (blocksAvailable == 1){
+        cv_blocksReadyToRead.notify_one();
+    }
 }
 
 
@@ -149,7 +153,8 @@ void MusicBox::openFile() {
         fileInfo.samplerate = 44100;
         fileInfo.channels = 1;
         fileInfo.format = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
-        outputFile = sf_open("retard.wav", SFM_WRITE, &fileInfo);
+//        fileInfo.format = SF_FORMAT_OGG | SF_FORMAT_FLOAT;
+        outputFile = sf_open("retard.ogg", SFM_WRITE, &fileInfo);
         if (outputFile == nullptr) {
             auto errorMessage = sf_strerror(nullptr);
             printf("%s\n", errorMessage);
@@ -208,6 +213,10 @@ int MusicBox::keyToNoteValue(SDL_Keycode key){
             return getRootCPosition() + 13;
         case SDLK_PERIOD:
             return getRootCPosition() + 14;
+        case SDLK_SEMICOLON:
+            return getRootCPosition() + 15;
+        case SDLK_SLASH:
+            return getRootCPosition() + 16;
         default:
             return 0;
     }

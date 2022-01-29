@@ -383,6 +383,7 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
                 if (prevIndex > instrumentList->selectedIndex && prevIndex != instrumentList->items.size() - 1){
                     editedInstrument = musicBox->instruments.at(instrumentList->selectedIndex);
                     editedOsc = editedInstrument->oscillators.front();
+                    currentOsc = 0;
                     musicBox->currentInstrument = instrumentList->selectedIndex;
                     updateSelectorValues();
                 }
@@ -402,6 +403,7 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
                 if (prevIndex < instrumentList->selectedIndex && instrumentList->selectedIndex != instrumentList->items.size() - 1){
                     editedInstrument = musicBox->instruments.at(instrumentList->selectedIndex);
                     editedOsc = editedInstrument->oscillators.front();
+                    currentOsc = 0;
                     musicBox->currentInstrument = instrumentList->selectedIndex;
                     updateSelectorValues();
                 }
