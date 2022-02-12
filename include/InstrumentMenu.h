@@ -108,6 +108,8 @@ public:
     void selectItemFromList(int index);
 
     void addInstrument(Instrument *instrument, int index);
+
+    void setHelpBarText(const string &text);
 };
 
 #endif //MUGEN_CPP_WAVEFORMMENU_H

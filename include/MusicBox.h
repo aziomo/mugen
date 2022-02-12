@@ -21,7 +21,7 @@ public:
 
     MusicBox();
     ~MusicBox();
-    bool isRunning;
+    bool isRunning, playbackKeys;
 
     bool pressedKeys[KEYBOARD_SIZE];
     Note pressedNotes[KEYBOARD_SIZE];
@@ -37,10 +37,10 @@ public:
     int blockSize;
 //private:
     int maxBlockCount = 4;
-    std::mutex mu_blocksReadyToRead, mu_keysPressed;
-    std::condition_variable cv_blocksReadyToRead, cv_keysPressed;
+    std::mutex mu_blocksReadyToRead;
+    std::condition_variable cv_blocksReadyToRead, cv_blocksReadyToWrite;
     std::queue<float*> blocksBuffer;
-    std::atomic<int> blocksAvailable;
+    std::atomic<int> blocksReadyToOutput;
 
     double globalTime;
     double timeStep;
@@ -50,7 +50,7 @@ public:
     std::thread readThread, writeThread;
     AudioAPI* audioApi;
 
-    void copyBlock(float *source, float *destination);
+    void copyBlock(const float *source, float *destination) const;
 
     void writePressedKeysToBuffer();
     bool readBlockFromBuffer(float *outputBlock);
@@ -61,7 +61,7 @@ public:
     void openFile();
     void closeFile();
 
-    long writeBlockToFile(float *block);
+    long writeBlockToFile(float *block) const;
 
     template <typename T>
     void zeroOutArray(T *array, int arraySize);
@@ -72,7 +72,7 @@ public:
 
     void writeBitsToBuffer(vector<Bit*> *bits);
 
-    int keyToNoteValue(SDL_Keycode key);
+    int keyToNoteValue(SDL_Keycode key) const;
 
     void tunePiano();
 

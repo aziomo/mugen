@@ -17,7 +17,7 @@ class Instrument {
 public:
     Instrument(int blockSize);
     ~Instrument();
-    std::string name;
+//    std::string name;
     int blockSize;
     vector<Oscillator*> oscillators;
     Envelope env;

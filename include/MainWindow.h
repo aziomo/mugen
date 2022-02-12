@@ -7,12 +7,11 @@
 #include "Texture.h"
 
 #define SET_WINDOW_WIDTH   (1000)
-#define SET_WINDOW_HEIGHT  (700)
+#define SET_WINDOW_HEIGHT  (600)
 
 class InstrumentMenu;
 class CompositionMenu;
 class OptionsMenu;
-class GraphPainter;
 
 class MainWindow {
 public:
@@ -33,6 +32,7 @@ public:
     CompositionMenu* compositionMenu;
     OptionsMenu* optionsMenu;
     MusicBox* musicBox;
+    Texture helpBar;
     int borderSize = 10;
     SDL_Rect mainArea = {borderSize, borderSize, w - borderSize * 2, h - borderSize * 2};
 
@@ -42,6 +42,8 @@ public:
     int xByPercent(SDL_Rect *rect, double percent, Alignment align = CENTER) const;
     int yByPercent(Texture *texture, double percent, Alignment align = CENTER) const;
     int yByPercent(SDL_Rect *rect, double percent, Alignment align = CENTER) const;
+
+    void setHelpBarText(const string &text);
 
 private:
     Texture instrumentsTab, compositionTab, optionsTab;
@@ -59,6 +61,7 @@ private:
     void passKeyPressToMenu(int menu, SDL_Keycode);
 
     void registerShiftPress(int menu, bool shiftPressed);
+
 };
 
 #endif //MUGEN_CPP_MAINWINDOW_H

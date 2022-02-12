@@ -11,7 +11,7 @@ InstrumentMenu::InstrumentMenu(MainWindow *mainWindow) {
     window = mainWindow;
     renderer = mainWindow->renderer;
     musicBox = mainWindow->musicBox;
-    instrumentList = new ItemList(this->renderer, window->smallFont, window->mainArea.w / 5, window->mainArea.h * 1 / 2, 4);
+    instrumentList = new ItemList(this->renderer, window->smallFont, window->mainArea.w / 5, window->mainArea.h * 1 / 2, 5);
 }
 
 InstrumentMenu::~InstrumentMenu() {
@@ -29,7 +29,7 @@ void InstrumentMenu::init() {
 
     window->compositionMenu->instrumentList->addItem("Instrument 1");
     instrumentList->addItem("Instrument 1");
-    instrumentList->addItem("+ New instrument");
+    instrumentList->addItem("+ Nowy instrument");
     helpMessage = "[ENTER] SELECT | [2] ADD OSC | [3] DEL OSC | [F4] QUIT | [ARROW KEYS] NAVIGATE";
     loadTextures();
     loadControls();
@@ -78,10 +78,10 @@ void InstrumentMenu::loadTextures() {
 
     setTextTexture(&instrumentName, "Instrument 1", window->largeFont);
 
-    setTextTexture(&oscLabel, "OSCILLATOR");
-    setTextTexture(&wavetypeLabel, "WAVE");
-    setTextTexture(&frequencyLabel, "FREQ");
-    setTextTexture(&amplitudeLabel, "AMP");
+    setTextTexture(&oscLabel, "OSCYLATOR");
+    setTextTexture(&wavetypeLabel, "TYP");
+    setTextTexture(&frequencyLabel, "CZEST.");
+    setTextTexture(&amplitudeLabel, "AMP.");
 
     setTextTexture(&helpBar, helpMessage, window->tinyFont);
     setImageTexture(&arrowImg, assets_dir + "flat_arrow.png");
@@ -96,12 +96,12 @@ void InstrumentMenu::loadTextures() {
     setTextTexture(&lfoLabel, "LFO");
     lfoCheckBox.loadTextures(&lfoLabel, window, true);
 
-    setTextTexture(&envelopeLabel, "ENVELOPE");
-    setTextTexture(&durationsLabel, "DURATIONS");
+    setTextTexture(&envelopeLabel, "OBWIEDNIA");
+    setTextTexture(&durationsLabel, "CZAS TRWANIA");
     setTextTexture(&attackLabel, "Attack");
     setTextTexture(&decayLabel, "Decay");
     setTextTexture(&releaseLabel, "Release");
-    setTextTexture(&levelsLabel, "LEVELS");
+    setTextTexture(&levelsLabel, "POZIOM");
     setTextTexture(&initialLabel, "Initial");
     setTextTexture(&sustainLabel, "Sustain");
 }
@@ -109,7 +109,7 @@ void InstrumentMenu::loadTextures() {
 void InstrumentMenu::updateTextures() {
     // waveform textures
     setWaveImage(&mainWaveSelector, editedOsc->waveType);
-    setTextTexture(&oscCounter, to_string(currentOsc + 1) + " of " +
+    setTextTexture(&oscCounter, to_string(currentOsc + 1) + " z " +
                                 to_string(editedInstrument->oscillators.size()));
     setTextTexture(&mainFreqValue, "x"+doubleToStr(editedOsc->freqModifier, 2));
     setTextTexture(&mainAmpValue, "x"+doubleToStr(editedOsc->ampModifier, 2));
@@ -134,7 +134,7 @@ void InstrumentMenu::updateTextures() {
     setTextTexture(&releaseValue, doubleToStr(editedInstrument->env.releaseDuration, 2));
 
     // debug controls
-    setTextTexture(&debugBlocksLeftLabel, to_string(musicBox->blocksAvailable));
+    setTextTexture(&debugBlocksLeftLabel, to_string(musicBox->blocksReadyToOutput));
     setTextTexture(&debugMaxSampleLabel, to_string(musicBox->maxSample));
     if (editedOsc->lfo != nullptr)
         setTextTexture(&debugCurrentFrequencyLabel,
@@ -158,7 +158,7 @@ int InstrumentMenu::yByPercent(SDL_Rect* rect, double percent, Alignment align) 
 void InstrumentMenu::render() {
     updateTextures();
     double waveMenuOffsetX = 0.4;
-    double waveMenuOffsetY = 0.175;
+    double waveMenuOffsetY = 0.25;
     double envMenuOffsetX = 0.8;
     double envMenuOffsetY = 0.8;
 
@@ -173,12 +173,10 @@ void InstrumentMenu::render() {
                                         yByPercent(&debugCurrentFrequencyLabel, 0.90));
     }
 
-    //render tab outlines somehow
-
     // MISC
     helpBar.render(window->borderSize * 2, window->mainArea.h - helpBar.h);
 
-//    instrumentName.render(xByPercent(&instrumentName, 0.5),
+//    instr umentName.render(xByPercent(&instrumentName, 0.5),
 //                          yByPercent(&instrumentName, 0.18));
 
     // MAIN OSCILLATOR LABELS
@@ -248,7 +246,7 @@ void InstrumentMenu::render() {
     envReleaseSelector.render(xByPercent(envReleaseSelector.mainTexture, envMenuOffsetX + 0.12),
                               yByPercent(envReleaseSelector.mainTexture, 0.65));
 
-    instrumentList->render(window->borderSize, window->mainArea.h / 4);
+    instrumentList->render(window->mainArea.w / 30, window->mainArea.h / 4);
 }
 
 void InstrumentMenu::setTextTexture(Texture* texture, const string& text) const {
@@ -523,7 +521,12 @@ void InstrumentMenu::addInstrument(Instrument* instrument, int index){
     int visibleInstrumentIndex = index + 1;
     instrumentList->items.pop_back();
     instrumentList->addItem("Instrument " + to_string(visibleInstrumentIndex));
-    instrumentList->addItem("+ New instrument");
+    instrumentList->addItem("+ Nowy instrument");
     window->compositionMenu->instrumentList->addItem("Instrument " + to_string(visibleInstrumentIndex));
+}
+
+void InstrumentMenu::setHelpBarText(const string& text)
+{
+    window->setHelpBarText(text);
 }
 

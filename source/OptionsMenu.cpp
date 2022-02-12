@@ -19,9 +19,9 @@ void OptionsMenu::init(){
 }
 
 void OptionsMenu::loadTextures(){
-    setTextTexture(&saveSongLabel, "SAVE SONG", window->mainFont);
-    setTextTexture(&saveProjectLabel, "SAVE PROJECT", window->mainFont);
-    setTextTexture(&loadProjectLabel, "LOAD PROJECT", window->mainFont);
+    setTextTexture(&saveSongLabel, "EKSPORTUJ KOMPOZYCJE", window->mainFont);
+    setTextTexture(&saveProjectLabel, "ZAPISZ PROJEKT", window->mainFont);
+    setTextTexture(&loadProjectLabel, "WCZYTAJ PROJEKT", window->mainFont);
 }
 
 void OptionsMenu::loadControls(){

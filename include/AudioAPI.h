@@ -48,6 +48,12 @@ private:
     void PrintDeviceInfo(PaDeviceInfo *deviceInfo, PaDeviceIndex deviceId);
     PaDeviceIndex GetDeviceId(const char* deviceName);
     PaDeviceIndex GetPulseDeviceId();
+    PaDeviceIndex GetDefaultDeviceId();
+
+
+    PaTime getSuggestedOutLatency(PaDeviceIndex deviceId);
+
+    void setOutDeviceParameters(PaStreamParameters *params);
 };
 
 

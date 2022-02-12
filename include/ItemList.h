@@ -107,12 +107,14 @@ public:
             SDL_Rect itemContainer = {x, y + itemHeight * (i - topDisplayedItemIndex), itemWidth, itemHeight};
 
             if (i == selectedIndex){
+                SDL_RenderFillRect(renderer, &itemContainer);
                 if (isFocused){
-                    SDL_RenderFillRect(renderer, &itemContainer);
                     setBlackStr(&itemLabel, items.at(i));
                     if (enumerate) setBlackStr(&indexLabel, getTwoDigitString(i));
                 } else{
-                    SDL_RenderDrawRect(renderer, &itemContainer);
+                    SDL_Rect containerFilling = {itemContainer.x+3, itemContainer.y+3, itemContainer.w-6, itemContainer.h-6};
+                    SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+                    SDL_RenderFillRect(renderer, &containerFilling);
                     setWhiteStr(&itemLabel, items.at(i));
                     if (enumerate) setWhiteStr(&indexLabel, getTwoDigitString(i));
                 }
@@ -127,13 +129,13 @@ public:
 
             if (enumerate){
                 indexLabel.render(itemContainer.x + itemContainer.w * 0.1 - indexLabel.w/2,
-                                  itemContainer.y + itemContainer.h/2 - itemLabel.h / 2);
+                                  itemContainer.y + itemContainer.h/2 - itemLabel.h / 2 + 1);
                 itemLabel.render(itemContainer.x + itemContainer.w * 0.55 - itemLabel.w/2,
-                                 itemContainer.y + itemContainer.h/2 - itemLabel.h / 2);
+                                 itemContainer.y + itemContainer.h/2 - itemLabel.h / 2 + 1);
             }
             else {
                 itemLabel.render(itemContainer.x + itemContainer.w / 2 - itemLabel.w / 2,
-                                 itemContainer.y + itemContainer.h/2 - itemLabel.h / 2);
+                                 itemContainer.y + itemContainer.h/2 - itemLabel.h / 2 + 1);
             }
 
         }

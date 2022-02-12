@@ -8,7 +8,7 @@ CompositionMenu::CompositionMenu(MainWindow *mainWindow) {
     musicBox = mainWindow->musicBox;
     window = mainWindow;
     renderer = mainWindow->renderer;
-    timeline = new Timeline(this->renderer, window->smallFont, 21, 45, window->mainArea.h*2/5, 8);
+    timeline = new Timeline(this->renderer, window->smallFont, 21, 45, window->mainArea.h*1/2, 8);
     instrumentList = new ItemList(this->renderer, window->tinyFont, window->mainArea.w/5, window->mainArea.w/6, 6, true);
     segmentManager = new SegmentManager(timeline, window->smallFont, window->mainArea.w/10, window->mainArea.w/6, 5);
 }
@@ -22,29 +22,29 @@ void CompositionMenu::init(){
 void CompositionMenu::render(){
     updateTextures();
     timeline->render(xByPercent(&timeline->outline, 0.5),
-            window->mainArea.h/2);
-    segmentManager->render(xByPercent(&segmentManager->outline, 0.04, TO_RIGHT),
-                           window->mainArea.h * 1/5);
-    segmentManagerLabel.render(xByPercent(&segmentManager->outline, 0.04, TO_RIGHT),
-                               window->mainArea.h * 1/5 - segmentManagerLabel.h);
+            window->mainArea.h * 0.45);
+    segmentManager->render(xByPercent(&segmentManager->outline, 0.04, TO_RIGHT) - 3,
+                           window->mainArea.h * 0.15);
+    segmentManagerLabel.render(xByPercent(&segmentManager->outline, 0.04, TO_RIGHT) - 3,
+                               window->mainArea.h * 0.15 - segmentManagerLabel.h);
     instrumentList->render(xByPercent(&instrumentList->outline, 0.864),
-                           window->mainArea.h * 1/5);
+                           window->mainArea.h * 0.15);
     instrumentListLabel.render(xByPercent(&instrumentList->outline, 0.864),
-                               window->mainArea.h * 1/5 - instrumentListLabel.h);
+                               window->mainArea.h * 0.15 - instrumentListLabel.h);
 
 
     segmentsLabel.render(xByPercent(&segmentsLabel, 0.5, TO_LEFT),
-                         yByPercent(&segmentsLabel, 0.23));
+                         yByPercent(&segmentsLabel, 0.18));
     segmentsSelector.render(xByPercent(&segmentsValue, 0.55, CENTER),
-                            yByPercent(&segmentsValue, 0.23));
+                            yByPercent(&segmentsValue, 0.18));
     colsLabel.render(xByPercent(&colsLabel, 0.5, TO_LEFT),
-                     yByPercent(&colsLabel, 0.28));
+                     yByPercent(&colsLabel, 0.26));
     colsSelector.render(xByPercent(&colsValue, 0.55, CENTER),
-                        yByPercent(&colsLabel, 0.28));
+                        yByPercent(&colsLabel, 0.26));
     tempoLabel.render(xByPercent(&tempoLabel, 0.5, TO_LEFT),
-                         yByPercent(&tempoLabel, 0.33));
+                         yByPercent(&tempoLabel, 0.34));
     tempoSelector.render(xByPercent(&tempoValue, 0.55, CENTER),
-                      yByPercent(&tempoValue, 0.33));
+                      yByPercent(&tempoValue, 0.34));
 
 
 }
@@ -78,11 +78,11 @@ void CompositionMenu::removeColumn(){
 
 
 void CompositionMenu::loadTextures() {
-    setTextTexture(&segmentsLabel, "Segments:", window->mainFont);
-    setTextTexture(&colsLabel, "Columns:", window->mainFont);
+    setTextTexture(&segmentsLabel, "Segmenty:", window->mainFont);
+    setTextTexture(&colsLabel, "Kolumny:", window->mainFont);
     setTextTexture(&tempoLabel, "Tempo:", window->mainFont);
-    setTextTexture(&instrumentListLabel, "Current instrument", window->smallFont);
-    setTextTexture(&segmentManagerLabel, "Segments", window->smallFont);
+    setTextTexture(&instrumentListLabel, "Bieżący instrument", window->smallFont);
+    setTextTexture(&segmentManagerLabel, "Segmenty", window->smallFont);
 }
 
 void CompositionMenu::loadControls(){
@@ -101,7 +101,8 @@ void CompositionMenu::loadControls(){
 void CompositionMenu::updateTextures() {
     setTextTexture(&segmentsValue, to_string(timeline->songSegs.size()), window->mainFont);
     setTextTexture(&colsValue, to_string(timeline->songSegs.front()->cols.size()), window->mainFont);
-    setTextTexture(&tempoValue, to_string(timeline->tempo), window->mainFont);
+//    setTextTexture(&tempoValue, to_string(timeline->tempo), window->mainFont);
+    setTextTexture(&tempoValue, to_string(musicBox->blocksReadyToOutput), window->mainFont);
 }
 
 void CompositionMenu::setTextTexture(Texture* texture, const string& text) const {
@@ -193,7 +194,7 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
                 timeline->focusedColIndex++;
             } else {
                 if (!playbackOn){
-                    playbackTimeline();
+                    startPlayback();
                 } else {
                     stopPlayback();
                 }
@@ -354,15 +355,6 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
                     }
                     delete *bitPtr;
                     *bitPtr = nullptr;
-                }
-                timeline->focusedColIndex++;
-                if (timeline->focusedColIndex == timeline->segColumns()){
-                    if (timeline->focusedSegmentIndex < timeline->songSegs.size()-1){
-                        timeline->focusedSegmentIndex++;
-                        timeline->focusedColIndex = 0;
-                    } else {
-                        timeline->focusedColIndex--;
-                    }
                 }
             }
             break;
@@ -543,10 +535,6 @@ void CompositionMenu::loadExampleBits() {
 
     for (int i = 0; i < cols->size(); i++){
         timeline->songSegs.front()->cols.at(i)->bits[0] = new Bit(60 - i * 3, instrument);
-//        if (i % 2 == 1) {
-//            auto* bitto = new Bit(80 - i * 3, instrument);
-//            cols->at(i)->bits[1] = bitto;
-//        }
     }
     timeline->songSegs.front()->cols.at(1)->bits[1] = new Bit(60, instrument, 4, 0);
     timeline->songSegs.front()->cols.at(2)->bits[1] = new Bit(60, instrument, 4, 1);
@@ -556,18 +544,27 @@ void CompositionMenu::loadExampleBits() {
 
 }
 
+void CompositionMenu::startPlayback(){
+    musicBox->stopPlaying();
+    musicBox->playbackKeys = false;
+    musicBox->startPlaying();
+    musicBox->writeThread = std::thread(&CompositionMenu::playbackTimeline, this);
+}
+
 void CompositionMenu::stopPlayback(){
     musicBox->stopPlaying();
     while (!musicBox->blocksBuffer.empty()){
         musicBox->blocksBuffer.pop();
     }
-    musicBox->blocksAvailable = 0;
+    musicBox->blocksReadyToOutput = 0;
+    musicBox->playbackKeys = true;
     musicBox->startPlaying();
     playbackOn = false;
 }
 
 void CompositionMenu::playbackTimeline(){
 
+    playbackOn = true;
     double globalTime = musicBox->globalTime;
     double beginTime = globalTime;
     double timeBetweenCols = 60.0 / timeline->tempo;
@@ -578,9 +575,13 @@ void CompositionMenu::playbackTimeline(){
 
     double songLength = timeline->songSegs.front()->cols.size() * timeBetweenCols * timeline->songSegs.size();
 
-    int playedSegment = 0;
-
     while (timeElapsed < songLength){
+
+        std::unique_lock<std::mutex> mu(musicBox->mu_blocksReadyToRead);
+        if (musicBox->blocksReadyToOutput == musicBox->maxBlockCount){
+            musicBox->cv_blocksReadyToWrite.wait(mu);
+        }
+        if (!musicBox->isRunning) break;
 
         if (timeElapsed - lastColTriggerTime > timeBetweenCols){
 
@@ -612,14 +613,6 @@ void CompositionMenu::playbackTimeline(){
             lastColTriggerTime = timeElapsed;
         }
 
-//        auto bitIterator = heldBits.begin();
-//        while (bitIterator != heldBits.end()){
-//            if (!(*bitIterator)->note.isAudible){
-//                bitIterator = heldBits.erase(bitIterator);
-//            } else {
-//                ++bitIterator;
-//            }
-//        }
 
         auto bitIterator = bitsPlayed.begin();
         while (bitIterator != bitsPlayed.end()){
@@ -629,8 +622,7 @@ void CompositionMenu::playbackTimeline(){
                 ++bitIterator;
             }
         }
-
-        if (musicBox->blocksAvailable < musicBox->maxBlockCount){
+        if (musicBox->blocksReadyToOutput < musicBox->maxBlockCount){
             musicBox->writeBitsToBuffer(&bitsPlayed);
         }
 
@@ -645,6 +637,8 @@ void CompositionMenu::playbackTimeline(){
         }
     }
     bitsPlayed.clear();
+
+    playbackOn = false;
 
 }
 

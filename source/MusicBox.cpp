@@ -1,14 +1,14 @@
 #include <iostream>
 
 #include "../include/MusicBox.h"
-#include "fdk-aac/aacenc_lib.h"
 
 MusicBox::MusicBox() {
     audioApi = new AudioAPI(FRAMES_PER_BUFFER, 44100.0);
     blockSize = audioApi->bufferSize;
     isRunning = false;
+    playbackKeys = true;
     instruments.push_back(new Instrument(blockSize));
-    blocksAvailable = 0;
+    blocksReadyToOutput = 0;
     outputFile = nullptr;
     timeStep = 1.0 / 44100.0;
     globalTime = 0.0;
@@ -43,12 +43,16 @@ void MusicBox::tunePiano(){
 void MusicBox::startPlaying() {
     isRunning = true;
     readThread = std::thread(&MusicBox::bufferOutputLoop, this);
-    writeThread = std::thread(&MusicBox::bufferInputLoop, this);
+    if (playbackKeys){
+        writeThread = std::thread(&MusicBox::bufferInputLoop, this);
+    }
 }
 
 void MusicBox::stopPlaying() {
     isRunning = false;
+    cv_blocksReadyToRead.notify_one();
     readThread.join();
+    cv_blocksReadyToWrite.notify_one();
     writeThread.join();
 }
 
@@ -60,10 +64,13 @@ void MusicBox::zeroOutArray(T *array, int arraySize) {
 }
 
 void MusicBox::writePressedKeysToBuffer() {
-    if (blocksAvailable < maxBlockCount) {
+    if (blocksReadyToOutput < maxBlockCount) {
         std::unique_lock<std::mutex> locker(mu_blocksReadyToRead);
-        if (blocksAvailable == 0)
-            cv_keysPressed.wait(locker);
+        if (blocksReadyToOutput == 0)
+            cv_blocksReadyToWrite.wait(locker);
+        if (!isRunning){
+            return;
+        }
         bool anyPlaying = false;
         for (auto note: pressedNotes)
             if (note.isAudible) {
@@ -83,8 +90,8 @@ void MusicBox::writePressedKeysToBuffer() {
             globalTime += timeStep * blockSize;
             blocksBuffer.push(newBlock);
 
-            blocksAvailable++;
-            if (blocksAvailable == 1)
+            blocksReadyToOutput++;
+            if (blocksReadyToOutput == 1)
                 cv_blocksReadyToRead.notify_one();
         }
     }
@@ -98,15 +105,15 @@ void MusicBox::writeBitsToBuffer(vector<Bit*> *bits){
     }
     globalTime += timeStep * blockSize;
     blocksBuffer.push(newBlock);
-    blocksAvailable++;
-    if (blocksAvailable == 1){
+    blocksReadyToOutput++;
+    if (blocksReadyToOutput == 1){
         cv_blocksReadyToRead.notify_one();
     }
 }
 
 
 
-void MusicBox::copyBlock(float *source, float *destination) {
+void MusicBox::copyBlock(const float *source, float *destination) const {
     for (int i = 0; i < blockSize; i++) {
         destination[i] = source[i];
     }
@@ -121,7 +128,7 @@ void MusicBox::bufferInputLoop() {
 void MusicBox::bufferOutputLoop() {
     float outputBlock[blockSize];
     while (isRunning) {
-        readBlockFromBuffer(outputBlock);
+        if (!readBlockFromBuffer(outputBlock)) break;
         writeBlockToFile(outputBlock);
         audioApi->writeOut(outputBlock);
     }
@@ -129,18 +136,18 @@ void MusicBox::bufferOutputLoop() {
 
 bool MusicBox::readBlockFromBuffer(float *outputBlock) {
     std::unique_lock<std::mutex> locker(mu_blocksReadyToRead);
-    if (blocksAvailable == 0)
+    if (blocksReadyToOutput == 0)
         cv_blocksReadyToRead.wait(locker);
+    if (!isRunning)
+        return false;
 
-//    if (blocksAvailable == 0) {
-//        return false;
-//    } else {
-//
     copyBlock(blocksBuffer.front(), outputBlock);
     blocksBuffer.pop();
-    blocksAvailable--;
+    blocksReadyToOutput--;
+    if (blocksReadyToOutput == maxBlockCount - 1){
+        cv_blocksReadyToWrite.notify_one();
+    }
     return true;
-//    }
 }
 
 int MusicBox::getRootCPosition() const {
@@ -153,7 +160,7 @@ void MusicBox::openFile() {
         fileInfo.samplerate = 44100;
         fileInfo.channels = 1;
         fileInfo.format = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
-        outputFile = sf_open("retard.wav", SFM_WRITE, &fileInfo);
+        outputFile = sf_open("composition.wav", SFM_WRITE, &fileInfo);
         if (outputFile == nullptr) {
             auto errorMessage = sf_strerror(nullptr);
             printf("%s\n", errorMessage);
@@ -161,7 +168,7 @@ void MusicBox::openFile() {
     }
 }
 
-long MusicBox::writeBlockToFile(float *block) {
+long MusicBox::writeBlockToFile(float *block) const {
     return sf_write_float(outputFile, block, blockSize);
 }
 
@@ -171,7 +178,7 @@ void MusicBox::closeFile() {
 }
 
 void MusicBox::pressNoteKey(int keyPosition) {
-    cv_keysPressed.notify_one();
+    cv_blocksReadyToWrite.notify_one();
     pressedNotes[keyPosition].isAudible = true;
     pressedNotes[keyPosition].pressedOnTime = globalTime;
 }
@@ -180,7 +187,7 @@ void MusicBox::releaseNoteKey(int keyPosition) {
     pressedNotes[keyPosition].releasedOnTime = globalTime;
 }
 
-int MusicBox::keyToNoteValue(SDL_Keycode key){
+int MusicBox::keyToNoteValue(SDL_Keycode key) const{
     switch (key){
         case SDLK_z:
             return getRootCPosition() + 0;

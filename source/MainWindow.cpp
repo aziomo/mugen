@@ -2,7 +2,6 @@
 #include "../include/CompositionMenu.h"
 #include "../include/InstrumentMenu.h"
 #include "../include/OptionsMenu.h"
-#include "../include/GraphPainter.h"
 
 #define INST_MENU 1
 #define COMP_MENU 2
@@ -41,7 +40,7 @@ void MainWindow::initSDL() {
         smallFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 20);
         tinyFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 16);
         if (mainFont == nullptr) {
-            printf("font fucked up\n");
+            printf("Failed to load the font\n");
         }
     }
 }
@@ -106,6 +105,7 @@ void MainWindow::render() {
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
     SDL_RenderFillRect(renderer, &mainArea);
     renderTabs();
+    helpBar.render(borderSize * 2, mainArea.h - helpBar.h);
 
     if (openTab == INST_MENU)
         instrumentMenu->render();
@@ -331,9 +331,13 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
 }
 
 void MainWindow::loadTextures() {
-    instrumentsTab.loadFromText(renderer, "INSTRUMENTS", textColor, mainFont);
-    compositionTab.loadFromText(renderer, "COMPOSITION", textColor, mainFont);
-    optionsTab.loadFromText(renderer, "OPTIONS", textColor, mainFont);
+    instrumentsTab.loadFromText(renderer, "INSTRUMENTY", textColor, mainFont);
+    compositionTab.loadFromText(renderer, "KOMPOZYCJA", textColor, mainFont);
+    optionsTab.loadFromText(renderer, "OPCJE", textColor, mainFont);
+}
+
+void MainWindow::setHelpBarText(const std::string& text){
+    helpBar.loadFromText(renderer, text, textColor, tinyFont);
 }
 
 int MainWindow::xByPercent(Texture* texture, double percent, Alignment align) const {

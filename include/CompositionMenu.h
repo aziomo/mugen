@@ -49,7 +49,8 @@ public:
 
     Texture instrumentListLabel, segmentManagerLabel,
             segmentsLabel, colsLabel, tempoLabel,
-            segmentsValue, colsValue, tempoValue;
+            segmentsValue, colsValue, tempoValue,
+            helpBar;
 
     void render();
 
@@ -91,6 +92,8 @@ public:
     void playbackTimeline();
 
     void switchTimelineFocus();
+
+    void startPlayback();
 
     void stopPlayback();
 

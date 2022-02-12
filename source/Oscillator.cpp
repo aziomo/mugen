@@ -19,7 +19,6 @@ void Oscillator::setupLfoLookup(WaveformType type) {
     for (double &i: lfoLookupTable)
         i = 0;
 
-
     double xIncrement = TWOPI / (double) lookupTableSize;
     double startingX = 0.0;
     double currentX = startingX;
