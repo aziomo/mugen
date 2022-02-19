@@ -1,54 +1,46 @@
 #include "../include/Oscillator.h"
 
-using std::abs;
+using std::abs, std::max, std::min;
 
 Oscillator::Oscillator(int sampleRate, WaveformType waveformType) {
     setWaveformType(waveformType);
     this->sampleRate = sampleRate;
-    currentFrequency = 0.0;
+    frequency = 0.0;
     freqModifier = 1.0;
     ampModifier = 1.0;
     lfo = nullptr;
 }
 
 void Oscillator::setFrequency(double frequency) {
-    currentFrequency = frequency * freqModifier;
+    this->frequency = frequency * freqModifier;
 }
 
 void Oscillator::setupLfoLookup(WaveformType type) {
-    for (double &i: lfoLookupTable)
-        i = 0;
+    double xIncrement = TWOPI / (double) lookupTableSize,
+    startingX = 0.0,
+    currentX = startingX,
+    currentY = YofX(currentX, type),
+    maxSample = 0.0,
+    minSample = abs(currentY);
 
-    double xIncrement = TWOPI / (double) lookupTableSize;
-    double startingX = 0.0;
-    double currentX = startingX;
-    double currentY = YofX(currentX, type);
+    for (double &sample: lfoLookupTable)
+        sample = 0;
 
-    double maxSample = 0.0;
-    double minSample = abs(currentY);
-
-    for (int i = 0; i < lookupTableSize; i++) {
+    for (double & i : lfoLookupTable) {
         currentX += xIncrement;
         currentY += YofX(currentX, type);
-
-        if (maxSample < abs(currentY)) {
-            maxSample = abs(currentY);
-        }
-        if (minSample > abs(currentY)) {
-            minSample = abs(currentY);
-        }
+        maxSample = max(maxSample, abs(currentY));
+        minSample = min(minSample, abs(currentY));
     }
 
     currentX = startingX;
     currentY = YofX(currentX, type);
 
-    double normalizedY = (currentY - minSample) / (maxSample - minSample);
-
-    for (int i = 0; i < lookupTableSize; i++) {
-        lfoLookupTable[i] = normalizedY;
+    for (double &sample : lfoLookupTable) {
+        double normalizedY = (currentY - minSample) / (maxSample - minSample);
+        sample = normalizedY;
         currentX += xIncrement;
         currentY += YofX(currentX, type);
-        normalizedY = (currentY - minSample) / (maxSample - minSample);
     }
 }
 
@@ -60,119 +52,85 @@ double Oscillator::indexToPhase(int index) {
     return (double) index / lookupTableSize * TWOPI;
 }
 
+double Oscillator::getLfoInterpSample(double dTime) {
+    double x = fmod(getPhase(dTime, lfo->frequency), TWOPI);
+    int x0Index = phaseToIndex(x);
+    int x1Index = (x0Index == lookupTableSize - 1) ? 0 : x0Index + 1;
+    if (x == lfoLookupTable[x0Index])
+        return lfoLookupTable[x0Index];
+
+    double x0 = indexToPhase(x0Index),
+    x1 = indexToPhase(x1Index),
+    y0 = lfoLookupTable[x0Index],
+    y1 = lfoLookupTable[x1Index];
+    return y0 + (y1-y0)/(x1-x0) * (x - x0);
+}
+
 double Oscillator::YofX(double x, WaveformType function) {
-    double value;
     switch (function) {
         case WaveformType::SINE:
-            value = sin(x);
-            break;
+            return sin(x);
         case WaveformType::SQUARE:
-            value = sin(x) > 0 ? 1.0 : -1.0;
-            break;
+            return sin(x) > 0 ? 1.0 : -1.0;
         case WaveformType::TRIANGLE:
-            value = asin(sin(x)) * 2.0 / PI;
-            break;
+            return asin(sin(x)) * 2.0 / PI;
         case WaveformType::SAWTOOTHDOWN:
-            value = 1.0 - 2.0 * (fmod(x, TWOPI) * (1.0 / TWOPI));
-            break;
+            return 1.0 - 2.0 * (fmod(x, TWOPI) * (1.0 / TWOPI));
         case WaveformType::SAWTOOTHUP:
-            value = (2.0 * (fmod(x, TWOPI) * (1.0 / TWOPI))) - 1.0;
-            break;
+            return (2.0 * (fmod(x, TWOPI) * (1.0 / TWOPI))) - 1.0;
         case WaveformType::NOISE:
-            value = 2.0 * ((double) rand() / (double) (RAND_MAX)) - 1.0;
-            break;
+            return 2.0 * ((double) rand() / (double) RAND_MAX) - 1.0;
     }
-    return value;
 }
 
-double Oscillator::getLfoTruncatedSample(double dTime) {
-    double Pc = fmod(getPhase(dTime, lfo->currentFrequency), TWOPI);
-    return lfoLookupTable[phaseToIndex(Pc)];
+double Oscillator::getPhase(double dTime) {
+    if (lfo != nullptr) {
+        return TWOPI * this->frequency * dTime
+               + lfo->ampModifier * 100.0 * getLfoInterpSample(dTime);
+    }
+    return TWOPI * this->frequency * dTime;
 }
 
-double Oscillator::getLfoInterpolatedSample(double dTime) {
-
-    double Pc = fmod(getPhase(dTime, lfo->currentFrequency), TWOPI);
-    int P1index = phaseToIndex(Pc); // rounds down
-    int P2index = (P1index == lookupTableSize - 1) ? 0 : P1index + 1;
-
-    if (Pc == lfoLookupTable[P1index])
-        return lfoLookupTable[P1index];
-
-    double P1 = indexToPhase(P1index);
-    double P2 = indexToPhase(P2index);
-
-    double VP1 = lfoLookupTable[P1index];
-    double VP2 = lfoLookupTable[P2index];
-    double V = VP2 - VP1;
-
-    double Si = Pc - P1;
-    double S = P2 - P1;
-    double Rs = Si / S;
-
-    return VP1 + V * Rs;
+void Oscillator::setLFO(WaveformType waveformType) {
+    this->lfo = new Oscillator(sampleRate, waveformType);
+    setupLfoLookup(waveformType);
 }
-
 
 double Oscillator::getSample(double dTime) {
     return ampModifier * (this->*getTick)(dTime);
 }
 
-double Oscillator::getPhase(double dTime) {
-    if (lfo != nullptr) {
-        return TWOPI * currentFrequency * dTime
-               + lfo->ampModifier * 100.0 / lfo->currentFrequency * getLfoInterpolatedSample(dTime);
-    }
-    return TWOPI * currentFrequency * dTime;
-}
-
 double Oscillator::getPhase(double dTime, double frequency) {
     return TWOPI * frequency * dTime;
 }
-
 double Oscillator::sineTick(double dTime) {
     return sin(getPhase(dTime));
 }
-
 double Oscillator::squareTick(double dTime) {
     return sin(getPhase(dTime)) <= 0 ? 1.0 : -1.0;
 }
-
 double Oscillator::triangleTick(double dTime) {
-    double value = 2.0 * (fmod(getPhase(dTime), TWOPI) * (1.0 / TWOPI)) - 1;
-
-    if (value < 0.0)
-        value = -value;
-    value = 2.0 * (value - 0.5);
-    return value;
+    return asin(sin(getPhase(dTime))) * 2.0 / PI;
 }
-
 double Oscillator::sawDownTick(double dTime) {
-    return 1.0 - 2.0 * (fmod(getPhase(dTime), TWOPI) * (1.0 / TWOPI));
+    double phase = fmod(getPhase(dTime), TWOPI);
+    return 1.0 - 2.0 * (phase * (1.0 / TWOPI));
 }
-
 double Oscillator::sawUpTick(double dTime) {
-    return (2.0 * (fmod(getPhase(dTime), TWOPI) * (1.0 / TWOPI))) - 1.0;
+    double phase = fmod(getPhase(dTime), TWOPI);
+    return (2.0 * (phase * (1.0 / TWOPI))) - 1.0;
 }
-
 double Oscillator::noiseTick(double dTime) {
-    return 2.0 * ((double) rand() / (double) (RAND_MAX)) - 1.0;
-}
-
-void Oscillator::setLFO(WaveformType waveformType) {
-    lfo = new Oscillator(sampleRate, waveformType);
-    setupLfoLookup(waveformType);
+    return 2.0 * ((double) rand() / (double) RAND_MAX) - 1.0;
 }
 
 void Oscillator::unsetLFO() {
     delete lfo;
     lfo = nullptr;
 }
-
 Oscillator::~Oscillator() {
     getTick = nullptr;
 }
-
 void Oscillator::setWaveformType(WaveformType type) {
     switch (type) {
         case WaveformType::SINE:

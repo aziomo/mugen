@@ -35,10 +35,11 @@ void MainWindow::initSDL() {
             printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         }
         TTF_Init();
-        largeFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 32);
-        mainFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 26);
-        smallFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 20);
-        tinyFont = TTF_OpenFont((assets_dir + "HoneyRoom.ttf").c_str(), 16);
+        auto fontPath = assets_dir + "NNNHoneyRoom.ttf";
+        largeFont = TTF_OpenFont(fontPath.c_str(), 32);
+        mainFont = TTF_OpenFont(fontPath.c_str(), 26);
+        smallFont = TTF_OpenFont(fontPath.c_str(), 20);
+        tinyFont = TTF_OpenFont(fontPath.c_str(), 16);
         if (mainFont == nullptr) {
             printf("Failed to load the font\n");
         }
@@ -96,6 +97,12 @@ void MainWindow::renderTabs() {
                           yByPercent(&compositionTab, 0.055));
     optionsTab.render(xByPercent(&optionsTab, 0.825),
                       yByPercent(&optionsTab, 0.055));
+    f1Label.render(firstTab.x + firstTab.w - 1.1 * f1Label.w,
+                   firstTab.y + 0.2 * f1Label.h);
+    f2Label.render(secondTab.x + secondTab.w - 1.1 * f2Label.w,
+                   secondTab.y + 0.2 * f2Label.h);
+    f3Label.render(thirdTab.x + thirdTab.w - 1.1 * f3Label.w,
+                   thirdTab.y + 0.2 * f3Label.h);
 }
 
 void MainWindow::render() {
@@ -105,6 +112,7 @@ void MainWindow::render() {
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
     SDL_RenderFillRect(renderer, &mainArea);
     renderTabs();
+
     helpBar.render(borderSize * 2, mainArea.h - helpBar.h);
 
     if (openTab == INST_MENU)
@@ -114,136 +122,148 @@ void MainWindow::render() {
     if (openTab == OPTI_MENU)
         optionsMenu->render();
 
+    if (showPiano){
+        piano.render(xByPercent(&piano, 0.5),
+                     yByPercent(&piano, 0.5));
+    }
+
     SDL_RenderPresent(renderer);
 }
 
 void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *keyPressState) {
 
-    if (keyState[SDL_SCANCODE_Z] && !lastKeyState[SDL_SCANCODE_Z]){
-        passKeyPressToMenu(openTab, SDLK_z);
-        musicBox->pressNoteKey(0);
-    }
-    if (!keyState[SDL_SCANCODE_Z] && lastKeyState[SDL_SCANCODE_Z])
-        musicBox->releaseNoteKey(0);
+    if (!typing){
+        if (keyState[SDL_SCANCODE_Z] && !lastKeyState[SDL_SCANCODE_Z]){
+            passKeyPressToMenu(openTab, SDLK_z);
+            musicBox->pressNoteKey(0);
+        }
+        if (!keyState[SDL_SCANCODE_Z] && lastKeyState[SDL_SCANCODE_Z])
+            musicBox->releaseNoteKey(0);
 
-    if (keyState[SDL_SCANCODE_S] && !lastKeyState[SDL_SCANCODE_S]){
-        passKeyPressToMenu(openTab, SDLK_s);
-        musicBox->pressNoteKey(1);
-    }
-    if (!keyState[SDL_SCANCODE_S] && lastKeyState[SDL_SCANCODE_S])
-        musicBox->releaseNoteKey(1);
+        if (keyState[SDL_SCANCODE_S] && !lastKeyState[SDL_SCANCODE_S]){
+            passKeyPressToMenu(openTab, SDLK_s);
+            musicBox->pressNoteKey(1);
+        }
+        if (!keyState[SDL_SCANCODE_S] && lastKeyState[SDL_SCANCODE_S])
+            musicBox->releaseNoteKey(1);
 
-    if (keyState[SDL_SCANCODE_X] && !lastKeyState[SDL_SCANCODE_X]){
-        passKeyPressToMenu(openTab, SDLK_x);
-        musicBox->pressNoteKey(2);
-    }
-    if (!keyState[SDL_SCANCODE_X] && lastKeyState[SDL_SCANCODE_X])
-        musicBox->releaseNoteKey(2);
+        if (keyState[SDL_SCANCODE_X] && !lastKeyState[SDL_SCANCODE_X]){
+            passKeyPressToMenu(openTab, SDLK_x);
+            musicBox->pressNoteKey(2);
+        }
+        if (!keyState[SDL_SCANCODE_X] && lastKeyState[SDL_SCANCODE_X])
+            musicBox->releaseNoteKey(2);
 
-    if (keyState[SDL_SCANCODE_D] && !lastKeyState[SDL_SCANCODE_D]){
-        passKeyPressToMenu(openTab, SDLK_d);
-        musicBox->pressNoteKey(3);
-    }
-    if (!keyState[SDL_SCANCODE_D] && lastKeyState[SDL_SCANCODE_D])
-        musicBox->releaseNoteKey(3);
+        if (keyState[SDL_SCANCODE_D] && !lastKeyState[SDL_SCANCODE_D]){
+            passKeyPressToMenu(openTab, SDLK_d);
+            musicBox->pressNoteKey(3);
+        }
+        if (!keyState[SDL_SCANCODE_D] && lastKeyState[SDL_SCANCODE_D])
+            musicBox->releaseNoteKey(3);
 
-    if (keyState[SDL_SCANCODE_C] && !lastKeyState[SDL_SCANCODE_C]){
-        passKeyPressToMenu(openTab, SDLK_c);
-        musicBox->pressNoteKey(4);
-    }
-    if (!keyState[SDL_SCANCODE_C] && lastKeyState[SDL_SCANCODE_C])
-        musicBox->releaseNoteKey(4);
+        if (keyState[SDL_SCANCODE_C] && !lastKeyState[SDL_SCANCODE_C]){
+            passKeyPressToMenu(openTab, SDLK_c);
+            musicBox->pressNoteKey(4);
+        }
+        if (!keyState[SDL_SCANCODE_C] && lastKeyState[SDL_SCANCODE_C])
+            musicBox->releaseNoteKey(4);
 
-    if (keyState[SDL_SCANCODE_V] && !lastKeyState[SDL_SCANCODE_V]){
-        passKeyPressToMenu(openTab, SDLK_v);
-        musicBox->pressNoteKey(5);
-    }
-    if (!keyState[SDL_SCANCODE_V] && lastKeyState[SDL_SCANCODE_V])
-        musicBox->releaseNoteKey(5);
+        if (keyState[SDL_SCANCODE_V] && !lastKeyState[SDL_SCANCODE_V]){
+            passKeyPressToMenu(openTab, SDLK_v);
+            musicBox->pressNoteKey(5);
+        }
+        if (!keyState[SDL_SCANCODE_V] && lastKeyState[SDL_SCANCODE_V])
+            musicBox->releaseNoteKey(5);
 
-    if (keyState[SDL_SCANCODE_G] && !lastKeyState[SDL_SCANCODE_G]){
-        passKeyPressToMenu(openTab, SDLK_v);
-        musicBox->pressNoteKey(6);
-    }
-    if (!keyState[SDL_SCANCODE_G] && lastKeyState[SDL_SCANCODE_G])
-        musicBox->releaseNoteKey(6);
+        if (keyState[SDL_SCANCODE_G] && !lastKeyState[SDL_SCANCODE_G]){
+            passKeyPressToMenu(openTab, SDLK_v);
+            musicBox->pressNoteKey(6);
+        }
+        if (!keyState[SDL_SCANCODE_G] && lastKeyState[SDL_SCANCODE_G])
+            musicBox->releaseNoteKey(6);
 
-    if (keyState[SDL_SCANCODE_B] && !lastKeyState[SDL_SCANCODE_B]){
-        passKeyPressToMenu(openTab, SDLK_b);
-        musicBox->pressNoteKey(7);
-    }
-    if (!keyState[SDL_SCANCODE_B] && lastKeyState[SDL_SCANCODE_B])
-        musicBox->releaseNoteKey(7);
+        if (keyState[SDL_SCANCODE_B] && !lastKeyState[SDL_SCANCODE_B]){
+            passKeyPressToMenu(openTab, SDLK_b);
+            musicBox->pressNoteKey(7);
+        }
+        if (!keyState[SDL_SCANCODE_B] && lastKeyState[SDL_SCANCODE_B])
+            musicBox->releaseNoteKey(7);
 
-    if (keyState[SDL_SCANCODE_H] && !lastKeyState[SDL_SCANCODE_H]){
-        passKeyPressToMenu(openTab, SDLK_h);
-        musicBox->pressNoteKey(8);
-    }
-    if (!keyState[SDL_SCANCODE_H] && lastKeyState[SDL_SCANCODE_H])
-        musicBox->releaseNoteKey(8);
+        if (keyState[SDL_SCANCODE_H] && !lastKeyState[SDL_SCANCODE_H]){
+            passKeyPressToMenu(openTab, SDLK_h);
+            musicBox->pressNoteKey(8);
+        }
+        if (!keyState[SDL_SCANCODE_H] && lastKeyState[SDL_SCANCODE_H])
+            musicBox->releaseNoteKey(8);
 
-    if (keyState[SDL_SCANCODE_N] && !lastKeyState[SDL_SCANCODE_N]){
-        passKeyPressToMenu(openTab, SDLK_n);
-        musicBox->pressNoteKey(9);
-    }
-    if (!keyState[SDL_SCANCODE_N] && lastKeyState[SDL_SCANCODE_N])
-        musicBox->releaseNoteKey(9);
+        if (keyState[SDL_SCANCODE_N] && !lastKeyState[SDL_SCANCODE_N]){
+            passKeyPressToMenu(openTab, SDLK_n);
+            musicBox->pressNoteKey(9);
+        }
+        if (!keyState[SDL_SCANCODE_N] && lastKeyState[SDL_SCANCODE_N])
+            musicBox->releaseNoteKey(9);
 
-    if (keyState[SDL_SCANCODE_J] && !lastKeyState[SDL_SCANCODE_J]){
-        passKeyPressToMenu(openTab, SDLK_j);
-        musicBox->pressNoteKey(10);
-    }
-    if (!keyState[SDL_SCANCODE_J] && lastKeyState[SDL_SCANCODE_J])
-        musicBox->releaseNoteKey(10);
+        if (keyState[SDL_SCANCODE_J] && !lastKeyState[SDL_SCANCODE_J]){
+            passKeyPressToMenu(openTab, SDLK_j);
+            musicBox->pressNoteKey(10);
+        }
+        if (!keyState[SDL_SCANCODE_J] && lastKeyState[SDL_SCANCODE_J])
+            musicBox->releaseNoteKey(10);
 
-    if (keyState[SDL_SCANCODE_M] && !lastKeyState[SDL_SCANCODE_M]){
-        passKeyPressToMenu(openTab, SDLK_m);
-        musicBox->pressNoteKey(11);
-    }
-    if (!keyState[SDL_SCANCODE_M] && lastKeyState[SDL_SCANCODE_M])
-        musicBox->releaseNoteKey(11);
+        if (keyState[SDL_SCANCODE_M] && !lastKeyState[SDL_SCANCODE_M]){
+            passKeyPressToMenu(openTab, SDLK_m);
+            musicBox->pressNoteKey(11);
+        }
+        if (!keyState[SDL_SCANCODE_M] && lastKeyState[SDL_SCANCODE_M])
+            musicBox->releaseNoteKey(11);
 
-    if (keyState[SDL_SCANCODE_COMMA] && !lastKeyState[SDL_SCANCODE_COMMA]){
-        passKeyPressToMenu(openTab, SDLK_COMMA);
-        musicBox->pressNoteKey(12);
-    }
-    if (!keyState[SDL_SCANCODE_COMMA] && lastKeyState[SDL_SCANCODE_COMMA])
-        musicBox->releaseNoteKey(12);
+        if (keyState[SDL_SCANCODE_COMMA] && !lastKeyState[SDL_SCANCODE_COMMA]){
+            passKeyPressToMenu(openTab, SDLK_COMMA);
+            musicBox->pressNoteKey(12);
+        }
+        if (!keyState[SDL_SCANCODE_COMMA] && lastKeyState[SDL_SCANCODE_COMMA])
+            musicBox->releaseNoteKey(12);
 
-    if (keyState[SDL_SCANCODE_L] && !lastKeyState[SDL_SCANCODE_L]){
-        passKeyPressToMenu(openTab, SDLK_l);
-        musicBox->pressNoteKey(13);
-    }
-    if (!keyState[SDL_SCANCODE_L] && lastKeyState[SDL_SCANCODE_L])
-        musicBox->releaseNoteKey(13);
+        if (keyState[SDL_SCANCODE_L] && !lastKeyState[SDL_SCANCODE_L]){
+            passKeyPressToMenu(openTab, SDLK_l);
+            musicBox->pressNoteKey(13);
+        }
+        if (!keyState[SDL_SCANCODE_L] && lastKeyState[SDL_SCANCODE_L])
+            musicBox->releaseNoteKey(13);
 
-    if (keyState[SDL_SCANCODE_PERIOD] && !lastKeyState[SDL_SCANCODE_PERIOD]){
-        passKeyPressToMenu(openTab, SDLK_PERIOD);
-        musicBox->pressNoteKey(14);
-    }
-    if (!keyState[SDL_SCANCODE_PERIOD] && lastKeyState[SDL_SCANCODE_PERIOD])
-        musicBox->releaseNoteKey(14);
+        if (keyState[SDL_SCANCODE_PERIOD] && !lastKeyState[SDL_SCANCODE_PERIOD]){
+            passKeyPressToMenu(openTab, SDLK_PERIOD);
+            musicBox->pressNoteKey(14);
+        }
+        if (!keyState[SDL_SCANCODE_PERIOD] && lastKeyState[SDL_SCANCODE_PERIOD])
+            musicBox->releaseNoteKey(14);
 
-    if (keyState[SDL_SCANCODE_SEMICOLON] && !lastKeyState[SDL_SCANCODE_SEMICOLON]){
-        passKeyPressToMenu(openTab, SDLK_SEMICOLON);
-        musicBox->pressNoteKey(15);
-    }
-    if (!keyState[SDL_SCANCODE_SEMICOLON] && lastKeyState[SDL_SCANCODE_SEMICOLON])
-        musicBox->releaseNoteKey(15);
+        if (keyState[SDL_SCANCODE_SEMICOLON] && !lastKeyState[SDL_SCANCODE_SEMICOLON]){
+            passKeyPressToMenu(openTab, SDLK_SEMICOLON);
+            musicBox->pressNoteKey(15);
+        }
+        if (!keyState[SDL_SCANCODE_SEMICOLON] && lastKeyState[SDL_SCANCODE_SEMICOLON])
+            musicBox->releaseNoteKey(15);
 
-    if (keyState[SDL_SCANCODE_SLASH] && !lastKeyState[SDL_SCANCODE_SLASH]){
-        passKeyPressToMenu(openTab, SDLK_SLASH);
-        musicBox->pressNoteKey(16);
-    }
-    if (!keyState[SDL_SCANCODE_SLASH] && lastKeyState[SDL_SCANCODE_SLASH])
-        musicBox->releaseNoteKey(16);
+        if (keyState[SDL_SCANCODE_SLASH] && !lastKeyState[SDL_SCANCODE_SLASH]){
+            passKeyPressToMenu(openTab, SDLK_SLASH);
+            musicBox->pressNoteKey(16);
+        }
+        if (!keyState[SDL_SCANCODE_SLASH] && lastKeyState[SDL_SCANCODE_SLASH])
+            musicBox->releaseNoteKey(16);
 
-    if (keyState[SDL_SCANCODE_F1] && !lastKeyState[SDL_SCANCODE_F1])
-        openTab = 1;
-    if (keyState[SDL_SCANCODE_F2] && !lastKeyState[SDL_SCANCODE_F2])
-        openTab = 2;
-    if (keyState[SDL_SCANCODE_F3] && !lastKeyState[SDL_SCANCODE_F3])
-        openTab = 3;
+        if (keyState[SDL_SCANCODE_F1] && !lastKeyState[SDL_SCANCODE_F1])
+            openTab = 1;
+        if (keyState[SDL_SCANCODE_F2] && !lastKeyState[SDL_SCANCODE_F2])
+            openTab = 2;
+        if (keyState[SDL_SCANCODE_F3] && !lastKeyState[SDL_SCANCODE_F3])
+            openTab = 3;
+    }
+
+    if (typing){
+        optionsMenu->inputLetter(keyState, lastKeyState);
+    }
+
 
     if (keyState[SDL_SCANCODE_2] && !lastKeyState[SDL_SCANCODE_2])
         passKeyPressToMenu(openTab, SDLK_2);
@@ -312,6 +332,9 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
     if (keyState[SDL_SCANCODE_PAGEDOWN] && !lastKeyState[SDL_SCANCODE_PAGEDOWN])
         musicBox->octaveDown();
 
+    if (keyState[SDL_SCANCODE_GRAVE] && !lastKeyState[SDL_SCANCODE_GRAVE])
+        showPiano = !showPiano;
+
     if (keyState[SDL_SCANCODE_TAB] && !lastKeyState[SDL_SCANCODE_TAB])
         passKeyPressToMenu(openTab, SDLK_TAB);
 
@@ -327,6 +350,8 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
     if (keyState[SDL_SCANCODE_BACKSPACE] && !lastKeyState[SDL_SCANCODE_BACKSPACE])
         passKeyPressToMenu(openTab, SDLK_BACKSPACE);
 
+    if (keyState[SDL_SCANCODE_ESCAPE] && !lastKeyState[SDL_SCANCODE_ESCAPE])
+        passKeyPressToMenu(openTab, SDLK_ESCAPE);
 
 }
 
@@ -334,6 +359,10 @@ void MainWindow::loadTextures() {
     instrumentsTab.loadFromText(renderer, "INSTRUMENTY", textColor, mainFont);
     compositionTab.loadFromText(renderer, "KOMPOZYCJA", textColor, mainFont);
     optionsTab.loadFromText(renderer, "OPCJE", textColor, mainFont);
+    f1Label.loadFromText(renderer, "[F1]", textColor, tinyFont);
+    f2Label.loadFromText(renderer, "[F2]", textColor, tinyFont);
+    f3Label.loadFromText(renderer, "[F3]", textColor, tinyFont);
+    piano.loadFromFile(renderer, assets_dir + "piano.png");
 }
 
 void MainWindow::setHelpBarText(const std::string& text){
@@ -390,6 +419,8 @@ void MainWindow::registerShiftPress(int menu, bool shiftPressed)
     switch (menu) {
         case COMP_MENU:
             compositionMenu->registerShiftPress(shiftPressed); break;
+        case OPTI_MENU:
+            optionsMenu->registerShiftPress(shiftPressed); break;
         default:
             break;
     }

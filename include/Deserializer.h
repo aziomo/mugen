@@ -12,7 +12,7 @@ public:
     void deserializeInstrument(JSON instJson, Instrument* instrument);
     void deserializeEnvelope(JSON envJson, Envelope* envelope);
     void deserializeOscillator(JSON oscJson, Oscillator* osc);
-    void deserializeLFO(JSON lfoJson, Oscillator* osc);
+    void deserializeLFO(JSON lfoJson, Oscillator* lfo);
 
 };
 

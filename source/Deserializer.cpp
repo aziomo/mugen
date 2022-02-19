@@ -24,13 +24,15 @@ void Deserializer::deserializeOscillator(JSON oscJson, Oscillator* osc){
     osc->freqModifier = oscJson["freq_mod"];
     osc->ampModifier = oscJson["amp_mod"];
     osc->setWaveformType(stringToWavetype(oscJson["type"]));
-    deserializeLFO(oscJson["lfo"], osc->lfo);
+    if (oscJson["lfo"] != nullptr){
+        auto* lfo = new Oscillator(44100);
+        deserializeLFO(oscJson["lfo"], lfo);
+        osc->lfo = lfo;
+    }
 }
 
-void Deserializer::deserializeLFO(JSON lfoJson, Oscillator* osc){
-    if (osc != nullptr){
-        osc->freqModifier = lfoJson["freq_mod"];
-        osc->ampModifier = lfoJson["amp_mod"];
-        osc->setWaveformType(stringToWavetype(lfoJson["type"]));
-    }
+void Deserializer::deserializeLFO(JSON lfoJson, Oscillator* lfo){
+    lfo->freqModifier = lfoJson["freq_mod"];
+    lfo->ampModifier = lfoJson["amp_mod"];
+    lfo->setWaveformType(stringToWavetype(lfoJson["type"]));
 }

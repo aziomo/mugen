@@ -38,10 +38,10 @@ void Instrument::removeOscillator(){
     oscillators.pop_back();
 }
 
-void Instrument::addToBufferBlock(float *mainBuffer, Note* note, double timePoint) {
+void Instrument::addToBufferBlock(float *block, Note* note, double timePoint) {
     double timestep = 1.0 / 44100.0;
     for (int i = 0; i < blockSize; i++) {
-        mainBuffer[i] += 0.2 * generateSample(note, timePoint);
+        block[i] += 0.2 * generateSample(note, timePoint);
         timePoint += timestep;
     }
 }

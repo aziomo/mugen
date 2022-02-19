@@ -30,7 +30,7 @@ void InstrumentMenu::init() {
     window->compositionMenu->instrumentList->addItem("Instrument 1");
     instrumentList->addItem("Instrument 1");
     instrumentList->addItem("+ Nowy instrument");
-    helpMessage = "[ENTER] SELECT | [2] ADD OSC | [3] DEL OSC | [F4] QUIT | [ARROW KEYS] NAVIGATE";
+    helpMessage = "[ENTER] SELECT | [2] ADD OSC | [3] DEL OSC | [F4] QUIT | [← ↑ → ↓] NAVIGATE";
     loadTextures();
     loadControls();
 }
@@ -62,7 +62,7 @@ void InstrumentMenu::updateSelectorValues() {
     mainFreqSelector.setModifiedDouble(&editedOsc->freqModifier);
     mainAmpSelector.setModifiedDouble(&editedOsc->ampModifier);
     if (editedOsc->lfo != nullptr) {
-        lfoFreqSelector.setModifiedDouble(&editedOsc->lfo->currentFrequency);
+        lfoFreqSelector.setModifiedDouble(&editedOsc->lfo->frequency);
         lfoAmpSelector.setModifiedDouble(&editedOsc->lfo->ampModifier);
     }
     envInitialSelector.setModifiedDouble(&editedInstrument->env.initialAmplitude);
@@ -80,7 +80,7 @@ void InstrumentMenu::loadTextures() {
 
     setTextTexture(&oscLabel, "OSCYLATOR");
     setTextTexture(&wavetypeLabel, "TYP");
-    setTextTexture(&frequencyLabel, "CZEST.");
+    setTextTexture(&frequencyLabel, "CZĘST.");
     setTextTexture(&amplitudeLabel, "AMP.");
 
     setTextTexture(&helpBar, helpMessage, window->tinyFont);
@@ -93,7 +93,7 @@ void InstrumentMenu::loadTextures() {
     setImageTexture(&noiseImg, assets_dir + "noise.png");
 
     setImageTexture(&checkImg, assets_dir + "check.png");
-    setTextTexture(&lfoLabel, "LFO");
+    setTextTexture(&lfoLabel, "GWP");
     lfoCheckBox.loadTextures(&lfoLabel, window, true);
 
     setTextTexture(&envelopeLabel, "OBWIEDNIA");
@@ -109,14 +109,14 @@ void InstrumentMenu::loadTextures() {
 void InstrumentMenu::updateTextures() {
     // waveform textures
     setWaveImage(&mainWaveSelector, editedOsc->waveType);
-    setTextTexture(&oscCounter, to_string(currentOsc + 1) + " z " +
+    setTextTexture(&oscCounter, to_string(currentOsc + 1) + "  z  " +
                                 to_string(editedInstrument->oscillators.size()));
     setTextTexture(&mainFreqValue, "x"+doubleToStr(editedOsc->freqModifier, 2));
     setTextTexture(&mainAmpValue, "x"+doubleToStr(editedOsc->ampModifier, 2));
 
     if (editedOsc->lfo != nullptr) {
         setWaveImage(&lfoWaveSelector, editedOsc->lfo->waveType);
-        setTextTexture(&lfoFreqValue, doubleToStr(editedOsc->lfo->currentFrequency, 2) + "Hz");
+        setTextTexture(&lfoFreqValue, doubleToStr(editedOsc->lfo->frequency, 2) + "Hz");
         setTextTexture(&lfoAmpValue, "x"+doubleToStr(editedOsc->lfo->ampModifier, 2));
         lfoCheckBox.isChecked = true;
     } else {
@@ -138,7 +138,7 @@ void InstrumentMenu::updateTextures() {
     setTextTexture(&debugMaxSampleLabel, to_string(musicBox->maxSample));
     if (editedOsc->lfo != nullptr)
         setTextTexture(&debugCurrentFrequencyLabel,
-                       to_string(sin(editedOsc->getLfoInterpolatedSample(musicBox->globalTime))));
+                       to_string(sin(editedOsc->getLfoInterpSample(musicBox->globalTime))));
 
 }
 
@@ -459,7 +459,7 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
 void InstrumentMenu::setLFO() {
     if (editedOsc->lfo == nullptr) {
         editedOsc->setLFO(WaveformType::SINE);
-        editedOsc->lfo->currentFrequency = 5.0;
+        editedOsc->lfo->frequency = 5.0;
         editedOsc->lfo->ampModifier = 0.05;
         updateSelectorValues();
     } else {

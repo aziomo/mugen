@@ -22,7 +22,7 @@ private:
     static constexpr int lookupTableSize = 512;
     double lfoLookupTable[lookupTableSize];
 public:
-    double currentFrequency;
+    double frequency;
     Oscillator *lfo;
     double freqModifier = 1.0;
     double ampModifier = 1.0;
@@ -57,9 +57,7 @@ public:
 
     static double indexToPhase(int index);
 
-    double getLfoTruncatedSample(double dTime);
-
-    double getLfoInterpolatedSample(double dTime);
+    double getLfoInterpSample(double dTime);
 
 };
 

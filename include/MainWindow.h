@@ -27,12 +27,14 @@ public:
     TTF_Font* mainFont = nullptr;
     TTF_Font* smallFont = nullptr;
     TTF_Font* tinyFont = nullptr;
+    bool typing = false;
+    bool showPiano = false;
 
     InstrumentMenu* instrumentMenu;
     CompositionMenu* compositionMenu;
     OptionsMenu* optionsMenu;
     MusicBox* musicBox;
-    Texture helpBar;
+    Texture helpBar, piano;
     int borderSize = 10;
     SDL_Rect mainArea = {borderSize, borderSize, w - borderSize * 2, h - borderSize * 2};
 
@@ -46,7 +48,8 @@ public:
     void setHelpBarText(const string &text);
 
 private:
-    Texture instrumentsTab, compositionTab, optionsTab;
+    Texture instrumentsTab, compositionTab, optionsTab,
+            f1Label, f2Label, f3Label;
     SDL_Color textColor = {255, 255, 255};
     int openTab = 2;
     SDL_Rect windowArea = {0, 0, w, h};

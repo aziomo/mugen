@@ -101,8 +101,7 @@ void CompositionMenu::loadControls(){
 void CompositionMenu::updateTextures() {
     setTextTexture(&segmentsValue, to_string(timeline->songSegs.size()), window->mainFont);
     setTextTexture(&colsValue, to_string(timeline->songSegs.front()->cols.size()), window->mainFont);
-//    setTextTexture(&tempoValue, to_string(timeline->tempo), window->mainFont);
-    setTextTexture(&tempoValue, to_string(musicBox->blocksReadyToOutput), window->mainFont);
+    setTextTexture(&tempoValue, to_string(timeline->tempo), window->mainFont);
 }
 
 void CompositionMenu::setTextTexture(Texture* texture, const string& text) const {

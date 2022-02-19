@@ -2,7 +2,13 @@
 #include "../include/OptionsMenu.h"
 #include "../include/CompositionMenu.h"
 #include "../include/InstrumentMenu.h"
+#include <filesystem>
+namespace fs = std::filesystem;
 
+#define MAIN 0
+#define EXPORT 1
+#define SAVE 2
+#define LOAD 3
 
 OptionsMenu::OptionsMenu(MainWindow* mainWindow) {
     textColor = {255, 255, 255};
@@ -11,6 +17,17 @@ OptionsMenu::OptionsMenu(MainWindow* mainWindow) {
     renderer = mainWindow->renderer;
     serializer = new Serializer();
     deserializer = new Deserializer();
+    itemList = nullptr;
+    inputBox = {0,0, static_cast<int>(window->w*0.5)-4, static_cast<int>(window->h*0.1)-4};
+    inputBoxBorder = {0,0, static_cast<int>(window->w*0.5), static_cast<int>(window->h*0.1)};
+    dialogBox = {0,0,
+                 static_cast<int>(window->w*0.5)-4, static_cast<int>(window->h*0.5)-4};
+    dialogBox.x = window->w/2 - dialogBox.w/2;
+    dialogBox.y = window->h/2 - dialogBox.h/2;
+    dialogBoxBorder = {dialogBox.x - 2,dialogBox.y - 2,
+                       static_cast<int>(window->w*0.5), static_cast<int>(window->h*0.5)};
+    inputValue = "";
+    dialogTextValue = "";
 }
 
 void OptionsMenu::init(){
@@ -19,38 +36,54 @@ void OptionsMenu::init(){
 }
 
 void OptionsMenu::loadTextures(){
-    setTextTexture(&saveSongLabel, "EKSPORTUJ KOMPOZYCJE", window->mainFont);
+    setTextTexture(&exportSongLabel, "EKSPORTUJ KOMPOZYCJĘ", window->mainFont);
     setTextTexture(&saveProjectLabel, "ZAPISZ PROJEKT", window->mainFont);
     setTextTexture(&loadProjectLabel, "WCZYTAJ PROJEKT", window->mainFont);
+    setTextTexture(&quitLabel, "WYJDŹ Z PROGRAMU", window->mainFont);
+    setTextTexture(&okLabel, "OK", window->mainFont);
+    setTextTexture(&opCancelLabel, "[Esc] Anuluj", window->mainFont);
+    setTextTexture(&opConfirmLabel, "[Enter] Zatwierdź", window->mainFont);
+}
+
+void OptionsMenu::updateControls(){
+    if (inputValue.length() > 0) setTextTexture(&inputValueLabel, inputValue, window->largeFont);
 }
 
 void OptionsMenu::loadControls(){
-    saveSongBtn.loadTextures(&saveSongLabel, window);
+    exportSongBtn.loadTextures(&exportSongLabel, window);
     saveProjectBtn.loadTextures(&saveProjectLabel, window);
     loadProjectBtn.loadTextures(&loadProjectLabel, window);
-    saveSongBtn.onPress = &OptionsMenu::saveProject;
-    saveProjectBtn.onPress = &OptionsMenu::saveProject;
-    loadProjectBtn.onPress = &OptionsMenu::loadProject;
+    quitBtn.loadTextures(&quitLabel, window);
+    okBtn.loadTextures(&okLabel, window);
+    okBtn.isHighlighted = true;
 
-    saveSongBtn.isHighlighted = true;
+    exportSongBtn.onPress = &OptionsMenu::openExportSongScreen;
+    saveProjectBtn.onPress = &OptionsMenu::openSaveProjectScreen;
+    loadProjectBtn.onPress = &OptionsMenu::openLoadProjectScreen;
+    quitBtn.onPress = &OptionsMenu::quit;
+
+    exportSongBtn.isHighlighted = true;
+}
+
+void OptionsMenu::quit(){
+    exit(0);
 }
 
 void OptionsMenu::saveProject(){
+    inputValue.pop_back();
     std::ofstream file;
-    file.open("project.txt");
+    file.open("projects/" + inputValue + ".json");
     file << nlohmann::to_string(serializer->extractProject(window->musicBox, window->compositionMenu->timeline));
     file.close();
 }
 
 void OptionsMenu::loadProject(){
     std::ifstream file;
-    file.open("project.txt");
+    auto filePath = fs::current_path().string() + "/projects/" +itemList->getSelectedItem()+ ".json";
+    file.open( filePath);
     JSON projectJson = JSON::parse(file);
-
     loadInstruments(projectJson);
-
     loadComposition(projectJson);
-
 }
 
 void OptionsMenu::loadInstruments(JSON projectJson){
@@ -116,12 +149,69 @@ void OptionsMenu::setTextTexture(Texture* texture, const string& text, TTF_Font*
 }
 
 void OptionsMenu::render(){
-    saveSongBtn.render(xByPercent(&saveSongLabel, 0.5),
-                          yByPercent(&saveSongLabel, 0.3));
-    saveProjectBtn.render(xByPercent(&saveProjectLabel, 0.5),
-                          yByPercent(&saveProjectLabel, 0.5));
-    loadProjectBtn.render(xByPercent(&loadProjectLabel, 0.5),
-                       yByPercent(&loadProjectLabel, 0.7));
+    updateControls();
+    switch (screenRendered) {
+        case MAIN:
+            exportSongBtn.render(xByPercent(&exportSongLabel, 0.5),
+                                 yByPercent(&exportSongLabel, 0.3));
+            saveProjectBtn.render(xByPercent(&saveProjectLabel, 0.5),
+                                  yByPercent(&saveProjectLabel, 0.45));
+            loadProjectBtn.render(xByPercent(&loadProjectLabel, 0.5),
+                                  yByPercent(&loadProjectLabel, 0.60));
+            quitBtn.render(xByPercent(&quitLabel, 0.5),
+                    yByPercent(&quitLabel   , 0.75));
+            break;
+        case EXPORT:
+            itemList->render(window->w*0.8 - itemList->width/2,
+                             window->h/2 - itemList->height/2);
+            SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+            SDL_RenderDrawRect(renderer, &inputBoxBorder);
+            SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+            SDL_RenderDrawRect(renderer, &inputBox);
+            opDescriptionLabel.render(xByPercent(&opDescriptionLabel, 0.5),
+                                      yByPercent(&opDescriptionLabel, 0.275));
+            opCancelLabel.render(xByPercent(&opCancelLabel, 0.33),
+                                 yByPercent(&opCancelLabel, 0.75));
+            opConfirmLabel.render(xByPercent(&opConfirmLabel, 0.66),
+                                  yByPercent(&opConfirmLabel, 0.75));
+            break;
+        case SAVE:
+            opDescriptionLabel.render(xByPercent(&opDescriptionLabel, 0.5),
+                                      yByPercent(&opDescriptionLabel, 0.35));
+            SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+            SDL_RenderDrawRect(renderer, &inputBoxBorder);
+            SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+            SDL_RenderDrawRect(renderer, &inputBox);
+
+            if (inputValue.length() > 0){
+                inputValueLabel.render(inputBox.x,
+                                       inputBox.y + inputBox.h/2 - inputValueLabel.h/2);
+            }
+
+            opCancelLabel.render(xByPercent(&opCancelLabel, 0.33),
+                                 yByPercent(&opCancelLabel, 0.7));
+            opConfirmLabel.render(xByPercent(&opConfirmLabel, 0.66),
+                                 yByPercent(&opConfirmLabel, 0.7));
+            break;
+        case LOAD:
+            itemList->render(window->w/2 - itemList->width/2,
+                             window->h/2 - itemList->height/2);
+            opDescriptionLabel.render(xByPercent(&opDescriptionLabel, 0.5),
+                                      yByPercent(&opDescriptionLabel, 0.25));
+            opCancelLabel.render(xByPercent(&opCancelLabel, 0.33),
+                                 yByPercent(&opCancelLabel, 0.75));
+            opConfirmLabel.render(xByPercent(&opConfirmLabel, 0.66),
+                                  yByPercent(&opConfirmLabel, 0.75));
+            break;
+    }
+    if (dialogOpen){
+        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SDL_RenderFillRect(renderer, &dialogBoxBorder);
+        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+        SDL_RenderFillRect(renderer, &dialogBox);
+        okBtn.render(xByPercent(&okLabel, 0.5),
+                              yByPercent(&okLabel, 0.65));
+    }
 
 }
 
@@ -145,11 +235,17 @@ Control* OptionsMenu::getFocusedControl() {
 void OptionsMenu::handleKeyPress(SDL_Keycode key){
     switch (key) {
         case SDLK_UP:
+            if (listFocused){
+                itemList->moveUp();
+            } else
             if (getFocusedControl()->isHighlighted) {
                 changeControlFocus(Direction::UP);
             }
             break;
         case SDLK_DOWN:
+            if (listFocused){
+                itemList->moveDown();
+            } else
             if (getFocusedControl()->isHighlighted) {
                 changeControlFocus(Direction::DOWN);
             }
@@ -165,8 +261,38 @@ void OptionsMenu::handleKeyPress(SDL_Keycode key){
             }
             break;
         case SDLK_RETURN:
-            selectFocusedControl();
+
+            if (screenRendered == LOAD){
+                if (!dialogOpen){
+                    if (!itemList->items.empty()){
+                        loadProject();
+                        dialogOpen = true;
+                    }
+                } else {
+                    dialogOpen = false;
+                    screenRendered = MAIN;
+                }
+            }
+
+            if (screenRendered == SAVE){
+                window->typing = false;
+                if (!dialogOpen){
+                    saveProject();
+                    dialogOpen = true;
+                } else {
+                    dialogOpen = false;
+                    screenRendered = MAIN;
+                }
+            } else {
+                selectFocusedControl();
+            }
             break;
+        case SDLK_ESCAPE:
+            listFocused = false;
+            itemList->isFocused = false;
+            screenRendered = MAIN;
+        case SDLK_BACKSPACE:
+            deleteLetter();
         default:
             break;
     }
@@ -244,6 +370,122 @@ void OptionsMenu::changeControlFocus(Direction direction) {
     getFocusedControl()->switchHighlight();
 }
 
+void OptionsMenu::openLoadProjectScreen()
+{
+    setTextTexture(&opDescriptionLabel, "Otwórz projekt:", window->largeFont);
+    delete itemList;
+    itemList = new ItemList(renderer, window->mainFont, 400,200,5);
+    std::string projectsPath = fs::current_path().string() + "/projects";
+    auto filenames = getDirFilenamesWithoutExtensions(projectsPath);
+    for (const auto & filename : filenames)
+        itemList->addItem(filename);
+    if (!itemList->items.empty())
+        itemList->setSelectedIndex(0);
+    listFocused = true;
+    itemList->isFocused = true;
+    screenRendered = LOAD;
+}
+
+vector<string> OptionsMenu::getDirFilenamesWithoutExtensions(const string& dirPath){
+    vector<string> filenames;
+    for (const auto & entry : fs::directory_iterator(dirPath)){
+        string filePath = entry.path();
+
+        auto slashpos = filePath.find_last_of('/');
+        auto filename = filePath.substr(slashpos+1);
+        auto dotpos = filename.find_last_of('.');
+        filename = filename.substr(0, dotpos);
+
+        filenames.push_back(filename);
+//        itemList->addItem(filename);
+    }
+    return filenames;
+}
+
+void OptionsMenu::openSaveProjectScreen()
+{
+    screenRendered = SAVE;
+    window->typing = true;
+    inputValue += '_';
+
+
+    setTextTexture(&opDescriptionLabel, "Zapisz projekt jako:", window->largeFont);
+    inputBox.x = xByPercent(&inputBox, 0.5);
+    inputBox.y = yByPercent(&inputBox, 0.5);
+    inputBoxBorder.x = inputBox.x-2;
+    inputBoxBorder.y = inputBox.y-2;
+}
+
+void OptionsMenu::openExportSongScreen()
+{
+    screenRendered = EXPORT;
+
+    setTextTexture(&opDescriptionLabel, "Eksportuj kompozycję jako:", window->largeFont);
+    inputBox.x = xByPercent(&inputBox, 0.45);
+    inputBox.y = yByPercent(&inputBox, 0.5);
+    inputBoxBorder.x = inputBox.x-2;
+    inputBoxBorder.y = inputBox.y-2;
+    delete itemList;
+    itemList = new ItemList(renderer, window->mainFont, 100,200,5);
+    itemList->addItem(".wav");
+    itemList->addItem(".mp3");
+    itemList->addItem(".ogg");
+    itemList->addItem(".flac");
+    itemList->addItem(".aac");
+
+}
+
 void OptionsMenu::selectFocusedControl() {
     getFocusedControl()->activate();
 }
+
+void OptionsMenu::deleteLetter(){
+    if (window->typing && inputValue.length() > 1){
+        inputValue.pop_back();
+        inputValue.pop_back();
+        inputValue += '_';
+    }
+}
+
+void OptionsMenu::inputLetter(const Uint8 *keyState, const bool *lastKeyState) {
+    if (inputValue.length() > 20) return;
+    char c = '\0';
+    if (keyState[SDL_SCANCODE_A] && !lastKeyState[SDL_SCANCODE_A]) c = shiftPressed ? 'A' : 'a';
+    if (keyState[SDL_SCANCODE_B] && !lastKeyState[SDL_SCANCODE_B]) c = shiftPressed ? 'B' : 'b';
+    if (keyState[SDL_SCANCODE_C] && !lastKeyState[SDL_SCANCODE_C]) c = shiftPressed ? 'C' : 'c';
+    if (keyState[SDL_SCANCODE_D] && !lastKeyState[SDL_SCANCODE_D]) c = shiftPressed ? 'D' : 'd';
+    if (keyState[SDL_SCANCODE_E] && !lastKeyState[SDL_SCANCODE_E]) c = shiftPressed ? 'E' : 'e';
+    if (keyState[SDL_SCANCODE_F] && !lastKeyState[SDL_SCANCODE_F]) c = shiftPressed ? 'F' : 'f';
+    if (keyState[SDL_SCANCODE_G] && !lastKeyState[SDL_SCANCODE_G]) c = shiftPressed ? 'G' : 'g';
+    if (keyState[SDL_SCANCODE_H] && !lastKeyState[SDL_SCANCODE_H]) c = shiftPressed ? 'H' : 'h';
+    if (keyState[SDL_SCANCODE_I] && !lastKeyState[SDL_SCANCODE_I]) c = shiftPressed ? 'I' : 'i';
+    if (keyState[SDL_SCANCODE_J] && !lastKeyState[SDL_SCANCODE_J]) c = shiftPressed ? 'J' : 'j';
+    if (keyState[SDL_SCANCODE_K] && !lastKeyState[SDL_SCANCODE_K]) c = shiftPressed ? 'K' : 'k';
+    if (keyState[SDL_SCANCODE_L] && !lastKeyState[SDL_SCANCODE_L]) c = shiftPressed ? 'L' : 'l';
+    if (keyState[SDL_SCANCODE_M] && !lastKeyState[SDL_SCANCODE_M]) c = shiftPressed ? 'M' : 'm';
+    if (keyState[SDL_SCANCODE_N] && !lastKeyState[SDL_SCANCODE_N]) c = shiftPressed ? 'N' : 'n';
+    if (keyState[SDL_SCANCODE_O] && !lastKeyState[SDL_SCANCODE_O]) c = shiftPressed ? 'O' : 'o';
+    if (keyState[SDL_SCANCODE_P] && !lastKeyState[SDL_SCANCODE_P]) c = shiftPressed ? 'P' : 'p';
+    if (keyState[SDL_SCANCODE_Q] && !lastKeyState[SDL_SCANCODE_Q]) c = shiftPressed ? 'Q' : 'q';
+    if (keyState[SDL_SCANCODE_R] && !lastKeyState[SDL_SCANCODE_R]) c = shiftPressed ? 'R' : 'r';
+    if (keyState[SDL_SCANCODE_S] && !lastKeyState[SDL_SCANCODE_S]) c = shiftPressed ? 'S' : 's';
+    if (keyState[SDL_SCANCODE_T] && !lastKeyState[SDL_SCANCODE_T]) c = shiftPressed ? 'T' : 't';
+    if (keyState[SDL_SCANCODE_U] && !lastKeyState[SDL_SCANCODE_U]) c = shiftPressed ? 'U' : 'u';
+    if (keyState[SDL_SCANCODE_V] && !lastKeyState[SDL_SCANCODE_V]) c = shiftPressed ? 'V' : 'v';
+    if (keyState[SDL_SCANCODE_W] && !lastKeyState[SDL_SCANCODE_W]) c = shiftPressed ? 'W' : 'w';
+    if (keyState[SDL_SCANCODE_X] && !lastKeyState[SDL_SCANCODE_X]) c = shiftPressed ? 'X' : 'x';
+    if (keyState[SDL_SCANCODE_Y] && !lastKeyState[SDL_SCANCODE_Y]) c = shiftPressed ? 'Y' : 'y';
+    if (keyState[SDL_SCANCODE_Z] && !lastKeyState[SDL_SCANCODE_Z]) c = shiftPressed ? 'Z' : 'z';
+    if (keyState[SDL_SCANCODE_SPACE] && !lastKeyState[SDL_SCANCODE_SPACE]) c = '_';
+    if (keyState[SDL_SCANCODE_MINUS] && !lastKeyState[SDL_SCANCODE_MINUS]) c = shiftPressed ? '_' : '-';
+    if (c != '\0'){
+        inputValue.pop_back();
+        inputValue += c;
+        inputValue += '_';
+    }
+}
+
+void OptionsMenu::registerShiftPress(bool shiftPressed) {
+    this->shiftPressed = shiftPressed;
+}
+

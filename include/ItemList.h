@@ -32,6 +32,14 @@ public:
         this->enumerate = enumerate;
     };
 
+    ~ItemList(){
+        renderer = nullptr;
+        font = nullptr;
+        items.clear();
+        indexLabel.free();
+        itemLabel.free();
+    };
+
     bool enumerate;
     int width, height, itemWidth, itemHeight;
     int selectedIndex, topDisplayedItemIndex;
@@ -91,6 +99,10 @@ public:
 
     void setSelectedIndex(int newSelectedIndex){
         this->selectedIndex = newSelectedIndex;
+    }
+
+    string getSelectedItem(){
+        return items.at(selectedIndex);
     }
 
 

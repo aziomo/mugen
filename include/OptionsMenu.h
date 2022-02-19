@@ -4,6 +4,7 @@
 #include "Deserializer.h"
 #include "MainWindow.h"
 #include "ButtonControl.h"
+#include "ItemList.h"
 
 class MainWindow;
 
@@ -14,21 +15,33 @@ public:
     SDL_Color textColor;
     MainWindow* window;
     MusicBox* musicBox;
-
+    ItemList* itemList;
     Serializer* serializer;
     Deserializer* deserializer;
+    int screenRendered = 0;
+    bool shiftPressed = false,
+        dialogOpen = false,
+        listFocused = false;
 
-    ButtonControl saveSongBtn, saveProjectBtn, loadProjectBtn;
+    string inputValue = "",
+        dialogTextValue = "";
 
-    Texture saveSongLabel, saveProjectLabel, loadProjectLabel;
+    ButtonControl exportSongBtn, saveProjectBtn, loadProjectBtn, quitBtn, okBtn;
 
-    const static int controlMatrixRows = 3, controlMatrixCols = 1;
+    SDL_Rect inputBox, inputBoxBorder, dialogBox, dialogBoxBorder;
+
+    Texture exportSongLabel, saveProjectLabel, loadProjectLabel, quitLabel, okLabel,
+            opDescriptionLabel, opCancelLabel, opConfirmLabel,
+            inputValueLabel;
+
+    const static int controlMatrixRows = 4, controlMatrixCols = 1;
     int focusedControlRow = 0, focusedControlCol = 0;
 
     Control* controlArray[controlMatrixRows][controlMatrixCols] = {
-            {&saveSongBtn},
+            {&exportSongBtn},
             {&saveProjectBtn},
-            {&loadProjectBtn}
+            {&loadProjectBtn},
+            {&quitBtn}
     };
 
 
@@ -62,6 +75,24 @@ public:
     void loadInstruments(JSON projectJson);
 
     void loadComposition(JSON projectJson);
+
+    void inputLetter(const Uint8 *keyState, const bool *lastKeyState);
+
+    void openSaveProjectScreen();
+
+    void openLoadProjectScreen();
+
+    void openExportSongScreen();
+
+    void quit();
+
+    void updateControls();
+
+    void deleteLetter();
+
+    void registerShiftPress(bool b);
+
+    vector<string> getDirFilenamesWithoutExtensions(const string &dirPath);
 };
 
 

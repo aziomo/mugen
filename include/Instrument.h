@@ -28,7 +28,7 @@ public:
 
     float generateSample(Note* note, double dTime);
 
-    void addToBufferBlock(float *mainBuffer, Note* note, double timePoint);
+    void addToBufferBlock(float *block, Note* note, double timePoint);
 };
 
 
