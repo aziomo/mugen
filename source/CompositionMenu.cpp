@@ -207,9 +207,9 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
             }
             break;
 
-        case SDLK_w:
-            musicBox->outputFile == nullptr ? musicBox->openFile() : musicBox->closeFile();
-            break;
+//        case SDLK_w:
+//            musicBox->outputFile == nullptr ? musicBox->openFile() : musicBox->closeFile();
+//            break;
 
         case SDLK_z:
         case SDLK_s:
@@ -584,6 +584,7 @@ void CompositionMenu::playbackTimeline(){
 
         if (timeElapsed - lastColTriggerTime > timeBetweenCols){
 
+
             int colsElapsed = (int)(timeElapsed / timeBetweenCols) % timeline->segColumns();
             int segsElapsed = timeElapsed / timeBetweenCols / timeline->segColumns();
             Column* currentCol = timeline->songSegs.at(segsElapsed)->cols.at(colsElapsed);
@@ -606,7 +607,16 @@ void CompositionMenu::playbackTimeline(){
                         beginBit->note.releasedOnTime = globalTime;
                     }
                 }
-
+            }
+            else if (segsElapsed > 0){
+                Column* previousCol = timeline->songSegs.at(segsElapsed-1)->cols.at(timeline->segColumns()-1);
+                for (int i = 0; i < 5; i++){
+                    auto bit = previousCol->bits[i];
+                    if (bit != nullptr && bit->holdSection == bit->holdDuration){
+                        auto beginBit = timeline->songSegs.at(segsElapsed-1)->cols.at(timeline->segColumns() - bit->holdDuration-1)->bits[i];
+                        beginBit->note.releasedOnTime = globalTime;
+                    }
+                }
             }
 
             lastColTriggerTime = timeElapsed;
@@ -638,6 +648,9 @@ void CompositionMenu::playbackTimeline(){
     bitsPlayed.clear();
 
     playbackOn = false;
+//    if (musicBox->outputFile != nullptr){
+//        musicBox->closeFile();
+//    }
 
 }
 

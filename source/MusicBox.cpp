@@ -129,8 +129,8 @@ void MusicBox::bufferOutputLoop() {
     float outputBlock[blockSize];
     while (isRunning) {
         if (!readBlockFromBuffer(outputBlock)) break;
-        writeBlockToFile(outputBlock);
-        audioApi->writeOut(outputBlock);
+        if (outputFile != nullptr) writeBlockToFile(outputBlock);
+        else audioApi->writeOut(outputBlock);
     }
 }
 
@@ -154,13 +154,13 @@ int MusicBox::getRootCPosition() const {
     return octaveSize * currentOctave;
 }
 
-void MusicBox::openFile() {
+void MusicBox::openFile(const string& filepath) {
     if (outputFile == nullptr) {
         SF_INFO fileInfo;
         fileInfo.samplerate = 44100;
         fileInfo.channels = 1;
         fileInfo.format = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
-        outputFile = sf_open("composition.wav", SFM_WRITE, &fileInfo);
+        outputFile = sf_open(filepath.c_str(), SFM_WRITE, &fileInfo);
         if (outputFile == nullptr) {
             auto errorMessage = sf_strerror(nullptr);
             printf("%s\n", errorMessage);
@@ -173,6 +173,8 @@ long MusicBox::writeBlockToFile(float *block) const {
 }
 
 void MusicBox::closeFile() {
+    auto errorMessage = sf_strerror(nullptr);
+    printf("%s\n", errorMessage);
     sf_close(outputFile);
     outputFile = nullptr;
 }

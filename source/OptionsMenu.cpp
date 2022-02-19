@@ -168,6 +168,10 @@ void OptionsMenu::render(){
             SDL_RenderDrawRect(renderer, &inputBoxBorder);
             SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
             SDL_RenderDrawRect(renderer, &inputBox);
+
+            if (inputValue.length() > 0) inputValueLabel.render(inputBox.x,inputBox.y + inputBox.h/2 - inputValueLabel.h/2);
+
+
             opDescriptionLabel.render(xByPercent(&opDescriptionLabel, 0.5),
                                       yByPercent(&opDescriptionLabel, 0.275));
             opCancelLabel.render(xByPercent(&opCancelLabel, 0.33),
@@ -183,10 +187,7 @@ void OptionsMenu::render(){
             SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
             SDL_RenderDrawRect(renderer, &inputBox);
 
-            if (inputValue.length() > 0){
-                inputValueLabel.render(inputBox.x,
-                                       inputBox.y + inputBox.h/2 - inputValueLabel.h/2);
-            }
+            if (inputValue.length() > 0) inputValueLabel.render(inputBox.x,inputBox.y + inputBox.h/2 - inputValueLabel.h/2);
 
             opCancelLabel.render(xByPercent(&opCancelLabel, 0.33),
                                  yByPercent(&opCancelLabel, 0.7));
@@ -251,16 +252,53 @@ void OptionsMenu::handleKeyPress(SDL_Keycode key){
             }
             break;
         case SDLK_LEFT:
-            if (getFocusedControl()->isHighlighted) {
-                changeControlFocus(Direction::LEFT);
+            if (screenRendered == EXPORT)
+            {
+                if (!window->typing){
+                    openTextInput();
+                    window->typing = true;
+                    focusList(false);
+                }
+
             }
+
             break;
         case SDLK_RIGHT:
-            if (getFocusedControl()->isHighlighted) {
-                changeControlFocus(Direction::RIGHT);
+            if (screenRendered == EXPORT)
+            {
+                if (window->typing){
+                    closeTextInput();
+                    listFocused = true;
+                    focusList(true);
+                }
             }
+
             break;
         case SDLK_RETURN:
+
+            if (screenRendered == EXPORT){
+                if (!dialogOpen){
+                    if (window->typing){
+                        closeTextInput();
+                    }
+
+                    exportCompositionToWav(inputValue);
+
+                    auto extension = itemList->getSelectedItem();
+                    if (extension != ".wav"){
+                        auto convertCommand = "ffmpeg -i compositions/" + inputValue + ".wav compositions/" + inputValue + extension
+                                              + " && rm compositions/" + inputValue + ".wav";
+                        system(convertCommand.c_str());
+                    }
+                    dialogOpen = true;
+                } else {
+                    cleanupTextInput();
+                    dialogOpen = false;
+                    screenRendered = MAIN;
+                }
+
+
+            }
 
             if (screenRendered == LOAD){
                 if (!dialogOpen){
@@ -288,14 +326,23 @@ void OptionsMenu::handleKeyPress(SDL_Keycode key){
             }
             break;
         case SDLK_ESCAPE:
-            listFocused = false;
-            itemList->isFocused = false;
+            if (listFocused){
+                focusList(false);
+            }
             screenRendered = MAIN;
         case SDLK_BACKSPACE:
             deleteLetter();
         default:
             break;
     }
+}
+
+void OptionsMenu::exportCompositionToWav(const string& filename){
+    musicBox->openFile("compositions/"+ filename+".wav");
+    musicBox->stopPlaying();
+    musicBox->playbackKeys = false;
+    musicBox->startPlaying();
+    window->compositionMenu->playbackTimeline();
 }
 
 void OptionsMenu::changeControlFocus(Direction direction) {
@@ -332,39 +379,7 @@ void OptionsMenu::changeControlFocus(Direction direction) {
             }
             break;
         case Direction::LEFT:
-
-            // the rest doesn't mean much right now
-            if (focusedControlCol > 0) {
-                if (controlArray[focusedControlRow][focusedControlCol - 1] != nullptr) {
-                    focusedControlCol -= 1;
-                } else {
-                    for (int i = 0; i < controlMatrixRows; i++) {
-                        if (controlArray[i][focusedControlCol - 1] != nullptr) {
-                            focusedControlRow = i;
-                            focusedControlCol -= 1;
-                            break;
-                        }
-                    }
-                }
-            }
-            break;
-
         case Direction::RIGHT:
-
-            // the rest doesn't mean much right now
-            if (focusedControlCol < controlMatrixCols - 1) {
-                if (controlArray[focusedControlRow][focusedControlCol + 1] != nullptr) {
-                    focusedControlCol += 1;
-                } else {
-                    for (int i = 0; i < controlMatrixRows; i++) {
-                        if (controlArray[i][focusedControlCol + 1] != nullptr) {
-                            focusedControlRow = i;
-                            focusedControlCol += 1;
-                            break;
-                        }
-                    }
-                }
-            }
             break;
     }
     getFocusedControl()->switchHighlight();
@@ -405,34 +420,44 @@ vector<string> OptionsMenu::getDirFilenamesWithoutExtensions(const string& dirPa
 void OptionsMenu::openSaveProjectScreen()
 {
     screenRendered = SAVE;
-    window->typing = true;
-    inputValue += '_';
-
-
+    updateInputBoxPosition();
+    openTextInput();
     setTextTexture(&opDescriptionLabel, "Zapisz projekt jako:", window->largeFont);
-    inputBox.x = xByPercent(&inputBox, 0.5);
-    inputBox.y = yByPercent(&inputBox, 0.5);
-    inputBoxBorder.x = inputBox.x-2;
-    inputBoxBorder.y = inputBox.y-2;
 }
 
 void OptionsMenu::openExportSongScreen()
 {
     screenRendered = EXPORT;
-
+    updateInputBoxPosition();
     setTextTexture(&opDescriptionLabel, "Eksportuj kompozycję jako:", window->largeFont);
-    inputBox.x = xByPercent(&inputBox, 0.45);
-    inputBox.y = yByPercent(&inputBox, 0.5);
-    inputBoxBorder.x = inputBox.x-2;
-    inputBoxBorder.y = inputBox.y-2;
+    openTextInput();
     delete itemList;
     itemList = new ItemList(renderer, window->mainFont, 100,200,5);
-    itemList->addItem(".wav");
-    itemList->addItem(".mp3");
-    itemList->addItem(".ogg");
-    itemList->addItem(".flac");
-    itemList->addItem(".aac");
+    for (const auto& format : getAudioFormats())
+        itemList->addItem("." + format);
 
+}
+
+void OptionsMenu::updateInputBoxPosition(){
+    switch (screenRendered){
+        case EXPORT:
+            inputBox.x = xByPercent(&inputBox, 0.45);
+            inputBox.y = yByPercent(&inputBox, 0.5);
+            break;
+        case SAVE:
+            inputBox.x = xByPercent(&inputBox, 0.5);
+            inputBox.y = yByPercent(&inputBox, 0.5);
+            break;
+        default:
+            break;
+    }
+    inputBoxBorder.x = inputBox.x-2;
+    inputBoxBorder.y = inputBox.y-2;
+}
+
+vector<string> OptionsMenu::getAudioFormats()
+{
+    return vector<string> {"wav", "mp3", "ogg", "flac", "aac"};
 }
 
 void OptionsMenu::selectFocusedControl() {
@@ -446,6 +471,32 @@ void OptionsMenu::deleteLetter(){
         inputValue += '_';
     }
 }
+
+void OptionsMenu::openTextInput()
+{
+    inputValue += '_';
+    window->typing = true;
+}
+
+void OptionsMenu::closeTextInput()
+{
+    inputValue.pop_back();
+    window->typing = false;
+}
+
+void OptionsMenu::cleanupTextInput()
+{
+    inputValue = "";
+    window->typing = false;
+}
+
+void OptionsMenu::focusList(bool focus)
+{
+    listFocused = focus;
+    itemList->isFocused = focus;
+}
+
+
 
 void OptionsMenu::inputLetter(const Uint8 *keyState, const bool *lastKeyState) {
     if (inputValue.length() > 20) return;

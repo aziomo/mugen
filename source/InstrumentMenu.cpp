@@ -447,9 +447,9 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
             selectFocusedControl();
             break;
 
-        case SDLK_w:
-            musicBox->outputFile == nullptr ? musicBox->openFile() : musicBox->closeFile();
-            break;
+//        case SDLK_w:
+//            musicBox->outputFile == nullptr ? musicBox->openFile() : musicBox->closeFile();
+//            break;
 
         default:
             break;

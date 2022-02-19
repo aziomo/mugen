@@ -93,6 +93,20 @@ public:
     void registerShiftPress(bool b);
 
     vector<string> getDirFilenamesWithoutExtensions(const string &dirPath);
+
+    void closeTextInput();
+
+    void openTextInput();
+
+    void cleanupTextInput();
+
+    vector<string> getAudioFormats();
+
+    void updateInputBoxPosition();
+
+    void focusList(bool focus);
+
+    void exportCompositionToWav(const string &filename);
 };
 
 

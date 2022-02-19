@@ -58,7 +58,7 @@ public:
     void bufferInputLoop();
     void bufferOutputLoop();
 
-    void openFile();
+    void openFile(const string &filepath);
     void closeFile();
 
     long writeBlockToFile(float *block) const;
