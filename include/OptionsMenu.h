@@ -32,7 +32,8 @@ public:
 
     Texture exportSongLabel, saveProjectLabel, loadProjectLabel, quitLabel, okLabel,
             opDescriptionLabel, opCancelLabel, opConfirmLabel,
-            inputValueLabel;
+            inputValueLabel,
+            dialogTextLabel;
 
     const static int controlMatrixRows = 4, controlMatrixCols = 1;
     int focusedControlRow = 0, focusedControlCol = 0;

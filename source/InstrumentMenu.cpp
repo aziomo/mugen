@@ -447,10 +447,6 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
             selectFocusedControl();
             break;
 
-//        case SDLK_w:
-//            musicBox->outputFile == nullptr ? musicBox->openFile() : musicBox->closeFile();
-//            break;
-
         default:
             break;
     }
@@ -504,7 +500,7 @@ void InstrumentMenu::selectPrevOsc() {
 
 void InstrumentMenu::selectItemFromList(int index) {
 
-    if (index == instrumentList->items.size() - 1){ // == musicBox->instruments.size()
+    if (index == instrumentList->items.size() - 1){
         auto instrument = new Instrument(musicBox->blockSize);
 
         addInstrument(instrument, index);

@@ -53,7 +53,8 @@ void MusicBox::stopPlaying() {
     cv_blocksReadyToRead.notify_one();
     readThread.join();
     cv_blocksReadyToWrite.notify_one();
-    writeThread.join();
+    if (writeThread.joinable())
+        writeThread.join();
 }
 
 template<typename T>

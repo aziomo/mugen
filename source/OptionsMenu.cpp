@@ -27,7 +27,7 @@ OptionsMenu::OptionsMenu(MainWindow* mainWindow) {
     dialogBoxBorder = {dialogBox.x - 2,dialogBox.y - 2,
                        static_cast<int>(window->w*0.5), static_cast<int>(window->h*0.5)};
     inputValue = "";
-    dialogTextValue = "";
+    dialogTextValue = "sample text";
 }
 
 void OptionsMenu::init(){
@@ -47,6 +47,7 @@ void OptionsMenu::loadTextures(){
 
 void OptionsMenu::updateControls(){
     if (inputValue.length() > 0) setTextTexture(&inputValueLabel, inputValue, window->largeFont);
+    setTextTexture(&dialogTextLabel, dialogTextValue, window->mainFont);
 }
 
 void OptionsMenu::loadControls(){
@@ -212,6 +213,8 @@ void OptionsMenu::render(){
         SDL_RenderFillRect(renderer, &dialogBox);
         okBtn.render(xByPercent(&okLabel, 0.5),
                               yByPercent(&okLabel, 0.65));
+        dialogTextLabel.render(xByPercent(&dialogTextLabel, 0.5),
+                               yByPercent(&dialogTextLabel, 0.4));
     }
 
 }
@@ -276,59 +279,70 @@ void OptionsMenu::handleKeyPress(SDL_Keycode key){
             break;
         case SDLK_RETURN:
 
-            if (screenRendered == EXPORT){
-                if (!dialogOpen){
-                    if (window->typing){
-                        closeTextInput();
-                    }
+            switch (screenRendered) {
+                case EXPORT:
+                    if (!dialogOpen){
+                        if (window->typing){
+                            closeTextInput();
+                        }
 
-                    exportCompositionToWav(inputValue);
+                        exportCompositionToWav(inputValue);
 
-                    auto extension = itemList->getSelectedItem();
-                    if (extension != ".wav"){
-                        auto convertCommand = "ffmpeg -i compositions/" + inputValue + ".wav compositions/" + inputValue + extension
-                                              + " && rm compositions/" + inputValue + ".wav";
-                        system(convertCommand.c_str());
-                    }
-                    dialogOpen = true;
-                } else {
-                    cleanupTextInput();
-                    dialogOpen = false;
-                    screenRendered = MAIN;
-                }
-
-
-            }
-
-            if (screenRendered == LOAD){
-                if (!dialogOpen){
-                    if (!itemList->items.empty()){
-                        loadProject();
+                        auto extension = itemList->getSelectedItem();
+                        if (extension != ".wav"){
+                            auto convertCommand = "ffmpeg -i compositions/" + inputValue + ".wav compositions/" + inputValue + extension
+                                                  + " && rm compositions/" + inputValue + ".wav";
+                            system(convertCommand.c_str());
+                        }
+                        dialogTextValue = "Eksport zakończony pomyślnie!";
                         dialogOpen = true;
+                    } else {
+                        musicBox->closeFile();
+                        cleanupTextInput();
+                        dialogOpen = false;
+                        screenRendered = MAIN;
                     }
-                } else {
-                    dialogOpen = false;
-                    screenRendered = MAIN;
-                }
-            }
+                    break;
+                case LOAD:
+                    if (!dialogOpen){
+                        if (!itemList->items.empty()){
+                            loadProject();
+                            dialogTextValue = "Projekt wczytany pomyślnie!";
+                            dialogOpen = true;
+                        }
+                    } else {
 
-            if (screenRendered == SAVE){
-                window->typing = false;
-                if (!dialogOpen){
-                    saveProject();
-                    dialogOpen = true;
-                } else {
-                    dialogOpen = false;
-                    screenRendered = MAIN;
-                }
-            } else {
-                selectFocusedControl();
+                        dialogOpen = false;
+                        focusList(false);
+                        screenRendered = MAIN;
+                        window->openTab = COMP_MENU;
+                    }
+                    break;
+
+                case SAVE:
+                    window->typing = false;
+                    if (!dialogOpen){
+                        saveProject();
+                        dialogTextValue = "Projekt zapisany pomyślnie!";
+                        dialogOpen = true;
+                    } else {
+                        cleanupTextInput();
+                        dialogOpen = false;
+                        screenRendered = MAIN;
+                    }
+                    break;
+                case MAIN:
+                    selectFocusedControl();
+                    break;
+                default:
+                    break;
             }
             break;
         case SDLK_ESCAPE:
             if (listFocused){
                 focusList(false);
             }
+            cleanupTextInput();
             screenRendered = MAIN;
         case SDLK_BACKSPACE:
             deleteLetter();
@@ -343,6 +357,9 @@ void OptionsMenu::exportCompositionToWav(const string& filename){
     musicBox->playbackKeys = false;
     musicBox->startPlaying();
     window->compositionMenu->playbackTimeline();
+    musicBox->stopPlaying();
+    musicBox->playbackKeys = true;
+    musicBox->startPlaying();
 }
 
 void OptionsMenu::changeControlFocus(Direction direction) {
@@ -474,14 +491,18 @@ void OptionsMenu::deleteLetter(){
 
 void OptionsMenu::openTextInput()
 {
-    inputValue += '_';
-    window->typing = true;
+    if (!window->typing) {
+        inputValue += '_';
+        window->typing = true;
+    }
 }
 
 void OptionsMenu::closeTextInput()
 {
-    inputValue.pop_back();
-    window->typing = false;
+    if (window->typing){
+        inputValue.pop_back();
+        window->typing = false;
+    }
 }
 
 void OptionsMenu::cleanupTextInput()

@@ -3,9 +3,6 @@
 #include "../include/InstrumentMenu.h"
 #include "../include/OptionsMenu.h"
 
-#define INST_MENU 1
-#define COMP_MENU 2
-#define OPTI_MENU 3
 
 MainWindow::MainWindow(MusicBox *musicBox) {
     this->musicBox = musicBox;
@@ -35,7 +32,7 @@ void MainWindow::initSDL() {
             printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         }
         TTF_Init();
-        auto fontPath = assets_dir + "NNNHoneyRoom.ttf";
+        auto fontPath = assets_dir + "NNHoneyRoom.ttf";
         largeFont = TTF_OpenFont(fontPath.c_str(), 32);
         mainFont = TTF_OpenFont(fontPath.c_str(), 26);
         smallFont = TTF_OpenFont(fontPath.c_str(), 20);
@@ -253,11 +250,11 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
             musicBox->releaseNoteKey(16);
 
         if (keyState[SDL_SCANCODE_F1] && !lastKeyState[SDL_SCANCODE_F1])
-            openTab = 1;
+            openTab = INST_MENU;
         if (keyState[SDL_SCANCODE_F2] && !lastKeyState[SDL_SCANCODE_F2])
-            openTab = 2;
+            openTab = COMP_MENU;
         if (keyState[SDL_SCANCODE_F3] && !lastKeyState[SDL_SCANCODE_F3])
-            openTab = 3;
+            openTab = OPTI_MENU;
     }
 
     if (typing){

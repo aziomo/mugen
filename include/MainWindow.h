@@ -9,6 +9,10 @@
 #define SET_WINDOW_WIDTH   (1000)
 #define SET_WINDOW_HEIGHT  (600)
 
+#define INST_MENU 1
+#define COMP_MENU 2
+#define OPTI_MENU 3
+
 class InstrumentMenu;
 class CompositionMenu;
 class OptionsMenu;
@@ -47,11 +51,11 @@ public:
 
     void setHelpBarText(const string &text);
 
+    int openTab = 2;
 private:
     Texture instrumentsTab, compositionTab, optionsTab,
             f1Label, f2Label, f3Label;
     SDL_Color textColor = {255, 255, 255};
-    int openTab = 2;
     SDL_Rect windowArea = {0, 0, w, h};
 
     SDL_Window* window = nullptr;
