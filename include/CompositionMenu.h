@@ -98,6 +98,8 @@ public:
     void stopPlayback();
 
     void registerShiftPress(bool shiftPressed);
+
+    void updateHelpBar();
 };
 
 

@@ -16,6 +16,7 @@ CompositionMenu::CompositionMenu(MainWindow *mainWindow) {
 void CompositionMenu::init(){
     loadTextures();
     loadControls();
+    updateHelpBar();
 }
 
 
@@ -202,14 +203,10 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
         case SDLK_RETURN:
             if (isTimelineFocused){
                 timeline->editingMode = !timeline->editingMode;
-            } else {
+            } else if (!isSegmentListFocused && !isInstrumentListFocused){
                 selectFocusedControl();
             }
             break;
-
-//        case SDLK_w:
-//            musicBox->outputFile == nullptr ? musicBox->openFile() : musicBox->closeFile();
-//            break;
 
         case SDLK_z:
         case SDLK_s:
@@ -408,6 +405,7 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
         default:
             break;
     }
+    updateHelpBar();
 }
 
 Control* CompositionMenu::getFocusedControl() {
@@ -648,19 +646,57 @@ void CompositionMenu::playbackTimeline(){
     bitsPlayed.clear();
 
     playbackOn = false;
-//    if (musicBox->outputFile != nullptr){
-//        musicBox->closeFile();
-//    }
-
 }
 
 void CompositionMenu::switchTimelineFocus() {
-    getFocusedControl()->switchHighlight();
+    if (!isSegmentListFocused && !isInstrumentListFocused){
+        getFocusedControl()->switchHighlight();
+    }
+
+
     if (isTimelineFocused){
+        if (timeline->editingMode){
+            timeline->editingMode = false;
+        }
         isTimelineFocused = false;
         timeline->timelineFocused = false;
+        if (isInstrumentListFocused){
+            instrumentList->isFocused = true;
+        }
+        if (isSegmentListFocused){
+            segmentManager->isFocused = true;
+        }
     } else {
         isTimelineFocused = true;
         timeline->timelineFocused = true;
+        if (isInstrumentListFocused){
+            instrumentList->isFocused = false;
+        }
+        if (isSegmentListFocused){
+            segmentManager->isFocused = false;
+        }
+    }
+}
+
+void CompositionMenu::updateHelpBar()
+{
+    if (isTimelineFocused){
+
+        if (timeline->editingMode){
+            window->setHelpBarText("[~] KLAWISZE | [KLAWISZ] UMIEŚĆ ([+ SHIFT] PRZEDŁUŻ) | [← ↓ ↑ →] NAWIGUJ | [BACKSPACE] USUŃ | [ENTER] ZATWIERDŹ");
+        } else {
+            window->setHelpBarText("[~] KLAWISZE | [← ↓ ↑ →] NAWIGUJ | [SPACJA] ODTWÓRZ | [TAB] USTAWIENIA | [ENTER] ZATWIERDŹ | [-/+] ZMIEŃ SEGMENT");
+        }
+
+    } else {
+        if (isSegmentListFocused){
+            window->setHelpBarText("[~] KLAWISZE | [← ↓ ↑ →] NAWIGUJ | [-] POPRZEDNI | [+] NASTĘPNY");
+        } else if (isInstrumentListFocused) {
+            window->setHelpBarText("[~] KLAWISZE | [← ↓ ↑ →] NAWIGUJ");
+        } else if (getFocusedControl()->isEditing){
+            window->setHelpBarText("[~] KLAWISZE | [← ↓] ZMNIEJSZ | [↑ →] ZWIĘKSZ | [ENTER] ZATWIERDŹ");
+        } else {
+            window->setHelpBarText("[~] KLAWISZE | [← ↓ ↑ →] NAWIGUJ | [TAB] OŚ CZASU | [ENTER] EDYTUJ | [SPACJA] ODTWÓRZ");
+        }
     }
 }

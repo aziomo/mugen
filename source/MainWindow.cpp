@@ -122,6 +122,10 @@ void MainWindow::render() {
     if (showPiano){
         piano.render(xByPercent(&piano, 0.5),
                      yByPercent(&piano, 0.5));
+        octaveLabel.render(xByPercent(&octaveLabel, 0.74, TO_LEFT),
+                           yByPercent(&octaveLabel, 0.67));
+        octaveHelpLabel.render(xByPercent(&octaveHelpLabel, 0.25, TO_RIGHT),
+                               yByPercent(&octaveHelpLabel, 0.71));
     }
 
     SDL_RenderPresent(renderer);
@@ -249,12 +253,19 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
         if (!keyState[SDL_SCANCODE_SLASH] && lastKeyState[SDL_SCANCODE_SLASH])
             musicBox->releaseNoteKey(16);
 
-        if (keyState[SDL_SCANCODE_F1] && !lastKeyState[SDL_SCANCODE_F1])
+        if (keyState[SDL_SCANCODE_F1] && !lastKeyState[SDL_SCANCODE_F1]){
             openTab = INST_MENU;
-        if (keyState[SDL_SCANCODE_F2] && !lastKeyState[SDL_SCANCODE_F2])
+            instrumentMenu->updateHelpBar();
+        }
+
+        if (keyState[SDL_SCANCODE_F2] && !lastKeyState[SDL_SCANCODE_F2]){
             openTab = COMP_MENU;
-        if (keyState[SDL_SCANCODE_F3] && !lastKeyState[SDL_SCANCODE_F3])
+            compositionMenu->updateHelpBar();
+        }
+        if (keyState[SDL_SCANCODE_F3] && !lastKeyState[SDL_SCANCODE_F3]){
             openTab = OPTI_MENU;
+            setHelpBarText(" ");
+        }
     }
 
     if (typing){
@@ -323,11 +334,15 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
         registerShiftPress(openTab, false);
 
 
-    if (keyState[SDL_SCANCODE_PAGEUP] && !lastKeyState[SDL_SCANCODE_PAGEUP])
+    if (keyState[SDL_SCANCODE_PAGEUP] && !lastKeyState[SDL_SCANCODE_PAGEUP]){
         musicBox->octaveUp();
+        octaveLabel.loadFromText(renderer, "Oktawa: "+to_string(musicBox->currentOctave), textColor, mainFont);
+    }
 
-    if (keyState[SDL_SCANCODE_PAGEDOWN] && !lastKeyState[SDL_SCANCODE_PAGEDOWN])
+    if (keyState[SDL_SCANCODE_PAGEDOWN] && !lastKeyState[SDL_SCANCODE_PAGEDOWN]){
         musicBox->octaveDown();
+        octaveLabel.loadFromText(renderer, "Oktawa: "+to_string(musicBox->currentOctave), textColor, mainFont);
+    }
 
     if (keyState[SDL_SCANCODE_GRAVE] && !lastKeyState[SDL_SCANCODE_GRAVE])
         showPiano = !showPiano;
@@ -360,6 +375,8 @@ void MainWindow::loadTextures() {
     f2Label.loadFromText(renderer, "[F2]", textColor, tinyFont);
     f3Label.loadFromText(renderer, "[F3]", textColor, tinyFont);
     piano.loadFromFile(renderer, assets_dir + "piano.png");
+    octaveLabel.loadFromText(renderer, "Oktawa: "+to_string(musicBox->currentOctave), textColor, mainFont);
+    octaveHelpLabel.loadFromText(renderer, "[PG DOWN] OKTAWA ↓ | [PG UP] OKTAWA ↑", textColor, tinyFont);
 }
 
 void MainWindow::setHelpBarText(const std::string& text){

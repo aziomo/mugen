@@ -33,6 +33,7 @@ void InstrumentMenu::init() {
     helpMessage = "[ENTER] SELECT | [2] ADD OSC | [3] DEL OSC | [F4] QUIT | [← ↑ → ↓] NAVIGATE";
     loadTextures();
     loadControls();
+    updateHelpBar();
 }
 
 void InstrumentMenu::loadControls() {
@@ -174,7 +175,7 @@ void InstrumentMenu::render() {
     }
 
     // MISC
-    helpBar.render(window->borderSize * 2, window->mainArea.h - helpBar.h);
+//    helpBar.render(window->borderSize * 2, window->mainArea.h - helpBar.h);
 
 //    instr umentName.render(xByPercent(&instrumentName, 0.5),
 //                          yByPercent(&instrumentName, 0.18));
@@ -450,6 +451,18 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
         default:
             break;
     }
+    updateHelpBar();
+}
+
+void InstrumentMenu::updateHelpBar()
+{
+    if (getFocusedControl()->isEditing) {
+        window->setHelpBarText("[~] KLAWISZE | [← ↓] ZMNIEJSZ | [↑ →] ZWIĘKSZ | [ENTER] ZATWIERDŹ | [2] DODAJ OSCYLATOR | [3] USUŃ OSCYLATOR");
+    } else if (instrumentList->selectedIndex == instrumentList->items.size()-1){
+        window->setHelpBarText("[~] KLAWISZE | [← ↑ → ↓] NAWIGUJ | [ENTER] WYBIERZ");
+    } else {
+        window->setHelpBarText("[~] KLAWISZE | [← ↑ → ↓] NAWIGUJ | [ENTER] WYBIERZ | [2] DODAJ OSCYLATOR | [3] USUŃ OSCYLATOR");
+    }
 }
 
 void InstrumentMenu::setLFO() {
@@ -521,8 +534,4 @@ void InstrumentMenu::addInstrument(Instrument* instrument, int index){
     window->compositionMenu->instrumentList->addItem("Instrument " + to_string(visibleInstrumentIndex));
 }
 
-void InstrumentMenu::setHelpBarText(const string& text)
-{
-    window->setHelpBarText(text);
-}
 
