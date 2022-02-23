@@ -36,8 +36,8 @@ int main() {
 //
 //        if (state[SDL_SCANCODE_1] && !stillPressed )  {
 //            stillPressed = true;
-//            musicBox->isRunning ?
-//                musicBox->stopPlaying() : musicBox->startPlaying();
+//            mBox->isRunning ?
+//                mBox->stopPlaying() : mBox->startPlaying();
 //        }
 
         if (state[SDL_SCANCODE_F4]){

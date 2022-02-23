@@ -277,7 +277,8 @@ void OptionsMenu::handleKeyPress(SDL_Keycode key){
             }
 
             break;
-        case SDLK_RETURN:
+//        case SDLK_RETURN:
+        case SDLK_p:
 
             switch (screenRendered) {
                 case EXPORT:

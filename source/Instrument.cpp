@@ -25,9 +25,9 @@ float Instrument::generateSample(Note* note, double dTime) {
         osc->setFrequency(note->frequency);
         sample += (float) (env.getAmplifier(dTime, note) * osc->getSample(dTime));
     }
-    if (oscCount > 1)
-        sample /= (float) oscCount;
-    return sample;
+//    if (oscCount > 1)
+//        sample /= (float) oscCount;
+    return sample / (float) oscCount;
 }
 
 void Instrument::addOscillator(){

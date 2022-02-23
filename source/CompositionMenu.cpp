@@ -200,7 +200,8 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
                 }
             }
             break;
-        case SDLK_RETURN:
+//        case SDLK_RETURN:
+        case SDLK_p:
             if (isTimelineFocused){
                 timeline->editingMode = !timeline->editingMode;
             } else if (!isSegmentListFocused && !isInstrumentListFocused){
@@ -546,6 +547,13 @@ void CompositionMenu::startPlayback(){
     musicBox->playbackKeys = false;
     musicBox->startPlaying();
     musicBox->writeThread = std::thread(&CompositionMenu::playbackTimeline, this);
+    if (musicBox->writeThread.joinable()){
+        musicBox->writeThread.join();
+    }
+    musicBox->stopPlaying();
+    musicBox->playbackKeys = true;
+    musicBox->startPlaying();
+    playbackOn = false;
 }
 
 void CompositionMenu::stopPlayback(){
@@ -567,8 +575,6 @@ void CompositionMenu::playbackTimeline(){
     double timeBetweenCols = 60.0 / timeline->tempo;
     double timeElapsed = 0.0;
     double lastColTriggerTime = -timeBetweenCols;
-
-    vector<Bit*> heldBits;
 
     double songLength = timeline->songSegs.front()->cols.size() * timeBetweenCols * timeline->songSegs.size();
 

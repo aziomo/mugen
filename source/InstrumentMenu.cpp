@@ -440,7 +440,8 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
             }
             break;
 
-        case SDLK_RETURN:
+//        case SDLK_RETURN:
+        case SDLK_p:
             if (isInstrumentListFocused){
                 selectItemFromList(instrumentList->selectedIndex);
                 break;

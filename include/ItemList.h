@@ -84,17 +84,21 @@ public:
     }
 
     void moveUp(){
-        if (selectedIndex > 0)
-            selectedIndex--;
-        if (selectedIndex < topDisplayedItemIndex)
-            topDisplayedItemIndex--;
+        if (!items.empty()){
+            if (selectedIndex > 0)
+                selectedIndex--;
+            if (selectedIndex < topDisplayedItemIndex)
+                topDisplayedItemIndex--;
+        }
     }
 
     void moveDown(){
-        if (selectedIndex < items.size()-1)
-            selectedIndex++;
-        if (selectedIndex == topDisplayedItemIndex + visibleItems)
-            topDisplayedItemIndex++;
+        if (!items.empty()) {
+            if (selectedIndex < items.size() - 1)
+                selectedIndex++;
+            if (selectedIndex == topDisplayedItemIndex + visibleItems)
+                topDisplayedItemIndex++;
+        }
     }
 
     void setSelectedIndex(int newSelectedIndex){
