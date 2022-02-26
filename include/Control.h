@@ -1,7 +1,3 @@
-//
-// Created by alberto on 11/29/21.
-//
-
 #ifndef MUGEN_CONTROL_H
 #define MUGEN_CONTROL_H
 

@@ -1,7 +1,6 @@
 #ifndef MUGEN_COMPOSITIONMENU_H
 #define MUGEN_COMPOSITIONMENU_H
 
-
 #include "Texture.h"
 #include "Direction.h"
 #include "ItemList.h"
@@ -53,15 +52,10 @@ public:
             helpBar;
 
     void render();
-
     void setTextTexture(Texture *texture, const string& text) const;
-
     void setTextTexture(Texture *texture, const string& text, TTF_Font *font) const;
-
     void loadTextures();
-
     void updateTextures();
-
     void init();
 
     int xByPercent(Texture *texture, double percent, Alignment align = CENTER) const;
@@ -70,37 +64,20 @@ public:
     int yByPercent(SDL_Rect *rect, double percent, Alignment align = CENTER) const;
 
     void loadControls();
-
     void addSegment();
-
     void removeSegment();
-
     void addColumn();
-
     void removeColumn();
-
     void handleKeyPress(SDL_Keycode key);
-
     Control* getFocusedControl();
-
     void changeControlFocus(Direction direction);
-
     void selectFocusedControl();
-
-    void loadExampleBits();
-
     void playbackTimeline();
-
     void switchTimelineFocus();
-
     void startPlayback();
-
     void stopPlayback();
-
     void registerShiftPress(bool shiftPressed);
-
     void updateHelpBar();
 };
-
 
 #endif //MUGEN_COMPOSITIONMENU_H

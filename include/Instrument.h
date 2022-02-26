@@ -1,7 +1,3 @@
-//
-// Created by alberto on 11/22/21.
-//
-
 #ifndef MUGEN_INSTRUMENT_H
 #define MUGEN_INSTRUMENT_H
 
@@ -12,12 +8,10 @@
 
 using std::vector;
 
-
 class Instrument {
 public:
     Instrument(int blockSize);
     ~Instrument();
-//    std::string name;
     int blockSize;
     vector<Oscillator*> oscillators;
     Envelope env;
@@ -25,11 +19,8 @@ public:
 
     void addOscillator();
     void removeOscillator();
-
     float generateSample(Note* note, double dTime);
-
     void addToBufferBlock(float *block, Note* note, double timePoint);
 };
-
 
 #endif //MUGEN_INSTRUMENT_H

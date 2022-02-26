@@ -3,6 +3,7 @@
 #include <string>
 #include <iomanip>
 #include <sstream>
+#include <utility>
 
 using std::string;
 using std::to_string;
@@ -174,12 +175,6 @@ void InstrumentMenu::render() {
                                         yByPercent(&debugCurrentFrequencyLabel, 0.90));
     }
 
-    // MISC
-//    helpBar.render(window->borderSize * 2, window->mainArea.h - helpBar.h);
-
-//    instr umentName.render(xByPercent(&instrumentName, 0.5),
-//                          yByPercent(&instrumentName, 0.18));
-
     // MAIN OSCILLATOR LABELS
     oscLabel.render(xByPercent(&oscLabel, waveMenuOffsetX + 0.075),
                     yByPercent(&oscLabel, waveMenuOffsetY + 0.025));
@@ -259,7 +254,7 @@ void InstrumentMenu::setTextTexture(Texture* texture, const string& text, TTF_Fo
 }
 
 void InstrumentMenu::setImageTexture(Texture *texture, string imagePath) const {
-    texture->loadFromFile(renderer, imagePath);
+    texture->loadFromFile(renderer, std::move(imagePath));
 }
 
 string InstrumentMenu::doubleToStr(double d, int precision) {
@@ -440,8 +435,7 @@ void InstrumentMenu::handleKeyPress(SDL_Keycode key) {
             }
             break;
 
-//        case SDLK_RETURN:
-        case SDLK_p:
+        case SDLK_RETURN:
             if (isInstrumentListFocused){
                 selectItemFromList(instrumentList->selectedIndex);
                 break;
@@ -516,10 +510,13 @@ void InstrumentMenu::selectItemFromList(int index) {
 
     if (index == instrumentList->items.size() - 1){
         auto instrument = new Instrument(musicBox->blockSize);
-
         addInstrument(instrument, index);
-
         instrumentList->setSelectedIndex(index);
+        editedInstrument = musicBox->instruments.at(index);
+        editedOsc = editedInstrument->oscillators.front();
+        currentOsc = 0;
+        musicBox->currentInstrument = instrumentList->selectedIndex;
+        updateSelectorValues();
     } else {
         musicBox->currentInstrument = index;
     }
@@ -533,6 +530,18 @@ void InstrumentMenu::addInstrument(Instrument* instrument, int index){
     instrumentList->addItem("Instrument " + to_string(visibleInstrumentIndex));
     instrumentList->addItem("+ Nowy instrument");
     window->compositionMenu->instrumentList->addItem("Instrument " + to_string(visibleInstrumentIndex));
+}
+
+void InstrumentMenu::updateMenuAfterProjectLoad()
+{
+    while (instrumentList->selectedIndex){
+        instrumentList->moveUp();
+    }
+    editedInstrument = musicBox->instruments.front();
+    editedOsc = editedInstrument->oscillators.front();
+    currentOsc = 0;
+    musicBox->currentInstrument = instrumentList->selectedIndex;
+    updateSelectorValues();
 }
 
 

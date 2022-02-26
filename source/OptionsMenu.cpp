@@ -10,7 +10,8 @@ namespace fs = std::filesystem;
 #define SAVE 2
 #define LOAD 3
 
-OptionsMenu::OptionsMenu(MainWindow* mainWindow) {
+OptionsMenu::OptionsMenu(MainWindow* mainWindow)
+{
     textColor = {255, 255, 255};
     window = mainWindow;
     musicBox = mainWindow->musicBox;
@@ -30,12 +31,14 @@ OptionsMenu::OptionsMenu(MainWindow* mainWindow) {
     dialogTextValue = "sample text";
 }
 
-void OptionsMenu::init(){
+void OptionsMenu::init()
+{
     loadTextures();
     loadControls();
 }
 
-void OptionsMenu::loadTextures(){
+void OptionsMenu::loadTextures()
+{
     setTextTexture(&exportSongLabel, "EKSPORTUJ KOMPOZYCJĘ", window->mainFont);
     setTextTexture(&saveProjectLabel, "ZAPISZ PROJEKT", window->mainFont);
     setTextTexture(&loadProjectLabel, "WCZYTAJ PROJEKT", window->mainFont);
@@ -45,12 +48,14 @@ void OptionsMenu::loadTextures(){
     setTextTexture(&opConfirmLabel, "[Enter] Zatwierdź", window->mainFont);
 }
 
-void OptionsMenu::updateControls(){
+void OptionsMenu::updateControls()
+{
     if (inputValue.length() > 0) setTextTexture(&inputValueLabel, inputValue, window->largeFont);
     setTextTexture(&dialogTextLabel, dialogTextValue, window->mainFont);
 }
 
-void OptionsMenu::loadControls(){
+void OptionsMenu::loadControls()
+{
     exportSongBtn.loadTextures(&exportSongLabel, window);
     saveProjectBtn.loadTextures(&saveProjectLabel, window);
     loadProjectBtn.loadTextures(&loadProjectLabel, window);
@@ -66,11 +71,13 @@ void OptionsMenu::loadControls(){
     exportSongBtn.isHighlighted = true;
 }
 
-void OptionsMenu::quit(){
-    exit(0);
+void OptionsMenu::quit()
+{
+    window->quit = true;
 }
 
-void OptionsMenu::saveProject(){
+void OptionsMenu::saveProject()
+{
     inputValue.pop_back();
     std::ofstream file;
     file.open("projects/" + inputValue + ".json");
@@ -78,7 +85,8 @@ void OptionsMenu::saveProject(){
     file.close();
 }
 
-void OptionsMenu::loadProject(){
+void OptionsMenu::loadProject()
+{
     std::ifstream file;
     auto filePath = fs::current_path().string() + "/projects/" +itemList->getSelectedItem()+ ".json";
     file.open( filePath);
@@ -87,7 +95,8 @@ void OptionsMenu::loadProject(){
     loadComposition(projectJson);
 }
 
-void OptionsMenu::loadInstruments(JSON projectJson){
+void OptionsMenu::loadInstruments(JSON projectJson)
+{
     for (auto* instrument : musicBox->instruments){
         delete instrument;
     }
@@ -101,9 +110,11 @@ void OptionsMenu::loadInstruments(JSON projectJson){
         deserializer->deserializeInstrument(instrumentJson, instrument);
         window->instrumentMenu->addInstrument(instrument, instrument->index);
     }
+    window->instrumentMenu->updateMenuAfterProjectLoad();
 }
 
-void OptionsMenu::loadComposition(JSON projectJson){
+void OptionsMenu::loadComposition(JSON projectJson)
+{
     auto& timeline = window->compositionMenu->timeline;
     JSON compositionJson = projectJson["composition"];
     timeline->tempo = compositionJson["tempo"];
@@ -145,11 +156,13 @@ void OptionsMenu::loadComposition(JSON projectJson){
     }
 }
 
-void OptionsMenu::setTextTexture(Texture* texture, const string& text, TTF_Font* font) const {
+void OptionsMenu::setTextTexture(Texture* texture, const string& text, TTF_Font* font) const
+{
     texture->loadFromText(renderer, text, textColor, font);
 }
 
-void OptionsMenu::render(){
+void OptionsMenu::render()
+{
     updateControls();
     switch (screenRendered) {
         case MAIN:
@@ -262,9 +275,7 @@ void OptionsMenu::handleKeyPress(SDL_Keycode key){
                     window->typing = true;
                     focusList(false);
                 }
-
             }
-
             break;
         case SDLK_RIGHT:
             if (screenRendered == EXPORT)
@@ -275,20 +286,15 @@ void OptionsMenu::handleKeyPress(SDL_Keycode key){
                     focusList(true);
                 }
             }
-
             break;
-//        case SDLK_RETURN:
-        case SDLK_p:
-
+        case SDLK_RETURN:
             switch (screenRendered) {
                 case EXPORT:
                     if (!dialogOpen){
                         if (window->typing){
                             closeTextInput();
                         }
-
                         exportCompositionToWav(inputValue);
-
                         auto extension = itemList->getSelectedItem();
                         if (extension != ".wav"){
                             auto convertCommand = "ffmpeg -i compositions/" + inputValue + ".wav compositions/" + inputValue + extension
@@ -312,11 +318,11 @@ void OptionsMenu::handleKeyPress(SDL_Keycode key){
                             dialogOpen = true;
                         }
                     } else {
-
                         dialogOpen = false;
                         focusList(false);
                         screenRendered = MAIN;
                         window->openTab = COMP_MENU;
+                        window->compositionMenu->updateHelpBar();
                     }
                     break;
 
@@ -423,28 +429,23 @@ vector<string> OptionsMenu::getDirFilenamesWithoutExtensions(const string& dirPa
     vector<string> filenames;
     for (const auto & entry : fs::directory_iterator(dirPath)){
         string filePath = entry.path();
-
         auto slashpos = filePath.find_last_of('/');
         auto filename = filePath.substr(slashpos+1);
         auto dotpos = filename.find_last_of('.');
         filename = filename.substr(0, dotpos);
-
         filenames.push_back(filename);
-//        itemList->addItem(filename);
     }
     return filenames;
 }
 
-void OptionsMenu::openSaveProjectScreen()
-{
+void OptionsMenu::openSaveProjectScreen(){
     screenRendered = SAVE;
     updateInputBoxPosition();
     openTextInput();
     setTextTexture(&opDescriptionLabel, "Zapisz projekt jako:", window->largeFont);
 }
 
-void OptionsMenu::openExportSongScreen()
-{
+void OptionsMenu::openExportSongScreen(){
     screenRendered = EXPORT;
     updateInputBoxPosition();
     setTextTexture(&opDescriptionLabel, "Eksportuj kompozycję jako:", window->largeFont);
@@ -473,16 +474,17 @@ void OptionsMenu::updateInputBoxPosition(){
     inputBoxBorder.y = inputBox.y-2;
 }
 
-vector<string> OptionsMenu::getAudioFormats()
-{
+vector<string> OptionsMenu::getAudioFormats(){
     return vector<string> {"wav", "mp3", "ogg", "flac", "aac"};
 }
 
-void OptionsMenu::selectFocusedControl() {
+void OptionsMenu::selectFocusedControl()
+{
     getFocusedControl()->activate();
 }
 
-void OptionsMenu::deleteLetter(){
+void OptionsMenu::deleteLetter()
+{
     if (window->typing && inputValue.length() > 1){
         inputValue.pop_back();
         inputValue.pop_back();
@@ -520,7 +522,8 @@ void OptionsMenu::focusList(bool focus)
 
 
 
-void OptionsMenu::inputLetter(const Uint8 *keyState, const bool *lastKeyState) {
+void OptionsMenu::inputLetter(const Uint8 *keyState, const bool *lastKeyState)
+{
     if (inputValue.length() > 20) return;
     char c = '\0';
     if (keyState[SDL_SCANCODE_A] && !lastKeyState[SDL_SCANCODE_A]) c = shiftPressed ? 'A' : 'a';
@@ -558,7 +561,8 @@ void OptionsMenu::inputLetter(const Uint8 *keyState, const bool *lastKeyState) {
     }
 }
 
-void OptionsMenu::registerShiftPress(bool shiftPressed) {
+void OptionsMenu::registerShiftPress(bool shiftPressed)
+{
     this->shiftPressed = shiftPressed;
 }
 

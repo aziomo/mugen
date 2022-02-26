@@ -1,7 +1,3 @@
-//
-// Created by alberto on 11/11/21.
-//
-
 #ifndef MUGEN_CPP_WAVEFORMTYPE_H
 #define MUGEN_CPP_WAVEFORMTYPE_H
 #include <string>

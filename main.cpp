@@ -9,33 +9,25 @@ int main() {
 
     MusicBox* musicBox = new MusicBox();
     MainWindow* mainWindow = new MainWindow(musicBox);
-    int quit = 0;
-    SDL_Event e;
 
     bool lastKeyState[128];
     int keyPressState[128] = {0};
-    const Uint8* state = SDL_GetKeyboardState(nullptr);
-
-    for (int i = 0; i < 128; i++) {
+    const Uint8* state;
+    state = SDL_GetKeyboardState(nullptr);
+    for (int i = 0; i < 128; i++)
         lastKeyState[i] = state[i];
-    }
 
     musicBox->startPlaying();
-    while (!quit){
+    while (!mainWindow->quit){
         SDL_PumpEvents();
-
         int keyboardSize = 20;
         state = SDL_GetKeyboardState(&keyboardSize);
-
         mainWindow->handleKeyPress(state, lastKeyState, keyPressState);
-
-        for (int i = 0; i < 128; i++) {
+        for (int i = 0; i < 128; i++)
             lastKeyState[i] = state[i];
-        }
-
         mainWindow->render();
     }
     delete mainWindow;
     delete musicBox;
-    return 0;
+    exit(0);
 }

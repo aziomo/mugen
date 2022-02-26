@@ -1,7 +1,3 @@
-//
-// Created by alberto on 11/20/21.
-//
-
 #ifndef MUGEN_CPP_WAVEFORMMENU_H
 #define MUGEN_CPP_WAVEFORMMENU_H
 
@@ -27,7 +23,6 @@ public:
     void selectFocusedControl();
 
     SDL_Renderer* renderer;
-//private:
     std::string helpMessage;
     int currentOsc = 0;
 
@@ -109,9 +104,9 @@ public:
 
     void addInstrument(Instrument *instrument, int index);
 
-    void setHelpBarText(const string &text);
-
     void updateHelpBar();
+
+    void updateMenuAfterProjectLoad();
 };
 
 #endif //MUGEN_CPP_WAVEFORMMENU_H

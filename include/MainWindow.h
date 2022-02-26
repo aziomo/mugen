@@ -33,6 +33,7 @@ public:
     TTF_Font* tinyFont = nullptr;
     bool typing = false;
     bool showPiano = false;
+    bool quit = false;
 
     InstrumentMenu* instrumentMenu;
     CompositionMenu* compositionMenu;

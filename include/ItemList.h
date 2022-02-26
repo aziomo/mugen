@@ -1,7 +1,3 @@
-//
-// Created by alberto on 12/25/21.
-//
-
 #ifndef MUGEN_ITEMLIST_H
 #define MUGEN_ITEMLIST_H
 
@@ -12,7 +8,6 @@
 using std::string;
 using std::to_string;
 using std::vector;
-
 
 class ItemList {
 
@@ -63,7 +58,6 @@ public:
         texture->loadFromText(renderer, text, white, font);
     }
 
-
     void addItem(const string& item){
         items.push_back(item);
         auto* strTexture = new Texture();
@@ -109,7 +103,6 @@ public:
         return items.at(selectedIndex);
     }
 
-
     void render(int x, int y){
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
         outline = {x, y, width, height};
@@ -140,9 +133,6 @@ public:
                 if (enumerate) setWhiteStr(&indexLabel, getTwoDigitString(i));
             }
 
-            //  h * percent - rect->h * 0.5;
-            //  w * percent - rect->w * 0.5;
-
             if (enumerate){
                 indexLabel.render(itemContainer.x + itemContainer.w * 0.1 - indexLabel.w/2,
                                   itemContainer.y + itemContainer.h/2 - itemLabel.h / 2 + 1);
@@ -156,7 +146,6 @@ public:
 
         }
     }
-
 };
 
 

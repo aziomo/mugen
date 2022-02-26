@@ -1,7 +1,3 @@
-//
-// Created by alberto on 11/11/21.
-//
-
 #ifndef MUGEN_CPP_OSCILLATOR_H
 #define MUGEN_CPP_OSCILLATOR_H
 

@@ -1,7 +1,3 @@
-//
-// Created by alberto on 1/15/22.
-//
-
 #ifndef MUGEN_BUTTONCONTROL_H
 #define MUGEN_BUTTONCONTROL_H
 

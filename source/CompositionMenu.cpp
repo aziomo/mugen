@@ -200,8 +200,7 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
                 }
             }
             break;
-//        case SDLK_RETURN:
-        case SDLK_p:
+        case SDLK_RETURN:
             if (isTimelineFocused){
                 timeline->editingMode = !timeline->editingMode;
             } else if (!isSegmentListFocused && !isInstrumentListFocused){
@@ -525,21 +524,6 @@ void CompositionMenu::changeControlFocus(Direction direction) {
 
 void CompositionMenu::selectFocusedControl() {
     getFocusedControl()->activate();
-}
-
-void CompositionMenu::loadExampleBits() {
-    auto* cols = &timeline->songSegs.front()->cols;
-    auto* instrument = musicBox->instruments.front();
-
-    for (int i = 0; i < cols->size(); i++){
-        timeline->songSegs.front()->cols.at(i)->bits[0] = new Bit(60 - i * 3, instrument);
-    }
-    timeline->songSegs.front()->cols.at(1)->bits[1] = new Bit(60, instrument, 4, 0);
-    timeline->songSegs.front()->cols.at(2)->bits[1] = new Bit(60, instrument, 4, 1);
-    timeline->songSegs.front()->cols.at(3)->bits[1] = new Bit(60, instrument, 4, 2);
-    timeline->songSegs.front()->cols.at(4)->bits[1] = new Bit(60, instrument, 4, 3);
-    timeline->songSegs.front()->cols.at(5)->bits[1] = new Bit(60, instrument, 4, 4);
-
 }
 
 void CompositionMenu::startPlayback(){

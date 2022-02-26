@@ -127,7 +127,6 @@ void MainWindow::render() {
         octaveHelpLabel.render(xByPercent(&octaveHelpLabel, 0.25, TO_RIGHT),
                                yByPercent(&octaveHelpLabel, 0.71));
     }
-
     SDL_RenderPresent(renderer);
 }
 
@@ -272,7 +271,6 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
         optionsMenu->inputLetter(keyState, lastKeyState);
     }
 
-
     if (keyState[SDL_SCANCODE_2] && !lastKeyState[SDL_SCANCODE_2])
         passKeyPressToMenu(openTab, SDLK_2);
 
@@ -353,11 +351,8 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
     if (keyState[SDL_SCANCODE_SPACE] && !lastKeyState[SDL_SCANCODE_SPACE])
         passKeyPressToMenu(openTab, SDLK_SPACE);
 
-    if (keyState[SDL_SCANCODE_P] && !lastKeyState[SDL_SCANCODE_P])
-        passKeyPressToMenu(openTab, SDLK_p);
-
-//    if (keyState[SDL_SCANCODE_RETURN] && !lastKeyState[SDL_SCANCODE_RETURN])
-//        passKeyPressToMenu(openTab, SDLK_RETURN);
+    if (keyState[SDL_SCANCODE_RETURN] && !lastKeyState[SDL_SCANCODE_RETURN])
+        passKeyPressToMenu(openTab, SDLK_RETURN);
 
     if (keyState[SDL_SCANCODE_DELETE] && !lastKeyState[SDL_SCANCODE_DELETE])
         passKeyPressToMenu(openTab, SDLK_DELETE);

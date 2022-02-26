@@ -1,11 +1,6 @@
-//
-// Created by alberto on 11/11/21.
-//
-
 #ifndef MUGEN_CPP_AUDIOAPI_H
 #define MUGEN_CPP_AUDIOAPI_H
 
-// ustawienia
 #define SET_PORT             (0)
 #define SET_VOLUME           (20)
 
@@ -23,7 +18,6 @@ typedef short SAMPLE;
 #include <portaudio.h>
 #include <alsa/asoundlib.h>
 
-
 class AudioAPI {
 
 public:
@@ -31,29 +25,17 @@ public:
     ~AudioAPI();
     PaError init(int bufferSize, double sampleRate);
     PaError writeOut(float* frame);
-
     int bufferSize;
-
-    void ListOutputDevices();
-
+    void listOutputDevices();
 private:
     PaStream* stream;
     double inLatency = -1;
     double outLatency = -1;
     int channels = 1;
     double sampleRate = 44100.0;
-    PaDeviceIndex outPortID;
-
-
-    void PrintDeviceInfo(PaDeviceInfo *deviceInfo, PaDeviceIndex deviceId);
-    PaDeviceIndex GetDeviceId(const char* deviceName);
-    PaDeviceIndex GetPulseDeviceId();
-    PaDeviceIndex GetDefaultDeviceId();
-
-
-    PaTime getSuggestedOutLatency(PaDeviceIndex deviceId);
-
-    void setOutDeviceParameters(PaStreamParameters *params);
+    void printDeviceInfo(PaDeviceInfo *deviceInfo, PaDeviceIndex id);
+    PaDeviceIndex getDeviceId(const char* deviceName);
+    PaDeviceIndex getPulseDeviceId();
 };
 
 

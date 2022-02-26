@@ -1,17 +1,11 @@
-//
-// Created by alberto on 11/21/21.
-//
-
 #ifndef MUGEN_CPP_SELECTCONTROL_H
 #define MUGEN_CPP_SELECTCONTROL_H
-
 
 #include "Texture.h"
 #include "MainWindow.h"
 #include "SelectorType.h"
 #include "Control.h"
 #include <vector>
-
 
 class SelectControl : public Control {
 
@@ -51,9 +45,7 @@ private:
     CompositionMenu* compositionMenu;
     bool modifyLFO = false;
 
-
     void setNextWaveType(bool increment = true);
-
 };
 
 
