@@ -5,14 +5,31 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 add_executable(mugen main.cpp
-        source/Oscillator.cpp include/Oscillator.h
-        source/MusicBox.cpp     include/MusicBox.h
-        source/AudioAPI.cpp     include/AudioAPI.h
-        source/InstrumentMenu.cpp include/InstrumentMenu.h
-        source/MainWindow.cpp   include/MainWindow.h
+        include/Oscillator.h        source/Oscillator.cpp
+        include/MusicBox.h          source/MusicBox.cpp
+        include/AudioAPI.h          source/AudioAPI.cpp
+        include/InstrumentMenu.h    source/InstrumentMenu.cpp
+        include/MainWindow.h        source/MainWindow.cpp
+        include/SelectControl.h     source/SelectControl.cpp
+        include/CheckboxControl.h   source/CheckboxControl.cpp
+        include/CompositionMenu.h   source/CompositionMenu.cpp
+        include/OptionsMenu.h       source/OptionsMenu.cpp
+        include/Serializer.h        source/Serializer.cpp
+        include/ButtonControl.h     source/ButtonControl.cpp
+        include/Deserializer.h      source/Deserializer.cpp
         include/WaveformType.h
         include/Texture.h
-        source/SelectControl.cpp include/SelectControl.h source/Instrument.cpp include/Instrument.h include/SelectorType.h include/Direction.h source/CheckboxControl.cpp include/CheckboxControl.h include/Control.h source/Envelope.cpp include/Envelope.h source/ItemList.cpp include/ItemList.h source/CompositionMenu.cpp include/CompositionMenu.h source/Timeline.cpp include/Timeline.h source/Segment.cpp include/Segment.h include/SegmentManager.h source/OptionsMenu.cpp include/OptionsMenu.h include/json.h include/Serializer.h source/ButtonControl.cpp include/ButtonControl.h source/Deserializer.cpp include/Deserializer.h source/Serializer.cpp)
+        include/Instrument.h
+        include/SelectorType.h
+        include/Direction.h
+        include/Control.h
+        include/Envelope.h
+        include/ItemList.h
+        include/Timeline.h
+        include/Segment.h
+        include/SegmentManager.h
+        include/json.h
+        )
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2TTF REQUIRED)
