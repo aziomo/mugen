@@ -86,7 +86,7 @@ double Oscillator::YofX(double x, WaveformType function) {
 double Oscillator::getPhase(double dTime) {
     if (lfo != nullptr) {
         return TWOPI * this->frequency * dTime
-               + lfo->ampModifier * 100.0 * getLfoInterpSample(dTime);
+               + lfo->ampModifier * 100.0 / lfo->frequency * getLfoInterpSample(dTime);
     }
     return TWOPI * this->frequency * dTime;
 }

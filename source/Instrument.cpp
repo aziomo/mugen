@@ -6,9 +6,9 @@ Instrument::Instrument(int blockSize) {
     this->blockSize = blockSize;
     env.initialAmplitude = 0.9;
     env.sustainAmplitude = 0.9;
-    env.attackDuration = 0.1;
-    env.decayDuration = 0.1;
-    env.releaseDuration = 0.1;
+    env.attackDuration = 0.01;
+    env.decayDuration = 0.01;
+    env.releaseDuration = 0.01;
 }
 
 Instrument::~Instrument() {
@@ -25,8 +25,6 @@ float Instrument::generateSample(Note* note, double dTime) {
         osc->setFrequency(note->frequency);
         sample += (float) (env.getAmplifier(dTime, note) * osc->getSample(dTime));
     }
-//    if (oscCount > 1)
-//        sample /= (float) oscCount;
     return sample / (float) oscCount;
 }
 
