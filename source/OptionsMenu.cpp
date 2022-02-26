@@ -294,6 +294,10 @@ void OptionsMenu::handleKeyPress(SDL_Keycode key){
                         if (window->typing){
                             closeTextInput();
                         }
+                        string compPath = fs::current_path().string() + "/compositions";
+                        if (!fs::exists(compPath)){
+                            fs::create_directory(compPath);
+                        }
                         exportCompositionToWav(inputValue);
                         auto extension = itemList->getSelectedItem();
                         if (extension != ".wav"){
@@ -414,7 +418,10 @@ void OptionsMenu::openLoadProjectScreen()
     setTextTexture(&opDescriptionLabel, "Otwórz projekt:", window->largeFont);
     delete itemList;
     itemList = new ItemList(renderer, window->mainFont, 400,200,5);
-    std::string projectsPath = fs::current_path().string() + "/projects";
+    string projectsPath = fs::current_path().string() + "/projects";
+    if (!fs::exists(projectsPath)){
+        fs::create_directory(projectsPath);
+    }
     auto filenames = getDirFilenamesWithoutExtensions(projectsPath);
     for (const auto & filename : filenames)
         itemList->addItem(filename);

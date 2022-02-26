@@ -17,9 +17,9 @@ add_executable(mugen main.cpp
         include/Serializer.h        source/Serializer.cpp
         include/ButtonControl.h     source/ButtonControl.cpp
         include/Deserializer.h      source/Deserializer.cpp
+        include/Instrument.h        source/Instrument.cpp
         include/WaveformType.h
         include/Texture.h
-        include/Instrument.h
         include/SelectorType.h
         include/Direction.h
         include/Control.h
