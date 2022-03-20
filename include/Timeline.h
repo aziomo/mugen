@@ -6,8 +6,6 @@
 #include "Texture.h"
 #include "Direction.h"
 
-using std::string;
-using std::to_string;
 
 class Timeline {
 public:
@@ -72,10 +70,10 @@ public:
 
             while (true){
                 if (leftColumnsRendered == leftColumnsLeftToRender) break;
-                if (leftColumnsRendered && leftColumnsRendered % segColumns() == 0){
+                if (leftColumnsRendered && leftColumnsRendered % getSegCols() == 0){
                     if (--renderedSegmentIndex < 0) break;
                 }
-                int renderedColumnIndex = segColumns()-1 - (leftColumnsRendered % segColumns());
+                int renderedColumnIndex = getSegCols() - 1 - (leftColumnsRendered % getSegCols());
                 SDL_Rect colOutline = {x + middleColX - (focusedColIndex * (colWidth - 1)) - (leftColumnsRendered + 1) * (colWidth - 1), y, colWidth, height};
 
                 for (int j = 0; j < 5; j++){
@@ -92,7 +90,7 @@ public:
 
     void renderRightUnfocusedSegments(int x, int y){
 
-        int focusedSegmentRenderedColumns = segColumns() - focusedColIndex;
+        int focusedSegmentRenderedColumns = getSegCols() - focusedColIndex;
         if (focusedSegmentRenderedColumns > renderedCols/2){
             return;
         }
@@ -105,11 +103,11 @@ public:
             while (true){
 
                 if (rightColumnsRendered == rightColumnsLeftToRender) break;
-                if (rightColumnsRendered && rightColumnsRendered % segColumns() == 0){
+                if (rightColumnsRendered && rightColumnsRendered % getSegCols() == 0){
                     if (++renderedSegmentIndex == songSegs.size()) break;
                 }
-                int renderedColumnIndex = rightColumnsRendered % segColumns();
-                SDL_Rect colOutline = {x + middleColX + (rightColumnsRendered+1) * (colWidth-1) + (segColumns()-1) * (colWidth-1) - (focusedColIndex * (colWidth - 1)), y, colWidth, height};
+                int renderedColumnIndex = rightColumnsRendered % getSegCols();
+                SDL_Rect colOutline = {x + middleColX + (rightColumnsRendered+1) * (colWidth-1) + (getSegCols() - 1) * (colWidth - 1) - (focusedColIndex * (colWidth - 1)), y, colWidth, height};
 
                 for (int j = 0; j < 5; j++) {
                     SDL_Rect bitOutline = {colOutline.x, colOutline.y + (colOutline.h / 5) * j, colWidth, colOutline.h / 5 - 3};
@@ -146,10 +144,10 @@ public:
     }
 
     void renderFocusedSegmentRightSide(int x, int y){
-        int columnsLeftToRender = std::min((segColumns() - focusedColIndex), (renderedCols/2 + 1));
+        int columnsLeftToRender = std::min((getSegCols() - focusedColIndex), (renderedCols / 2 + 1));
         int columnsRendered = 0;
 
-        for (int i = focusedColIndex; i < segColumns(); i++){
+        for (int i = focusedColIndex; i < getSegCols(); i++){
             if (columnsRendered == columnsLeftToRender) break;
             SDL_Rect colOutline = {x + middleColX + (i * (colWidth - 1)) - (focusedColIndex * (colWidth - 1)), y, colWidth, height};
             for (int j = 0; j < 5; j++){
@@ -262,11 +260,11 @@ public:
                     focusedColIndex--;
                 } else if (focusedSegmentIndex > 0) {
                     focusedSegmentIndex--;
-                    focusedColIndex = segColumns() - 1;
+                    focusedColIndex = getSegCols() - 1;
                 }
                 break;
             case Direction::RIGHT:
-                if (focusedColIndex < segColumns() - 1){
+                if (focusedColIndex < getSegCols() - 1){
                     focusedColIndex++;
                 }
                 else if (focusedSegmentIndex < songSegs.size() - 1){
@@ -277,7 +275,7 @@ public:
         }
     }
 
-    int segColumns(){
+    int getSegCols(){
         return static_cast<int>(allSegs.front()->cols.size());
     }
 

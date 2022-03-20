@@ -48,8 +48,7 @@ public:
 
     Texture instrumentListLabel, segmentManagerLabel,
             segmentsLabel, colsLabel, tempoLabel,
-            segmentsValue, colsValue, tempoValue,
-            helpBar;
+            segmentsValue, colsValue, tempoValue;
 
     void render();
     void setTextTexture(Texture *texture, const string& text) const;

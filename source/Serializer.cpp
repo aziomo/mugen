@@ -13,7 +13,7 @@ JSON Serializer::extractProject(MusicBox* musicBox, Timeline* timeline){
 JSON Serializer::extractComposition(Timeline* timeline){
     JSON compositionJson;
     compositionJson["tempo"] = timeline->tempo;
-    compositionJson["columns"] = timeline->segColumns();
+    compositionJson["columns"] = timeline->getSegCols();
     compositionJson["song_segments"] = extractSongSegmentsIndices(timeline);
     compositionJson["all_segments"] = extractAllSegments(timeline);
     return compositionJson;

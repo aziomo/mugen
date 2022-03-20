@@ -1,7 +1,5 @@
 #include "../include/CompositionMenu.h"
 
-using std::string;
-using std::to_string;
 
 CompositionMenu::CompositionMenu(MainWindow *mainWindow) {
     textColor = {255, 255, 255};
@@ -69,10 +67,10 @@ void CompositionMenu::addColumn(){
 }
 
 void CompositionMenu::removeColumn(){
-    if (timeline->segColumns() > 1)
+    if (timeline->getSegCols() > 1)
         for (auto& segment : timeline->allSegs)
             segment->cols.pop_back();
-    if (timeline->focusedColIndex == timeline->segColumns()){
+    if (timeline->focusedColIndex == timeline->getSegCols()){
         timeline->focusedColIndex--;
     }
 }
@@ -315,7 +313,7 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
                     }
                 }
                 timeline->focusedColIndex++;
-                if (timeline->focusedColIndex == timeline->segColumns()){
+                if (timeline->focusedColIndex == timeline->getSegCols()){
                     if (timeline->focusedSegmentIndex < timeline->songSegs.size()-1){
                         timeline->focusedSegmentIndex++;
                         timeline->focusedColIndex = 0;
@@ -361,7 +359,7 @@ void CompositionMenu::handleKeyPress(SDL_Keycode key) {
                 if (timeline->focusedColIndex < 0){
                     if (timeline->focusedSegmentIndex > 0){
                         timeline->focusedSegmentIndex--;
-                        timeline->focusedColIndex = timeline->segColumns()-1;
+                        timeline->focusedColIndex = timeline->getSegCols() - 1;
                     } else {
                         timeline->focusedColIndex++;
                     }
@@ -530,7 +528,7 @@ void CompositionMenu::startPlayback(){
     musicBox->stopPlaying();
     musicBox->playbackKeys = false;
     musicBox->startPlaying();
-    musicBox->writeThread = std::thread(&CompositionMenu::playbackTimeline, this);
+    musicBox->writeThread = thread(&CompositionMenu::playbackTimeline, this);
     if (musicBox->writeThread.joinable()){
         musicBox->writeThread.join();
     }
@@ -556,25 +554,25 @@ void CompositionMenu::playbackTimeline(){
     playbackOn = true;
     double globalTime = musicBox->globalTime;
     double beginTime = globalTime;
-    double timeBetweenCols = 60.0 / timeline->tempo;
+    double colDuration = 60.0 / timeline->tempo;
     double timeElapsed = 0.0;
-    double lastColTriggerTime = -timeBetweenCols;
+    double lastColTriggerTime = -colDuration;
 
-    double songLength = timeline->songSegs.front()->cols.size() * timeBetweenCols * timeline->songSegs.size();
+    double songLength = timeline->songSegs.size() * timeline->getSegCols() * colDuration;
 
     while (timeElapsed < songLength){
 
-        std::unique_lock<std::mutex> mu(musicBox->mu_blocksReadyToRead);
+        unique_lock<mutex> mu(musicBox->mu_blocksReadyToRead);
         if (musicBox->blocksReadyToOutput == musicBox->maxBlockCount){
             musicBox->cv_blocksReadyToWrite.wait(mu);
         }
         if (!musicBox->isRunning) break;
 
-        if (timeElapsed - lastColTriggerTime > timeBetweenCols){
+        if (timeElapsed - lastColTriggerTime > colDuration){
 
 
-            int colsElapsed = (int)(timeElapsed / timeBetweenCols) % timeline->segColumns();
-            int segsElapsed = timeElapsed / timeBetweenCols / timeline->segColumns();
+            int colsElapsed = (int)(timeElapsed / colDuration) % timeline->getSegCols();
+            int segsElapsed = timeElapsed / colDuration / timeline->getSegCols();
             Column* currentCol = timeline->songSegs.at(segsElapsed)->cols.at(colsElapsed);
 
 
@@ -597,11 +595,12 @@ void CompositionMenu::playbackTimeline(){
                 }
             }
             else if (segsElapsed > 0){
-                Column* previousCol = timeline->songSegs.at(segsElapsed-1)->cols.at(timeline->segColumns()-1);
+                Column* previousCol = timeline->songSegs.at(segsElapsed-1)->cols.at(timeline->getSegCols() - 1);
                 for (int i = 0; i < 5; i++){
                     auto bit = previousCol->bits[i];
                     if (bit != nullptr && bit->holdSection == bit->holdDuration){
-                        auto beginBit = timeline->songSegs.at(segsElapsed-1)->cols.at(timeline->segColumns() - bit->holdDuration-1)->bits[i];
+                        auto beginBit = timeline->songSegs.at(segsElapsed-1)->cols.at(
+                                timeline->getSegCols() - bit->holdDuration - 1)->bits[i];
                         beginBit->note.releasedOnTime = globalTime;
                     }
                 }

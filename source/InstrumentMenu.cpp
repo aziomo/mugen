@@ -5,8 +5,7 @@
 #include <sstream>
 #include <utility>
 
-using std::string;
-using std::to_string;
+using std::move, std::stringstream, std::setprecision, std::fixed;
 
 InstrumentMenu::InstrumentMenu(MainWindow *mainWindow) {
     window = mainWindow;
@@ -76,8 +75,6 @@ void InstrumentMenu::updateSelectorValues() {
 
 void InstrumentMenu::loadTextures() {
     setTextTexture(&undefinedLabel, "-");
-
-
     setTextTexture(&instrumentName, "Instrument 1", window->largeFont);
 
     setTextTexture(&oscLabel, "OSCYLATOR");
@@ -254,12 +251,12 @@ void InstrumentMenu::setTextTexture(Texture* texture, const string& text, TTF_Fo
 }
 
 void InstrumentMenu::setImageTexture(Texture *texture, string imagePath) const {
-    texture->loadFromFile(renderer, std::move(imagePath));
+    texture->loadFromFile(renderer, move(imagePath));
 }
 
 string InstrumentMenu::doubleToStr(double d, int precision) {
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(precision) << d;
+    stringstream stream;
+    stream << fixed << setprecision(precision) << d;
     return stream.str();
 }
 

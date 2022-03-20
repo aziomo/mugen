@@ -15,6 +15,7 @@
 #include <condition_variable>
 #include <sndfile.h>
 
+using std::thread, std::mutex, std::condition_variable, std::queue, std::atomic, std::unique_lock;
 
 class MusicBox {
 public:
@@ -37,17 +38,17 @@ public:
     int blockSize;
 //private:
     int maxBlockCount = 4;
-    std::mutex mu_blocksReadyToRead;
-    std::condition_variable cv_blocksReadyToRead, cv_blocksReadyToWrite;
-    std::queue<float*> blocksBuffer;
-    std::atomic<int> blocksReadyToOutput;
+    mutex mu_blocksReadyToRead;
+    condition_variable cv_blocksReadyToRead, cv_blocksReadyToWrite;
+    queue<float*> blocksBuffer;
+    atomic<int> blocksReadyToOutput;
 
     double globalTime;
     double timeStep;
 
     const int octaveSize = 12;
     int currentOctave = 4;
-    std::thread readThread, writeThread;
+    thread readThread, writeThread;
     AudioAPI* audioApi;
 
     void copyBlock(const float *source, float *destination) const;

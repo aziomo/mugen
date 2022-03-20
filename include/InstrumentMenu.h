@@ -18,12 +18,12 @@ public:
     void init();
     void render();
 
-    void setTextTexture(Texture* texture, const std::string& text) const;
+    void setTextTexture(Texture* texture, const string& text) const;
 
     void selectFocusedControl();
 
     SDL_Renderer* renderer;
-    std::string helpMessage;
+    string helpMessage;
     int currentOsc = 0;
 
     SDL_Color textColor;
@@ -74,15 +74,15 @@ public:
     Instrument* editedInstrument;
     Oscillator* editedOsc;
 
-    static std::string doubleToStr(double d, int precision);
+    static string doubleToStr(double d, int precision);
 
     bool drawIntegral = false;
-    void setImageTexture(Texture *texture, std::string imagePath) const;
+    void setImageTexture(Texture *texture, string imagePath) const;
     void loadTextures();
     void handleKeyPress(SDL_Keycode key);
     void updateTextures();
     void loadControls();
-    void setTextTexture(Texture *texture, const std::string& text, TTF_Font *font) const;
+    void setTextTexture(Texture *texture, const string& text, TTF_Font *font) const;
     void setWaveImage(SelectControl* control, WaveformType wavetype);
     void changeControlFocus(Direction direction);
     Control* getFocusedControl();

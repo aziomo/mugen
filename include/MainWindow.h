@@ -39,7 +39,7 @@ public:
     CompositionMenu* compositionMenu;
     OptionsMenu* optionsMenu;
     MusicBox* musicBox;
-    Texture helpBar, piano, octaveLabel, octaveDescriptionLabel, octaveHelpLabel;
+    Texture helpBar, piano, octaveLabel, octaveHelpLabel;
     int borderSize = 10;
     SDL_Rect mainArea = {borderSize, borderSize, w - borderSize * 2, h - borderSize * 2};
 

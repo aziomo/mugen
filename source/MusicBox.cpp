@@ -42,9 +42,9 @@ void MusicBox::tunePiano(){
 
 void MusicBox::startPlaying() {
     isRunning = true;
-    readThread = std::thread(&MusicBox::bufferOutputLoop, this);
+    readThread = thread(&MusicBox::bufferOutputLoop, this);
     if (playbackKeys){
-        writeThread = std::thread(&MusicBox::bufferInputLoop, this);
+        writeThread = thread(&MusicBox::bufferInputLoop, this);
     }
 }
 
@@ -66,7 +66,7 @@ void MusicBox::zeroOutArray(T *array, int arraySize) {
 
 void MusicBox::writePressedKeysToBuffer() {
     if (blocksReadyToOutput < maxBlockCount) {
-        std::unique_lock<std::mutex> locker(mu_blocksReadyToRead);
+        unique_lock<mutex> locker(mu_blocksReadyToRead);
         if (blocksReadyToOutput == 0)
             cv_blocksReadyToWrite.wait(locker);
         if (!isRunning){
@@ -136,7 +136,7 @@ void MusicBox::bufferOutputLoop() {
 }
 
 bool MusicBox::readBlockFromBuffer(float *outputBlock) {
-    std::unique_lock<std::mutex> locker(mu_blocksReadyToRead);
+    unique_lock<mutex> locker(mu_blocksReadyToRead);
     if (blocksReadyToOutput == 0)
         cv_blocksReadyToRead.wait(locker);
     if (!isRunning)

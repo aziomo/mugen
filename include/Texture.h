@@ -1,26 +1,26 @@
 #ifndef MUGEN_CPP_TEXTURE_H
 #define MUGEN_CPP_TEXTURE_H
 
-
-
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 #include <cstdio>
 #include <string>
 
+using std::string, std::to_string;
+
 typedef int Alignment;
 
 constexpr Alignment CENTER = 1, TO_LEFT = 0, TO_RIGHT = 2, TO_TOP = 0, TO_BOTTOM = 2;
 
-static std::string assets_dir = "../assets/";
+static string assets_dir = "../assets/";
 
-static std::string getTwoDigitString(int number){
+static string getTwoDigitString(int number){
     if (number < 0 || number > 99)
         return "XX";
     if (number < 10)
-        return "0"+ std::to_string(number);
-    return std::to_string(number);
+        return "0"+ to_string(number);
+    return to_string(number);
 }
 
 class Texture {
@@ -36,7 +36,7 @@ public:
         free();
     }
 
-    void loadFromFile(SDL_Renderer* pRenderer, std::string path){
+    void loadFromFile(SDL_Renderer* pRenderer, string path){
         renderer = pRenderer;
         free();
         SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
@@ -57,7 +57,7 @@ public:
         }
     }
 
-    void loadFromText(SDL_Renderer* pRenderer, const std::string& textValue, SDL_Color textColor, TTF_Font* font){
+    void loadFromText(SDL_Renderer* pRenderer, const string& textValue, SDL_Color textColor, TTF_Font* font){
         renderer = pRenderer;
         free();
         SDL_Surface* textSurface = TTF_RenderUTF8_Blended(font, textValue.c_str(), textColor);

@@ -119,11 +119,11 @@ void OptionsMenu::loadComposition(JSON projectJson)
     JSON compositionJson = projectJson["composition"];
     timeline->tempo = compositionJson["tempo"];
 
-    while (timeline->segColumns() > 1)
+    while (timeline->getSegCols() > 1)
         window->compositionMenu->removeColumn();
     for (auto& segment : timeline->allSegs)
         segment->cols.pop_back();
-    while (timeline->segColumns() != compositionJson["columns"])
+    while (timeline->getSegCols() != compositionJson["columns"])
         window->compositionMenu->addColumn();
 
     for (int i = 0; i < compositionJson["all_segments"].size(); i++){

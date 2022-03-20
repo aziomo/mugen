@@ -32,7 +32,7 @@ void MainWindow::initSDL() {
             printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         }
         TTF_Init();
-        auto fontPath = assets_dir + "NNHoneyRoom.ttf";
+        auto fontPath = assets_dir + "HoneyRoom.ttf";
         largeFont = TTF_OpenFont(fontPath.c_str(), 32);
         mainFont = TTF_OpenFont(fontPath.c_str(), 26);
         smallFont = TTF_OpenFont(fontPath.c_str(), 20);
@@ -377,7 +377,7 @@ void MainWindow::loadTextures() {
     octaveHelpLabel.loadFromText(renderer, "[PG DOWN] OKTAWA ↓ | [PG UP] OKTAWA ↑", textColor, tinyFont);
 }
 
-void MainWindow::setHelpBarText(const std::string& text){
+void MainWindow::setHelpBarText(const string& text){
     helpBar.loadFromText(renderer, text, textColor, tinyFont);
 }
 
