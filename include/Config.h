@@ -16,7 +16,7 @@ public:
     int m_blockCount = -1;
     int m_blockSize = -1;
     char m_sampleType = '\0';
-    std::string m_device = "";
+    std::string m_device;
     void load();
 private:
     void loadConfigData(JSON data);
