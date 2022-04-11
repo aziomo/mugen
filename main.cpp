@@ -7,8 +7,10 @@
 
 int main() {
 
-    MusicBox* musicBox = new MusicBox();
-    MainWindow* mainWindow = new MainWindow(musicBox);
+    Config config;
+    config.load();
+    MusicBox* musicBox = new MusicBox(config);
+    MainWindow mainWindow(musicBox);
 
     bool lastKeyState[128];
     int keyPressState[128] = {0};
@@ -18,16 +20,14 @@ int main() {
         lastKeyState[i] = state[i];
 
     musicBox->startPlaying();
-    while (!mainWindow->quit){
+    while (!mainWindow.quit){
         SDL_PumpEvents();
-        int keyboardSize = 20;
-        state = SDL_GetKeyboardState(&keyboardSize);
-        mainWindow->handleKeyPress(state, lastKeyState, keyPressState);
+        state = SDL_GetKeyboardState(nullptr);
+        mainWindow.handleKeyPress(state, lastKeyState, keyPressState);
         for (int i = 0; i < 128; i++)
             lastKeyState[i] = state[i];
-        mainWindow->render();
+        mainWindow.render();
     }
-    delete mainWindow;
     delete musicBox;
     exit(0);
 }

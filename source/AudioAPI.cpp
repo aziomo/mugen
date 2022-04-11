@@ -1,65 +1,49 @@
 #include <iostream>
 #include "../include/AudioAPI.h"
 
-PaError AudioAPI::init(int bufferSize, double sampleRate)
-{
-    PaStreamParameters inParams, outParams;
-    PaDeviceIndex in_dev_ndx, out_dev_ndx;
-    PaError  err;
-
-    this->bufferSize = bufferSize;
-    this->sampleRate = sampleRate;
-
+AudioAPI::AudioAPI(const Config& config) {
+    PaStreamParameters outParams;
+    PaError err;
+    m_blockSize = config.m_blockSize;
     err = Pa_Initialize();
-    if( err != paNoError ) goto error;
-
-    out_dev_ndx = getPulseDeviceId();
-
-    in_dev_ndx = Pa_GetDefaultInputDevice();
-    if (in_dev_ndx >= 0 && inLatency < 0) {
-        inLatency = Pa_GetDeviceInfo(in_dev_ndx )->defaultLowInputLatency;
-        if (inLatency <= 0) inLatency = 0.2;
-    }
-    inParams.device = in_dev_ndx;
-    inParams.channelCount = channels;
-    inParams.sampleFormat = SAMPLE_TYPE;
-    inParams.suggestedLatency = inLatency;
-    inParams.hostApiSpecificStreamInfo = nullptr;
-
-    if (out_dev_ndx >=0 && outLatency < 0) {
-        outLatency = Pa_GetDeviceInfo(out_dev_ndx )->defaultLowOutputLatency;
-        if (outLatency <= 0) outLatency = 0.2;
-    }
-    outParams.device = out_dev_ndx;
-    outParams.channelCount = channels;
-    outParams.sampleFormat = SAMPLE_TYPE;
-    outParams.suggestedLatency = outLatency;
-    outParams.hostApiSpecificStreamInfo = nullptr;
-
-
+    if (err != paNoError) goto error;
+    outParams = getOutputStreamParams(config);
     err = Pa_OpenStream(
             &stream,
-            &inParams,
+            nullptr,
             &outParams,
-            sampleRate,
-            FRAMES_PER_BUFFER,
+            config.m_sampleRate,
+            config.m_blockSize,
             paNoFlag,
             nullptr,
             nullptr);
-    if( err != paNoError ) goto error;
-    err = Pa_StartStream( stream );
-    if( err != paNoError ) goto error;
-
-    return err;
-
-    error:
-    std::cout << "An error occured while initializing PortAudio - " << Pa_GetErrorText( err );
-    Pa_Terminate();
-    return err;
+    if (err != paNoError) goto error;
+    err = Pa_StartStream(stream);
+    if (err != paNoError) {
+        error:
+        std::cout << "An error occured while initializing PortAudio - " << Pa_GetErrorText( err );
+        Pa_Terminate();
+    }
 }
 
-AudioAPI::AudioAPI(int bufferSize, double sampleRate) {
-    init(bufferSize, sampleRate);
+PaStreamParameters AudioAPI::getOutputStreamParams(const Config &config)
+{
+    PaStreamParameters outParams;
+    PaDeviceIndex outDeviceIndex = !config.m_device.empty()
+            ? getDeviceId(config.m_device.c_str())
+            : Pa_GetDefaultOutputDevice();
+
+    double latency;
+    if (outDeviceIndex >= 0) {
+        latency = Pa_GetDeviceInfo(outDeviceIndex)->defaultLowOutputLatency;
+        if (latency <= 0) latency = 0.2;
+    }
+    outParams.device = outDeviceIndex;
+    outParams.channelCount = config.m_channels;
+    outParams.sampleFormat = config.m_sampleType == 'f' ? paFloat32 : paInt16;
+    outParams.suggestedLatency = latency;
+    outParams.hostApiSpecificStreamInfo = nullptr;
+    return outParams;
 }
 
 AudioAPI::~AudioAPI(){
@@ -70,18 +54,8 @@ AudioAPI::~AudioAPI(){
 
 void AudioAPI::listOutputDevices(){
     PaDeviceIndex deviceCount = Pa_GetDeviceCount();
-    PaDeviceIndex defaultOutputDevice = Pa_GetDefaultOutputDevice();
-
-    const PaDeviceInfo* devices[deviceCount];
-    const PaDeviceInfo* defaultOutputInfo = Pa_GetDeviceInfo(defaultOutputDevice);
-
-    printf("default output: \n");
-    printDeviceInfo(const_cast<PaDeviceInfo *>(defaultOutputInfo), defaultOutputDevice);
-
-    for (int i = 0; i < deviceCount; i++) {
-        devices[i] = Pa_GetDeviceInfo(i);
-        printDeviceInfo(const_cast<PaDeviceInfo *>(devices[i]), i);
-    }
+    for (int i = 0; i < deviceCount; i++)
+        printDeviceInfo(const_cast<PaDeviceInfo *>(Pa_GetDeviceInfo(i)), i);
 }
 
 void AudioAPI::printDeviceInfo(PaDeviceInfo* deviceInfo, PaDeviceIndex id){
@@ -89,23 +63,14 @@ void AudioAPI::printDeviceInfo(PaDeviceInfo* deviceInfo, PaDeviceIndex id){
 }
 
 PaError AudioAPI::writeOut(float* frame) {
-    Pa_WriteStream(stream, frame, bufferSize);
-}
-
-PaDeviceIndex AudioAPI::getPulseDeviceId() {
-    PaDeviceIndex deviceCount = Pa_GetDeviceCount();
-    for (int i = 0; i < deviceCount; i++) {
-        if (!strcmp(Pa_GetDeviceInfo(i)->name, "pulse")){
-            return i;
-        }
-    }
+    return Pa_WriteStream(stream, frame, m_blockSize);
 }
 
 PaDeviceIndex AudioAPI::getDeviceId(const char* deviceName) {
     PaDeviceIndex deviceCount = Pa_GetDeviceCount();
     for (int i = 0; i < deviceCount; i++) {
-        if (!strcmp(Pa_GetDeviceInfo(i)->name, deviceName)){
+        if (!strcmp(Pa_GetDeviceInfo(i)->name, deviceName))
             return i;
-        }
     }
+    return -1;
 }

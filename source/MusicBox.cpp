@@ -2,9 +2,9 @@
 
 #include "../include/MusicBox.h"
 
-MusicBox::MusicBox() {
-    audioApi = new AudioAPI(FRAMES_PER_BUFFER, 44100.0);
-    blockSize = audioApi->bufferSize;
+MusicBox::MusicBox(const Config& config) {
+    audioApi = new AudioAPI(config);
+    blockSize = config.m_blockSize;
     isRunning = false;
     playbackKeys = true;
     instruments.push_back(new Instrument(blockSize));

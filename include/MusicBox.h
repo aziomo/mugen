@@ -20,7 +20,7 @@ using std::thread, std::mutex, std::condition_variable, std::queue, std::atomic,
 class MusicBox {
 public:
 
-    MusicBox();
+    explicit MusicBox(const Config& config);
     ~MusicBox();
     bool isRunning, playbackKeys;
 
