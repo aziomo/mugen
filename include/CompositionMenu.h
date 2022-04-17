@@ -1,12 +1,10 @@
 #ifndef MUGEN_COMPOSITIONMENU_H
 #define MUGEN_COMPOSITIONMENU_H
 
-#include "Texture.h"
 #include "Direction.h"
 #include "ItemList.h"
 #include "Timeline.h"
 #include <vector>
-#include "MainWindow.h"
 #include "SelectControl.h"
 #include "SegmentManager.h"
 

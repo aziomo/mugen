@@ -1,7 +1,6 @@
 #ifndef MUGEN_CPP_WAVEFORMMENU_H
 #define MUGEN_CPP_WAVEFORMMENU_H
 
-#include "Texture.h"
 #include "SelectControl.h"
 #include "Direction.h"
 #include "CheckboxControl.h"

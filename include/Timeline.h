@@ -1,7 +1,6 @@
 #ifndef MUGEN_TIMELINE_H
 #define MUGEN_TIMELINE_H
 
-#include <stdexcept>
 #include "Segment.h"
 #include "Texture.h"
 #include "Direction.h"

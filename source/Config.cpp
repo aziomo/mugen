@@ -15,7 +15,6 @@ void Config::load()
     loadConfigData(cfgData);
 }
 
-
 void Config::loadConfigData(JSON data)
 {
     auto blockCount = data["block_count"],

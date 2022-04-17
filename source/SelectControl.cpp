@@ -1,23 +1,22 @@
-#include <sstream>
 #include "../include/SelectControl.h"
 #include "../include/InstrumentMenu.h"
 #include "../include/CompositionMenu.h"
 
 SelectControl::~SelectControl(){
-    rend = nullptr;
+    p_rend = nullptr;
     while (!optionsImages.empty()){
         optionsImages.pop_back();
     }
-    arrowTexture = nullptr;
+    p_arrowTexture = nullptr;
     mainTexture = nullptr;
 }
 
 void SelectControl::setModifiedDouble(double* modifiedDouble){
-    this->modifiedDouble = modifiedDouble;
+    p_modifiedDouble = modifiedDouble;
 }
 
 void SelectControl::setModifiedInteger(int* modifiedInt){
-    this->modifiedInteger = modifiedInt;
+    p_modifiedInteger = modifiedInt;
 }
 
 void SelectControl::switchEditing(){
@@ -30,19 +29,19 @@ void SelectControl::isModifyingLFO(bool isModifying){
 
 void SelectControl::loadTextControl(SelectorType selectorType, Texture* textTexture, MainWindow* window) {
 
-    instrumentMenu = window->instrumentMenu;
-    compositionMenu = window->compositionMenu;
-    this->type = selectorType;
-    this->rend = window->renderer;
-    this->arrowTexture = &window->instrumentMenu->arrowImg;
+    p_instrumentMenu = window->instrumentMenu;
+    p_compositionMenu = window->compositionMenu;
+    m_type = selectorType;
+    p_rend = window->renderer;
+    p_arrowTexture = &window->instrumentMenu->arrowImg;
     mainTexture = textTexture;
 }
 
 void SelectControl::loadImageControl(vector<Texture*> imageTextures, MainWindow* window) {
-    instrumentMenu = window->instrumentMenu;
-    this->type = SelectorType::WAVETYPE;
-    this->rend = window->renderer;
-    this->arrowTexture = &window->instrumentMenu->arrowImg;
+    p_instrumentMenu = window->instrumentMenu;
+    m_type = SelectorType::WAVETYPE;
+    p_rend = window->renderer;
+    this->p_arrowTexture = &window->instrumentMenu->arrowImg;
     optionsImages = std::move(imageTextures);
     mainTexture = optionsImages[0];
 }
@@ -53,70 +52,70 @@ void SelectControl::render(int x, int y) {
                          mainTexture->w + borderSize * 4,
                          mainTexture->h + borderSize * 4};
         bgRect = {x - borderSize, y - borderSize, mainTexture->w + borderSize * 2, mainTexture->h + borderSize * 2};
-        SDL_SetRenderDrawColor(rend, 0xFF, 0xFF, 0xFF, 0xFF);
-        SDL_RenderFillRect(rend, &highlightRect);
-        SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, 0xFF);
-        SDL_RenderFillRect(rend, &bgRect);
+        SDL_SetRenderDrawColor(p_rend, 0xFF, 0xFF, 0xFF, 0xFF);
+        SDL_RenderFillRect(p_rend, &highlightRect);
+        SDL_SetRenderDrawColor(p_rend, 0x00, 0x00, 0x00, 0xFF);
+        SDL_RenderFillRect(p_rend, &bgRect);
     }
 
     if (isEditing){
-        arrowTexture->renderRotated(x - arrowTexture->w,
-                             y + (mainTexture->h - arrowTexture->h) / 2, 270);
-        arrowTexture->renderRotated(x + mainTexture->w,
-                             y + (mainTexture->h - arrowTexture->h) / 2, 90);
+        p_arrowTexture->renderRotated(x - p_arrowTexture->w,
+                             y + (mainTexture->h - p_arrowTexture->h) / 2, 270);
+        p_arrowTexture->renderRotated(x + mainTexture->w,
+                             y + (mainTexture->h - p_arrowTexture->h) / 2, 90);
     }
     mainTexture->render(x,y);
 }
 
 void SelectControl::increment(bool largeIncrement) {
-    switch(type){
+    switch(m_type){
         case SelectorType::FUNCTION:
-            (compositionMenu->*incrementFunction)();
+            (p_compositionMenu->*p_incFunc)();
             break;
         case SelectorType::OSCILLATOR:
-            instrumentMenu->selectNextOsc();
+            p_instrumentMenu->selectNextOsc();
             break;
         case SelectorType::WAVETYPE:
             setNextWaveType(); break;
         case SelectorType::INTEGER:
-            *modifiedInteger += 1;
+            *p_modifiedInteger += 1;
             break;
         case SelectorType::FINEDOUBLE:
-            *modifiedDouble += largeIncrement ? 0.1 : 0.01; break;
+            *p_modifiedDouble += largeIncrement ? 0.1 : 0.01; break;
         case SelectorType::DOUBLE:
-            *modifiedDouble += 0.1; break;
+            *p_modifiedDouble += 0.1; break;
     }
 }
 
 void SelectControl::decrement(bool largeDecrement) {
-    switch(type){
+    switch(m_type){
         case SelectorType::FUNCTION:
-            (compositionMenu->*decrementFunction)();
+            (p_compositionMenu->*p_decFunc)();
             break;
         case SelectorType::OSCILLATOR:
-            instrumentMenu->selectPrevOsc();
+            p_instrumentMenu->selectPrevOsc();
             break;
         case SelectorType::WAVETYPE:
             setNextWaveType(false); break;
         case SelectorType::FINEDOUBLE:
-            *modifiedDouble -= largeDecrement ? 0.1 : 0.01;
-            if (*modifiedDouble < 0)
-                *modifiedDouble = 0;
+            *p_modifiedDouble -= largeDecrement ? 0.1 : 0.01;
+            if (*p_modifiedDouble < 0)
+                *p_modifiedDouble = 0;
             break;
         case SelectorType::DOUBLE:
-            *modifiedDouble -= 0.1;
-            if (*modifiedDouble < 0)
-                *modifiedDouble = 0;
+            *p_modifiedDouble -= 0.1;
+            if (*p_modifiedDouble < 0)
+                *p_modifiedDouble = 0;
             break;
         case SelectorType::INTEGER:
-            if (*modifiedInteger > 0)
-                *modifiedInteger -= 1;
+            if (*p_modifiedInteger > 0)
+                *p_modifiedInteger -= 1;
             break;
     }
 }
 
 void SelectControl::setNextWaveType(bool increment){
-    WaveformType previousWave = modifyLFO ? instrumentMenu->editedOsc->lfo->waveType : instrumentMenu->editedOsc->waveType;
+    WaveformType previousWave = modifyLFO ? p_instrumentMenu->editedOsc->lfo->waveType : p_instrumentMenu->editedOsc->waveType;
     WaveformType nextWave;
 
     switch (previousWave) {
@@ -135,24 +134,24 @@ void SelectControl::setNextWaveType(bool increment){
     }
 
     if (modifyLFO){
-        instrumentMenu->editedOsc->lfo->setWaveformType(nextWave);
-        instrumentMenu->editedOsc->setupLfoLookup(instrumentMenu->editedOsc->lfo->waveType);
+        p_instrumentMenu->editedOsc->lfo->setWaveformType(nextWave);
+        p_instrumentMenu->editedOsc->setupLfoLookup(p_instrumentMenu->editedOsc->lfo->waveType);
     } else {
-        instrumentMenu->editedOsc->setWaveformType(nextWave);
+        p_instrumentMenu->editedOsc->setWaveformType(nextWave);
     }
 }
 
 void SelectControl::activate() {
-    if (!modifyLFO || instrumentMenu->lfoCheckBox.isChecked){
+    if (!modifyLFO || p_instrumentMenu->lfoCheckBox.isChecked){
         switchHighlight();
         switchEditing();
     }
 }
 
 void SelectControl::setIncrementFunction(void (CompositionMenu::*function)()) {
-    incrementFunction = function;
+    p_incFunc = function;
 }
 
 void SelectControl::setDecrementFunction(void (CompositionMenu::*function)()) {
-    decrementFunction = function;
+    p_decFunc = function;
 }

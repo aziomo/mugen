@@ -36,7 +36,7 @@ public:
         free();
     }
 
-    void loadFromFile(SDL_Renderer* pRenderer, string path){
+    void loadFromFile(SDL_Renderer* pRenderer, const string& path){
         renderer = pRenderer;
         free();
         SDL_Surface* loadedSurface = IMG_Load( path.c_str() );

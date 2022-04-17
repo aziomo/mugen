@@ -102,7 +102,7 @@ JSON Serializer::extractOscillators(Instrument *pInstrument) {
     JSON allOscsJson;
     for (auto* osc : pInstrument->oscillators){
         JSON singleOscJson;
-        singleOscJson["type"] = wavetypeToString(osc->waveType);
+        singleOscJson["m_type"] = wavetypeToString(osc->waveType);
         singleOscJson["freq_mod"] = osc->freqModifier;
         singleOscJson["amp_mod"] = osc->ampModifier;
         singleOscJson["lfo"] = extractLFO(osc->lfo);
@@ -116,7 +116,7 @@ JSON Serializer::extractLFO(Oscillator* osc){
         return nullptr;
     }
     JSON lfoJson;
-    lfoJson["type"] = wavetypeToString(osc->waveType);
+    lfoJson["m_type"] = wavetypeToString(osc->waveType);
     lfoJson["freq_mod"] = osc->freqModifier;
     lfoJson["amp_mod"] = osc->ampModifier;
     return lfoJson;

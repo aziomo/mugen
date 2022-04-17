@@ -10,8 +10,8 @@
 class SelectControl : public Control {
 
 public:
-    double* modifiedDouble = nullptr;
-    int* modifiedInteger = nullptr;
+    double* p_modifiedDouble = nullptr;
+    int* p_modifiedInteger = nullptr;
 
     ~SelectControl() override;
 
@@ -23,7 +23,7 @@ public:
 
     void switchEditing();
     void loadTextControl(SelectorType type, Texture *textTexture, MainWindow *window);
-    void loadImageControl(std::vector<Texture *> imageTextures, MainWindow *window);
+    void loadImageControl(std::vector<Texture*> imageTextures, MainWindow *window);
     void isModifyingLFO(bool isModifying);
     Texture* mainTexture;
 
@@ -33,16 +33,16 @@ public:
     void setDecrementFunction(void (CompositionMenu::*function)());
 
 private:
-    void (CompositionMenu::*incrementFunction)();
-    void (CompositionMenu::*decrementFunction)();
-    SDL_Renderer* rend;
+    void (CompositionMenu::*p_incFunc)();
+    void (CompositionMenu::*p_decFunc)();
+    SDL_Renderer* p_rend;
     int borderSize = 2;
     vector<Texture*> optionsImages;
-    Texture* arrowTexture;
+    Texture* p_arrowTexture;
     SDL_Rect highlightRect, bgRect;
-    SelectorType type;
-    InstrumentMenu* instrumentMenu;
-    CompositionMenu* compositionMenu;
+    SelectorType m_type;
+    InstrumentMenu* p_instrumentMenu;
+    CompositionMenu* p_compositionMenu;
     bool modifyLFO = false;
 
     void setNextWaveType(bool increment = true);

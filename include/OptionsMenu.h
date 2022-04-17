@@ -2,7 +2,6 @@
 #define MUGEN_OPTIONSMENU_H
 #include "Serializer.h"
 #include "Deserializer.h"
-#include "MainWindow.h"
 #include "ButtonControl.h"
 #include "ItemList.h"
 

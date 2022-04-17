@@ -68,7 +68,7 @@ void CheckboxControl::loadTextures(Texture* labelTexture, MainWindow* window, bo
         renderArea.w = labelTexture->w + borderSize*4,
         renderArea.h = labelTexture->h + checkboxBorderRect.w + borderSize*4;
     }
-//    labelTexture->loadFromText(window->renderer, text, window->instrumentMenu->textColor, window->tinyFont);
+//    labelTexture->loadFromText(window->renderer, text, window->p_instrumentMenu->textColor, window->tinyFont);
 }
 
 

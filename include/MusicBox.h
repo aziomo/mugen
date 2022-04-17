@@ -24,7 +24,6 @@ public:
     ~MusicBox();
     bool isRunning, playbackKeys;
 
-    bool pressedKeys[KEYBOARD_SIZE];
     Note pressedNotes[KEYBOARD_SIZE];
 
     SNDFILE* outputFile;
@@ -52,33 +51,20 @@ public:
     AudioAPI* audioApi;
 
     void copyBlock(const float *source, float *destination) const;
-
     void writePressedKeysToBuffer();
     bool readBlockFromBuffer(float *outputBlock);
-
     void bufferInputLoop();
     void bufferOutputLoop();
-
     void openFile(const string &filepath);
     void closeFile();
-
     long writeBlockToFile(float *block) const;
-
-    template <typename T>
-    void zeroOutArray(T *array, int arraySize);
-
+    template <typename T> void zeroOutArray(T *array, int arraySize);
     void pressNoteKey(int keyPosition);
-
     void releaseNoteKey(int keyPosition);
-
     void writeBitsToBuffer(vector<Bit*> *bits);
-
     int keyToNoteValue(SDL_Keycode key) const;
-
     void tunePiano();
-
     void octaveUp();
-
     void octaveDown();
 };
 
