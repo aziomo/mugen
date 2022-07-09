@@ -12,7 +12,6 @@ namespace fs = std::filesystem;
 
 OptionsMenu::OptionsMenu(MainWindow* mainWindow)
 {
-    textColor = {255, 255, 255};
     window = mainWindow;
     musicBox = mainWindow->musicBox;
     renderer = mainWindow->renderer;
@@ -158,7 +157,7 @@ void OptionsMenu::loadComposition(JSON projectJson)
 
 void OptionsMenu::setTextTexture(Texture* texture, const string& text, TTF_Font* font) const
 {
-    texture->loadFromText(renderer, text, textColor, font);
+    texture->loadFromText(renderer, text, window->colors.foreground, font);
 }
 
 void OptionsMenu::render()
@@ -178,9 +177,9 @@ void OptionsMenu::render()
         case EXPORT:
             itemList->render(window->w*0.8 - itemList->width/2,
                              window->h/2 - itemList->height/2);
-            SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+            SetRenderDrawColor(renderer, window->colors.foreground);
             SDL_RenderDrawRect(renderer, &inputBoxBorder);
-            SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+            SetRenderDrawColor(renderer, window->colors.background);
             SDL_RenderDrawRect(renderer, &inputBox);
 
             if (inputValue.length() > 0) inputValueLabel.render(inputBox.x,inputBox.y + inputBox.h/2 - inputValueLabel.h/2);
@@ -196,9 +195,9 @@ void OptionsMenu::render()
         case SAVE:
             opDescriptionLabel.render(xByPercent(&opDescriptionLabel, 0.5),
                                       yByPercent(&opDescriptionLabel, 0.35));
-            SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+            SetRenderDrawColor(renderer, window->colors.foreground);
             SDL_RenderDrawRect(renderer, &inputBoxBorder);
-            SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+            SetRenderDrawColor(renderer, window->colors.background);
             SDL_RenderDrawRect(renderer, &inputBox);
 
             if (inputValue.length() > 0) inputValueLabel.render(inputBox.x,inputBox.y + inputBox.h/2 - inputValueLabel.h/2);
@@ -220,9 +219,9 @@ void OptionsMenu::render()
             break;
     }
     if (dialogOpen){
-        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SetRenderDrawColor(renderer, window->colors.foreground);
         SDL_RenderFillRect(renderer, &dialogBoxBorder);
-        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+        SetRenderDrawColor(renderer, window->colors.background);
         SDL_RenderFillRect(renderer, &dialogBox);
         okBtn.render(xByPercent(&okLabel, 0.5),
                               yByPercent(&okLabel, 0.65));
@@ -417,7 +416,7 @@ void OptionsMenu::openLoadProjectScreen()
 {
     setTextTexture(&opDescriptionLabel, "Otwórz projekt:", window->largeFont);
     delete itemList;
-    itemList = new ItemList(renderer, window->mainFont, 400,200,5);
+    itemList = new ItemList(renderer, window->mainFont, window->colors, 400,200,5);
     string projectsPath = fs::current_path().string() + "/projects";
     if (!fs::exists(projectsPath)){
         fs::create_directory(projectsPath);
@@ -458,7 +457,7 @@ void OptionsMenu::openExportSongScreen(){
     setTextTexture(&opDescriptionLabel, "Eksportuj kompozycję jako:", window->largeFont);
     openTextInput();
     delete itemList;
-    itemList = new ItemList(renderer, window->mainFont, 100,200,5);
+    itemList = new ItemList(renderer, window->mainFont, window->colors, 100,200,5);
     for (const auto& format : getAudioFormats())
         itemList->addItem("." + format);
 

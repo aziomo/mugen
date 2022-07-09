@@ -19,7 +19,7 @@ class OptionsMenu;
 
 class MainWindow {
 public:
-    MainWindow(MusicBox* musicBox);
+    MainWindow(MusicBox* musicBox, const Config& config);
     ~MainWindow();
     void initSDL();
     void render();
@@ -31,6 +31,8 @@ public:
     TTF_Font* mainFont = nullptr;
     TTF_Font* smallFont = nullptr;
     TTF_Font* tinyFont = nullptr;
+    Config config;
+    ColorTheme colors;
     bool typing = false;
     bool showPiano = false;
     bool quit = false;
@@ -56,7 +58,6 @@ public:
 private:
     Texture instrumentsTab, compositionTab, optionsTab,
             f1Label, f2Label, f3Label;
-    SDL_Color textColor = {255, 255, 255};
     SDL_Rect windowArea = {0, 0, w, h};
 
     SDL_Window* window = nullptr;

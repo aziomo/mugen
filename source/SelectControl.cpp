@@ -52,9 +52,9 @@ void SelectControl::render(int x, int y) {
                          mainTexture->w + borderSize * 4,
                          mainTexture->h + borderSize * 4};
         bgRect = {x - borderSize, y - borderSize, mainTexture->w + borderSize * 2, mainTexture->h + borderSize * 2};
-        SDL_SetRenderDrawColor(p_rend, 0xFF, 0xFF, 0xFF, 0xFF);
+        SetRenderDrawColor(p_rend, p_instrumentMenu->window->colors.foreground);
         SDL_RenderFillRect(p_rend, &highlightRect);
-        SDL_SetRenderDrawColor(p_rend, 0x00, 0x00, 0x00, 0xFF);
+        SetRenderDrawColor(p_rend, p_instrumentMenu->window->colors.background);
         SDL_RenderFillRect(p_rend, &bgRect);
     }
 

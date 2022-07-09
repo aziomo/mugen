@@ -11,7 +11,7 @@ InstrumentMenu::InstrumentMenu(MainWindow *mainWindow) {
     window = mainWindow;
     renderer = mainWindow->renderer;
     musicBox = mainWindow->musicBox;
-    instrumentList = new ItemList(this->renderer, window->smallFont, window->mainArea.w / 5, window->mainArea.h * 1 / 2, 5);
+    instrumentList = new ItemList(this->renderer, window->smallFont, window->colors, window->mainArea.w / 5, window->mainArea.h * 1 / 2, 5);
 }
 
 InstrumentMenu::~InstrumentMenu() {
@@ -23,7 +23,6 @@ InstrumentMenu::~InstrumentMenu() {
 }
 
 void InstrumentMenu::init() {
-    textColor = {255, 255, 255};
     editedInstrument = musicBox->instruments.front();
     editedOsc = editedInstrument->oscillators.front();
 
@@ -243,15 +242,15 @@ void InstrumentMenu::render() {
 }
 
 void InstrumentMenu::setTextTexture(Texture* texture, const string& text) const {
-    texture->loadFromText(renderer, text, textColor, window->mainFont);
+    texture->loadFromText(renderer, text, window->colors.foreground, window->mainFont);
 }
 
 void InstrumentMenu::setTextTexture(Texture* texture, const string& text, TTF_Font* font) const {
-    texture->loadFromText(renderer, text, textColor, font);
+    texture->loadFromText(renderer, text, window->colors.foreground, font);
 }
 
-void InstrumentMenu::setImageTexture(Texture *texture, string imagePath) const {
-    texture->loadFromFile(renderer, move(imagePath));
+void InstrumentMenu::setImageTexture(Texture *texture, const string& imagePath) const {
+    texture->loadFromFile(renderer, imagePath, &window->colors.foreground);
 }
 
 string InstrumentMenu::doubleToStr(double d, int precision) {

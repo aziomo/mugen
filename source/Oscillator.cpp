@@ -81,6 +81,7 @@ double Oscillator::YofX(double x, WaveformType function) {
         case WaveformType::NOISE:
             return 2.0 * ((double) rand() / (double) RAND_MAX) - 1.0;
     }
+    return sin(x);
 }
 
 double Oscillator::getPhase(double dTime) {

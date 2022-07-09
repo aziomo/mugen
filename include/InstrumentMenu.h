@@ -25,8 +25,6 @@ public:
     string helpMessage;
     int currentOsc = 0;
 
-    SDL_Color textColor;
-
     ItemList* instrumentList;
     bool isInstrumentListFocused = false;
 
@@ -76,7 +74,7 @@ public:
     static string doubleToStr(double d, int precision);
 
     bool drawIntegral = false;
-    void setImageTexture(Texture *texture, string imagePath) const;
+    void setImageTexture(Texture *texture, const string& imagePath) const;
     void loadTextures();
     void handleKeyPress(SDL_Keycode key);
     void updateTextures();

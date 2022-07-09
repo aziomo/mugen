@@ -11,7 +11,6 @@ class OptionsMenu {
 
 public:
     SDL_Renderer* renderer;
-    SDL_Color textColor;
     MainWindow* window;
     MusicBox* musicBox;
     ItemList* itemList;

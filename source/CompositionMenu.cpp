@@ -6,8 +6,8 @@ CompositionMenu::CompositionMenu(MainWindow *mainWindow) {
     musicBox = mainWindow->musicBox;
     window = mainWindow;
     renderer = mainWindow->renderer;
-    timeline = new Timeline(this->renderer, window->smallFont, 21, 45, window->mainArea.h*1/2, 8);
-    instrumentList = new ItemList(this->renderer, window->tinyFont, window->mainArea.w/5, window->mainArea.w/6, 6, true);
+    timeline = new Timeline(this->renderer, window->smallFont, window->colors, 21, 45, window->mainArea.h*1/2, 8);
+    instrumentList = new ItemList(this->renderer, window->tinyFont, window->colors, window->mainArea.w/5, window->mainArea.w/6, 6, true);
     segmentManager = new SegmentManager(timeline, window->smallFont, window->mainArea.w/10, window->mainArea.w/6, 5);
 }
 
@@ -103,11 +103,8 @@ void CompositionMenu::updateTextures() {
     setTextTexture(&tempoValue, to_string(timeline->tempo), window->mainFont);
 }
 
-void CompositionMenu::setTextTexture(Texture* texture, const string& text) const {
-    texture->loadFromText(renderer, text, textColor, window->mainFont);
-}
 void CompositionMenu::setTextTexture(Texture* texture, const string& text, TTF_Font* font) const {
-    texture->loadFromText(renderer, text, textColor, font);
+    texture->loadFromText(renderer, text, window->colors.foreground, font);
 }
 int CompositionMenu::xByPercent(Texture* texture, double percent, Alignment align) const {
     return window->xByPercent(texture, percent, align);
