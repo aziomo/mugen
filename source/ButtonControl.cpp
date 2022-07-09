@@ -17,9 +17,9 @@ void ButtonControl::render(int x, int y) {
         bgRect = {x - borderSize*2, y - borderSize*2,
                   labelTexture->w + borderSize * 4,
                   labelTexture->h + borderSize * 4};
-        SDL_SetRenderDrawColor(rend, 0xFF, 0xFF, 0xFF, 0xFF);
+        SetRenderDrawColor(rend, menu->window->colors.foreground);
         SDL_RenderFillRect(rend, &highlightRect);
-        SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, 0xFF);
+        SetRenderDrawColor(rend, menu->window->colors.background);
         SDL_RenderFillRect(rend, &bgRect);
     }
     labelTexture->render(x, y);

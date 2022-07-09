@@ -1,11 +1,13 @@
 #ifndef MUGEN_CPP_TEXTURE_H
 #define MUGEN_CPP_TEXTURE_H
 
+#include "SDL_Utils.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 #include <cstdio>
 #include <string>
+#include <filesystem>
 
 using std::string, std::to_string;
 
@@ -36,7 +38,7 @@ public:
         free();
     }
 
-    void loadFromFile(SDL_Renderer* pRenderer, const string& path){
+    void loadFromFile(SDL_Renderer* pRenderer, const string& path, SDL_Color* colorMod = nullptr){
         renderer = pRenderer;
         free();
         SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
@@ -46,6 +48,9 @@ public:
         else
         {
             texture = SDL_CreateTextureFromSurface( renderer, loadedSurface );
+            if (colorMod != nullptr){
+                SDL_SetTextureColorMod(texture, colorMod->r, colorMod->g, colorMod->b);
+            }
             if( texture == nullptr ) {
                 printf( "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
             }

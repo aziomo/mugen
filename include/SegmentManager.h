@@ -27,7 +27,7 @@ public:
     Texture segIndex, segNumber;
 
     void render(int x, int y){
-        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SetRenderDrawColor(renderer, timeline->theme.foreground);
         outline = {x, y, width, height};
         SDL_RenderDrawRect(renderer, &outline);
 
@@ -39,17 +39,17 @@ public:
             if (i == timeline->focusedSegmentIndex){
                 if (isFocused){
                     SDL_RenderFillRect(renderer, &itemContainer);
-                    setBlackStr(&segIndex, getTwoDigitString(i));
-                    setBlackStr(&segNumber, getTwoDigitString(timeline->songSegs.at(i)->index));
+                    setStrColorToBackground(&segIndex, getTwoDigitString(i));
+                    setStrColorToBackground(&segNumber, getTwoDigitString(timeline->songSegs.at(i)->index));
                 }
                 else {
                     SDL_RenderDrawRect(renderer, &itemContainer);
-                    setWhiteStr(&segIndex, getTwoDigitString(i));
-                    setWhiteStr(&segNumber, getTwoDigitString(timeline->songSegs.at(i)->index));
+                    setStrColorToForeground(&segIndex, getTwoDigitString(i));
+                    setStrColorToForeground(&segNumber, getTwoDigitString(timeline->songSegs.at(i)->index));
                 }
             } else {
-                setWhiteStr(&segIndex, getTwoDigitString(i));
-                setWhiteStr(&segNumber, getTwoDigitString(timeline->songSegs.at(i)->index));
+                setStrColorToForeground(&segIndex, getTwoDigitString(i));
+                setStrColorToForeground(&segNumber, getTwoDigitString(timeline->songSegs.at(i)->index));
             }
 
             segIndex.render(itemContainer.x + itemContainer.w / 4 - segIndex.w / 2, itemContainer.y + itemContainer.h / 2 - segIndex.h / 2 + 1);
@@ -57,12 +57,12 @@ public:
         }
     }
 
-    void setBlackStr(Texture* texture, const string& text) const{
-        texture->loadFromText(renderer, text, timeline->black, font);
+    void setStrColorToBackground(Texture* texture, const string& text) const{
+        timeline->setStrColorToBackground(texture, text);
     }
 
-    void setWhiteStr(Texture* texture, const string& text) const{
-        texture->loadFromText(renderer, text, timeline->white, font);
+    void setStrColorToForeground(Texture* texture, const string& text) const{
+        timeline->setStrColorToForeground(texture, text);
     }
 
     void moveUp(){

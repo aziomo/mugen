@@ -29,8 +29,8 @@ AudioAPI::AudioAPI(const Config& config) {
 PaStreamParameters AudioAPI::getOutputStreamParams(const Config &config)
 {
     PaStreamParameters outParams;
-    PaDeviceIndex outDeviceIndex = !config.m_device.empty()
-            ? getDeviceId(config.m_device.c_str())
+    PaDeviceIndex outDeviceIndex = !config.m_outputDevice.empty()
+            ? getDeviceId(config.m_outputDevice.c_str())
             : Pa_GetDefaultOutputDevice();
 
     double latency;

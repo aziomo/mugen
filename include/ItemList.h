@@ -10,8 +10,9 @@ using std::vector;
 class ItemList {
 
 public:
-    ItemList(SDL_Renderer* renderer, TTF_Font* font, int width, int height, int visibleItems, bool enumerate = false)
+    ItemList(SDL_Renderer* renderer, TTF_Font* font, ColorTheme theme, int width, int height, int visibleItems, bool enumerate = false)
     {
+        this->theme = theme;
         this->renderer = renderer;
         this->width = width;
         this->height = height;
@@ -38,6 +39,7 @@ public:
     int selectedIndex, topDisplayedItemIndex;
     int visibleItems = 4;
 
+    ColorTheme theme;
     TTF_Font* font;
     SDL_Color white = {0xFF, 0xFF, 0xFF, 0xFF};
     SDL_Color black = {0x00, 0x00, 0x00, 0xFF};
@@ -48,12 +50,12 @@ public:
     vector<string> items;
     Texture indexLabel, itemLabel;
 
-    void setBlackStr(Texture* texture, const string& text) const{
-        texture->loadFromText(renderer, text, black, font);
+    void setStrColorToBackground(Texture* texture, const string& text) const{
+        texture->loadFromText(renderer, text, theme.background, font);
     }
 
-    void setWhiteStr(Texture* texture, string text) const{
-        texture->loadFromText(renderer, text, white, font);
+    void setStrColorToForeground(Texture* texture, const string& text) const{
+        texture->loadFromText(renderer, text, theme.foreground, font);
     }
 
     void addItem(const string& item){
@@ -61,12 +63,12 @@ public:
         auto* strTexture = new Texture();
         auto* indexTexture = new Texture();
         if (items.size() == 1){
-            setBlackStr(strTexture, item);
-            setBlackStr(indexTexture, getTwoDigitString(items.size()));
+            setStrColorToBackground(strTexture, item);
+            setStrColorToBackground(indexTexture, getTwoDigitString(items.size()));
             selectedIndex = 0;
         } else {
-            setWhiteStr(strTexture, item);
-            setWhiteStr(indexTexture, getTwoDigitString(items.size()));
+            setStrColorToForeground(strTexture, item);
+            setStrColorToForeground(indexTexture, getTwoDigitString(items.size()));
         }
     }
 
@@ -102,7 +104,7 @@ public:
     }
 
     void render(int x, int y){
-        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SetRenderDrawColor(renderer, theme.foreground);
         outline = {x, y, width, height};
         SDL_RenderDrawRect(renderer, &outline);
 
@@ -116,19 +118,19 @@ public:
             if (i == selectedIndex){
                 SDL_RenderFillRect(renderer, &itemContainer);
                 if (isFocused){
-                    setBlackStr(&itemLabel, items.at(i));
-                    if (enumerate) setBlackStr(&indexLabel, getTwoDigitString(i));
+                    setStrColorToBackground(&itemLabel, items.at(i));
+                    if (enumerate) setStrColorToBackground(&indexLabel, getTwoDigitString(i));
                 } else{
                     SDL_Rect containerFilling = {itemContainer.x+3, itemContainer.y+3, itemContainer.w-6, itemContainer.h-6};
-                    SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+                    SetRenderDrawColor(renderer, theme.background);
                     SDL_RenderFillRect(renderer, &containerFilling);
-                    setWhiteStr(&itemLabel, items.at(i));
-                    if (enumerate) setWhiteStr(&indexLabel, getTwoDigitString(i));
+                    setStrColorToForeground(&itemLabel, items.at(i));
+                    if (enumerate) setStrColorToForeground(&indexLabel, getTwoDigitString(i));
                 }
             }
             else {
-                setWhiteStr(&itemLabel, items.at(i));
-                if (enumerate) setWhiteStr(&indexLabel, getTwoDigitString(i));
+                setStrColorToForeground(&itemLabel, items.at(i));
+                if (enumerate) setStrColorToForeground(&indexLabel, getTwoDigitString(i));
             }
 
             if (enumerate){

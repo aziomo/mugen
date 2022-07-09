@@ -5,10 +5,12 @@
 
 int main()
 {
+    assets_dir = std::filesystem::is_directory("./assets/") ? "./assets/" : "../assets/";
+    printf("%s", assets_dir.c_str());
     Config config;
     config.load();
     MusicBox musicBox(config);
-    MainWindow mainWindow(&musicBox);
+    MainWindow mainWindow(&musicBox, config);
     bool lastKeyState[128];
     int keyPressState[128] = {0};
     const Uint8* state = SDL_GetKeyboardState(nullptr);

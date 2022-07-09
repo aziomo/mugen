@@ -8,7 +8,8 @@
 
 class Timeline {
 public:
-    Timeline(SDL_Renderer* renderer, TTF_Font* font, int renderedCols, int colWidth, int height, int startingColCount){
+    Timeline(SDL_Renderer* renderer, TTF_Font* font, ColorTheme theme, int renderedCols, int colWidth, int height, int startingColCount){
+        this->theme = theme;
         this->renderer = renderer;
         this->font = font;
         this->renderedCols = renderedCols;
@@ -30,9 +31,7 @@ public:
 
     TTF_Font* font;
     SDL_Renderer* renderer;
-    SDL_Color black = {0x00, 0x00, 0x00, 0xFF};
-    SDL_Color grey = {0x77, 0x77, 0x77, 0xFF};
-    SDL_Color white = {0xFF, 0xFF, 0xFF, 0xFF};
+    ColorTheme theme;
     string dashdash = "--";
     SDL_Rect outline;
 
@@ -48,10 +47,10 @@ public:
 
     void render(int x, int y) {
         outline = {x, y, width - renderedCols + 1, height - 3};
-        SDL_SetRenderDrawColor(renderer, 0x55, 0x55, 0x55, 0xFF);
+        SetRenderDrawColor(renderer, theme.inactiveBorder);
         renderLeftUnfocusedSegments(x, y);
         renderRightUnfocusedSegments(x, y);
-        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SetRenderDrawColor(renderer, theme.foreground);
         SDL_RenderDrawRect(renderer, &outline);
         renderFocusedSegmentLeftSide(x, y);
         renderFocusedSegmentRightSide(x, y);
@@ -189,11 +188,11 @@ public:
 
     void renderBitBackground(SDL_Rect* bitOutline) const{
         if (!editingMode){
-            SDL_SetRenderDrawColor(renderer, 0x40, 0x40, 0x40, 0xFF); // grey
+            SetRenderDrawColor(renderer, theme.focusedBit);
         }
         SDL_RenderFillRect(renderer, bitOutline);
         if (!editingMode){
-            SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+            SetRenderDrawColor(renderer, theme.foreground);
         }
     }
 
@@ -201,28 +200,28 @@ public:
         if (segmentFocused) {
             if (renderedBit != nullptr){
                 if (bitFocused && editingMode){
-                    setBlackStr(&bitNoteLabel, freqToSymbol(renderedBit->note.frequency));
-                    setBlackStr(&bitInstrumentLabel, getTwoDigitString(renderedBit->instrument->index));
+                    setStrColorToBackground(&bitNoteLabel, freqToSymbol(renderedBit->note.frequency));
+                    setStrColorToBackground(&bitInstrumentLabel, getTwoDigitString(renderedBit->instrument->index));
                 } else {
-                    setWhiteStr(&bitNoteLabel, freqToSymbol(renderedBit->note.frequency));
-                    setWhiteStr(&bitInstrumentLabel, getTwoDigitString(renderedBit->instrument->index));
+                    setStrColorToForeground(&bitNoteLabel, freqToSymbol(renderedBit->note.frequency));
+                    setStrColorToForeground(&bitInstrumentLabel, getTwoDigitString(renderedBit->instrument->index));
                 }
             } else {
                 if (bitFocused && editingMode){
-                    setBlackStr(&bitNoteLabel, dashdash);
-                    setBlackStr(&bitInstrumentLabel, dashdash);
+                    setStrColorToBackground(&bitNoteLabel, dashdash);
+                    setStrColorToBackground(&bitInstrumentLabel, dashdash);
                 } else {
-                    setWhiteStr(&bitNoteLabel, dashdash);
-                    setWhiteStr(&bitInstrumentLabel, dashdash);
+                    setStrColorToForeground(&bitNoteLabel, dashdash);
+                    setStrColorToForeground(&bitInstrumentLabel, dashdash);
                 }
             }
         } else {
             if (renderedBit != nullptr){
-                setGreyStr(&bitNoteLabel, freqToSymbol(renderedBit->note.frequency));
-                setGreyStr(&bitInstrumentLabel, getTwoDigitString(renderedBit->instrument->index));
+                setStrColorToInactive(&bitNoteLabel, freqToSymbol(renderedBit->note.frequency));
+                setStrColorToInactive(&bitInstrumentLabel, getTwoDigitString(renderedBit->instrument->index));
             } else {
-                setGreyStr(&bitNoteLabel, dashdash);
-                setGreyStr(&bitInstrumentLabel, dashdash);
+                setStrColorToInactive(&bitNoteLabel, dashdash);
+                setStrColorToInactive(&bitInstrumentLabel, dashdash);
             }
         }
     }
@@ -232,16 +231,16 @@ public:
         bitInstrumentLabel.render(bitOutline->x + bitOutline->w / 2 - bitInstrumentLabel.w / 2, bitOutline->y + bitOutline->h / 2 + 2);
     }
 
-    void setBlackStr(Texture* texture, const string& text) const{
-        texture->loadFromText(renderer, text, black, font);
+    void setStrColorToBackground(Texture* texture, const string& text) const{
+        texture->loadFromText(renderer, text, theme.background, font);
     }
 
-    void setGreyStr(Texture* texture, const string& text) const{
-        texture->loadFromText(renderer, text, grey, font);
+    void setStrColorToInactive(Texture* texture, const string& text) const{
+        texture->loadFromText(renderer, text, theme.inactiveText, font);
     }
 
-    void setWhiteStr(Texture* texture, const string& text) const{
-        texture->loadFromText(renderer, text, white, font);
+    void setStrColorToForeground(Texture* texture, const string& text) const{
+        texture->loadFromText(renderer, text, theme.foreground, font);
     }
 
     void move(Direction direction){

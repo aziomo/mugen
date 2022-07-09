@@ -4,8 +4,10 @@
 #include "../include/OptionsMenu.h"
 
 
-MainWindow::MainWindow(MusicBox *musicBox) {
+MainWindow::MainWindow(MusicBox *musicBox, const Config& config) {
     this->musicBox = musicBox;
+    this->config = config;
+    colors = config.colorTheme;
     initSDL();
     loadTextures();
     compositionMenu = new CompositionMenu(this);
@@ -32,7 +34,8 @@ void MainWindow::initSDL() {
             printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         }
         TTF_Init();
-        auto fontPath = assets_dir + "HoneyRoom.ttf";
+        auto fontPath = config.assetsDir + "HoneyRoom.ttf";
+        printf("%s", fontPath.c_str());
         largeFont = TTF_OpenFont(fontPath.c_str(), 32);
         mainFont = TTF_OpenFont(fontPath.c_str(), 26);
         smallFont = TTF_OpenFont(fontPath.c_str(), 20);
@@ -72,7 +75,7 @@ void MainWindow::renderTabs() {
                 h / 13
     };
 
-    SDL_SetRenderDrawColor(renderer, 0x33, 0x33, 0x33, 0x33);
+    SDL_SetRenderDrawColor(renderer, 0x33, 0x33, 0x33, 0x33); //TODO
     if (openTab != INST_MENU)
         SDL_RenderFillRect(renderer, &firstTab);
     if (openTab != COMP_MENU)
@@ -80,7 +83,7 @@ void MainWindow::renderTabs() {
     if (openTab != OPTI_MENU)
         SDL_RenderFillRect(renderer, &thirdTab);
 
-    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    SetRenderDrawColor(renderer, colors.foreground);
     if (openTab != INST_MENU)
         SDL_RenderDrawRect(renderer, &firstTab);
     if (openTab != COMP_MENU)
@@ -104,9 +107,9 @@ void MainWindow::renderTabs() {
 
 void MainWindow::render() {
     SDL_RenderClear(renderer);
-    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    SetRenderDrawColor(renderer, colors.foreground);
     SDL_RenderFillRect(renderer, &windowArea);
-    SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
+    SetRenderDrawColor(renderer, colors.background);
     SDL_RenderFillRect(renderer, &mainArea);
     renderTabs();
 
@@ -334,12 +337,12 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
 
     if (keyState[SDL_SCANCODE_PAGEUP] && !lastKeyState[SDL_SCANCODE_PAGEUP]){
         musicBox->octaveUp();
-        octaveLabel.loadFromText(renderer, "Oktawa: "+to_string(musicBox->currentOctave), textColor, mainFont);
+        octaveLabel.loadFromText(renderer, "Oktawa: "+to_string(musicBox->currentOctave), colors.foreground, mainFont);
     }
 
     if (keyState[SDL_SCANCODE_PAGEDOWN] && !lastKeyState[SDL_SCANCODE_PAGEDOWN]){
         musicBox->octaveDown();
-        octaveLabel.loadFromText(renderer, "Oktawa: "+to_string(musicBox->currentOctave), textColor, mainFont);
+        octaveLabel.loadFromText(renderer, "Oktawa: "+to_string(musicBox->currentOctave), colors.foreground, mainFont);
     }
 
     if (keyState[SDL_SCANCODE_GRAVE] && !lastKeyState[SDL_SCANCODE_GRAVE])
@@ -366,19 +369,19 @@ void MainWindow::handleKeyPress(const Uint8 *keyState, bool *lastKeyState, int *
 }
 
 void MainWindow::loadTextures() {
-    instrumentsTab.loadFromText(renderer, "INSTRUMENTY", textColor, mainFont);
-    compositionTab.loadFromText(renderer, "KOMPOZYCJA", textColor, mainFont);
-    optionsTab.loadFromText(renderer, "OPCJE", textColor, mainFont);
-    f1Label.loadFromText(renderer, "[F1]", textColor, tinyFont);
-    f2Label.loadFromText(renderer, "[F2]", textColor, tinyFont);
-    f3Label.loadFromText(renderer, "[F3]", textColor, tinyFont);
+    instrumentsTab.loadFromText(renderer, "INSTRUMENTY", colors.foreground, mainFont);
+    compositionTab.loadFromText(renderer, "KOMPOZYCJA", colors.foreground, mainFont);
+    optionsTab.loadFromText(renderer, "OPCJE", colors.foreground, mainFont);
+    f1Label.loadFromText(renderer, "[F1]", colors.foreground, tinyFont);
+    f2Label.loadFromText(renderer, "[F2]", colors.foreground, tinyFont);
+    f3Label.loadFromText(renderer, "[F3]", colors.foreground, tinyFont);
     piano.loadFromFile(renderer, assets_dir + "piano.png");
-    octaveLabel.loadFromText(renderer, "Oktawa: "+to_string(musicBox->currentOctave), textColor, mainFont);
-    octaveHelpLabel.loadFromText(renderer, "[PG DOWN] OKTAWA ↓ | [PG UP] OKTAWA ↑", textColor, tinyFont);
+    octaveLabel.loadFromText(renderer, "Oktawa: "+to_string(musicBox->currentOctave), colors.foreground, mainFont);
+    octaveHelpLabel.loadFromText(renderer, "[PG DOWN] OKTAWA ↓ | [PG UP] OKTAWA ↑", colors.foreground, tinyFont);
 }
 
 void MainWindow::setHelpBarText(const string& text){
-    helpBar.loadFromText(renderer, text, textColor, tinyFont);
+    helpBar.loadFromText(renderer, text, colors.foreground, tinyFont);
 }
 
 int MainWindow::xByPercent(Texture* texture, double percent, Alignment align) const {

@@ -29,7 +29,7 @@ add_executable(mugen main.cpp
         include/Segment.h
         include/SegmentManager.h
         include/json.h
-        source/Config.cpp include/Config.h include/Menu.h)
+        source/Config.cpp include/Config.h include/Menu.h include/SDL_Utils.h)
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2TTF REQUIRED)

@@ -20,9 +20,9 @@ void CheckboxControl::render(int x, int y) {
         bgRect = {x - borderSize, y - borderSize,
                   renderArea.w - borderSize * 2,
                   renderArea.h - borderSize * 2};
-        SDL_SetRenderDrawColor(rend, 0xFF, 0xFF, 0xFF, 0xFF);
+        SetRenderDrawColor(rend, menu->window->colors.foreground);
         SDL_RenderFillRect(rend, &highlightRect);
-        SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, 0xFF);
+        SetRenderDrawColor(rend, menu->window->colors.background);
         SDL_RenderFillRect(rend, &bgRect);
     }
     labelTexture->render(x, y);
@@ -39,9 +39,9 @@ void CheckboxControl::renderCheckbox(int x, int y){
     checkboxBgRect.x = x - borderSize;
     checkboxBgRect.y = y - borderSize;
 
-    SDL_SetRenderDrawColor(rend, 0xFF, 0xFF, 0xFF, 0xFF);
+    SetRenderDrawColor(rend, menu->window->colors.foreground);
     SDL_RenderFillRect(rend, &checkboxBorderRect);
-    SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, 0xFF);
+    SetRenderDrawColor(rend, menu->window->colors.background);
     SDL_RenderFillRect(rend, &checkboxBgRect);
     if (isChecked) {
         checkTexture->render(x, y);
